@@ -135,6 +135,7 @@ git checkout -b <type>/<nom-de-fonctionnalite>
     - feat: ajout de la route de connexion POST /auth/login
     - fix: gestion du statut 404 si l'utilisateur n'existe pas
     - test: tests unitaires sur le calcul du panier
+    - docs: ajout de documentation
 
 3. Tests obligatoires
 - Chaque nouvelle classe de logique métier (@Service) ou contrôleur (@RestController) doit obligatoirement être accompagnée de tests unitaires ou d'intégration dans src/test/java/.
