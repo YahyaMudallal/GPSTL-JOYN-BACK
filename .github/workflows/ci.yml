@@ -1,0 +1,59 @@
+name: Joyn Backend CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # Define a PostgreSQL service for the job
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: myapp_test
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+        ports:
+          - 5432:5432
+        # Health check to ensure PostgreSQL is ready before running tests
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v6.0.1
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Make the wrapper executable
+        run: chmod +x mvnw
+
+      - name: Execute tests
+        # Injection of connection variables to override Spring Boot config
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/myapp_test
+          SPRING_DATASOURCE_USERNAME: testuser
+          SPRING_DATASOURCE_PASSWORD: testpassword
+        run: ./mvnw clean test
