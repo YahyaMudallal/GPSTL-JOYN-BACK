@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 .env
 application-local.properties
+application-local.yml
 
 ### STS ###
 .apt_generated

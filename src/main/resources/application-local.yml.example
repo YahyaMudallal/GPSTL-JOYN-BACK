@@ -1,0 +1,23 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: joyn
+  
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/joyn_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  jpa:
+    hibernate:
+      ddl_auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        formal_sql: true
