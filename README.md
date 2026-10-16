@@ -54,32 +54,48 @@ git clone https://github.com/votre-orga/joyn-backend.git
 cd joyn-backend
 ```
 
-### 1. Fichier de configuration par défaut (`application.properties`)
+### 1. Fichier de configuration par défaut (`application.yml`)
 
-Le fichier `src/main/resources/application.properties` est versionné sur Git et contient les valeurs standards prêtes à l'emploi :
+Le fichier `src/main/resources/application.yml` est versionné sur Git et contient les valeurs standards prêtes à l'emploi :
 
-```properties
-spring.application.name=joyn
-server.port=${PORT:8080}
+```yaml
+server:
+  port: ${PORT:8080}
 
-# Valeurs par défaut pour le développement local
-spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/joyn_db}
-spring.datasource.username=${DB_USER:postgres}
-spring.datasource.password=${DB_PASSWORD:postgres}
+spring:
+  application:
+    name: joyn
+  
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/joyn_db}
+    username: ${DB_USER:joyn_user}
+    password: ${DB_PASSWORD:joyn_secret}
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  jpa:
+    hibernate:
+      ddl_auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        formal_sql: true
 ```
 Si ta machine utilise ces identifiants standards, l'application démarre directement sans configuration supplémentaire.
 
-### 2. Personnalisation locale (application-local.properties)
+### 2. Personnalisation locale (application-local.yml)
 
 Si tu souhaites surcharger ces valeurs (mot de passe Postgres différent, port alternatif, etc.) sans risquer de commiter tes identifiants :
 
 1. Créer le fichier local :
 Copie le modèle d'exemple présent dans le dépôt :
 ```Bash
-cp src/main/resources/application-local.properties.example src/main/resources/application-local.properties
+cp src/main/resources/application-local.yml.example src/main/resources/application-local.yml
 ```
 2.Adapter tes accès :
-Modifie les propriétés souhaitées dans `src/main/resources/application-local.properties`. Ce fichier est ignoré par Git via le .gitignore.
+Modifie les propriétés souhaitées dans `src/main/resources/application-local.yml`. Ce fichier est ignoré par Git via le .gitignore.
 
 3.Activer le profil local :
 En ligne de commande :
@@ -139,6 +155,16 @@ git checkout -b <type>/<nom-de-fonctionnalite>
 
 3. Tests obligatoires
 - Chaque nouvelle classe de logique métier (@Service) ou contrôleur (@RestController) doit obligatoirement être accompagnée de tests unitaires ou d'intégration dans src/test/java/.
+
+Executer les tests
+**Linux / MacOS**
+```bash
+./mvnw clean test
+```
+**Window**
+```shell
+.\mvnw.cmd clean test
+```
 
 4. Processus de Pull Request (PR) & Revue de code
 - Poussez votre branche sur GitHub :
