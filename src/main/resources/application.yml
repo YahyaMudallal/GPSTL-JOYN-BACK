@@ -25,4 +25,7 @@ spring:
   servlet:
     multipart:
       max-file-size: 5MB
-      max-request-size: 5MB
+      max-request-size: 6MB
+
+  gemini:
+    api-key: ${GOOGLE_API_KEY:}

@@ -4,6 +4,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
+/**
+ *  Data Transfer Object representing the parsed information from a resume. 
+ */
 public record ResumeParseResponse(
     
     @JsonPropertyDescription("Information about the candidate's contact details")
