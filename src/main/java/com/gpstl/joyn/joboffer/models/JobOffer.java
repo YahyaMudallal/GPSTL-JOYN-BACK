@@ -1,4 +1,5 @@
-package com.gpstl.joyn.entity;
+package com.gpstl.joyn.joboffer.models;
+import com.gpstl.joyn.common.models.Skill;
 import com.gpstl.joyn.recruiter.models.Company;
 import com.gpstl.joyn.recruiter.models.RecruiterProfile;
 import jakarta.persistence.Column;

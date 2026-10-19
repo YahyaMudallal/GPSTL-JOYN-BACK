@@ -2,21 +2,21 @@ package com.gpstl.joyn.joboffer.service;
 
 import com.gpstl.joyn.joboffer.dto.CreateJobOfferRequest;
 import com.gpstl.joyn.joboffer.dto.JobOfferResponse;
-import com.gpstl.joyn.entity.ContractType;
-import com.gpstl.joyn.entity.ExperienceLevel;
-import com.gpstl.joyn.entity.JobOffer;
-import com.gpstl.joyn.entity.OfferStatus;
+import com.gpstl.joyn.common.models.Skill;
+import com.gpstl.joyn.common.repositories.SkillRepository;
 import com.gpstl.joyn.recruiter.models.RecruiterProfile;
 import com.gpstl.joyn.recruiter.repositories.RecruiterProfileRepository;
-import com.gpstl.joyn.entity.RemoteMode;
-import com.gpstl.joyn.entity.SalaryPeriod;
-import com.gpstl.joyn.entity.Skill;
 import com.gpstl.joyn.joboffer.exception.InvalidFieldException;
 import com.gpstl.joyn.joboffer.exception.RecruiterProfileNotFoundException;
-import com.gpstl.joyn.repository.ContractTypeRepository;
-import com.gpstl.joyn.repository.JobOfferRepository;
+import com.gpstl.joyn.joboffer.models.ContractType;
+import com.gpstl.joyn.joboffer.models.ExperienceLevel;
+import com.gpstl.joyn.joboffer.models.JobOffer;
+import com.gpstl.joyn.joboffer.models.OfferStatus;
+import com.gpstl.joyn.joboffer.models.RemoteMode;
+import com.gpstl.joyn.joboffer.models.SalaryPeriod;
+import com.gpstl.joyn.joboffer.repositories.ContractTypeRepository;
+import com.gpstl.joyn.joboffer.repositories.JobOfferRepository;
 
-import com.gpstl.joyn.repository.SkillRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
