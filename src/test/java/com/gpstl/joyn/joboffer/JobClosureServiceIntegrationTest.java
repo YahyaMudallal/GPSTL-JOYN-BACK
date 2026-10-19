@@ -1,6 +1,8 @@
 package com.gpstl.joyn.joboffer;
 
 import com.gpstl.joyn.joboffer.service.JobClosureService;
+import com.gpstl.joyn.joboffer.service.JobAccessService;
+import com.gpstl.joyn.joboffer.exception.JobApiException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -9,7 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.*;
-import java.math.BigDecimal;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -19,6 +24,45 @@ class JobClosureServiceIntegrationTest extends JobDatabaseTestSupport {
     private static final String SCHEMA = "job_test_" + UUID.randomUUID().toString().replace("-", "");
     @DynamicPropertySource static void database(DynamicPropertyRegistry registry) { configureDatabase(registry, SCHEMA); }
     @Autowired JobClosureService service;
+    @Autowired JobAccessService access;
+    @Autowired PlatformTransactionManager transactions;
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void jpaLockSerializesConcurrentClosuresAndAuditsOnlyOnce() throws Exception {
+        var executor = Executors.newSingleThreadExecutor();
+        var started = new CountDownLatch(1);
+        var transaction = new TransactionTemplate(transactions);
+        var pending = new AtomicReference<Future<Integer>>();
+        try {
+            transaction.executeWithoutResult(status -> {
+                access.authorizedJob(recruiter, job);
+                pending.set(executor.submit(() -> {
+                    started.countDown();
+                    try {
+                        service.close(recruiter, job, "Second request");
+                        return 204;
+                    } catch (JobApiException ex) {
+                        return ex.getStatus();
+                    }
+                }));
+                try {
+                    assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException(ex);
+                }
+                assertThatThrownBy(() -> pending.get().get(300, TimeUnit.MILLISECONDS))
+                    .isInstanceOf(TimeoutException.class);
+                service.close(recruiter, job, "First request");
+            });
+            assertThat(pending.get().get(5, TimeUnit.SECONDS)).isEqualTo(404);
+            assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM job_offer_audit WHERE job_offer_id = ?", Integer.class, job)).isEqualTo(1);
+        } finally {
+            executor.shutdownNow();
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        }
+    }
 
 
     @Test void closePreservesApplicationsMatchesConversationsAndMessages() {

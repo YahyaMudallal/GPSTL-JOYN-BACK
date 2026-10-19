@@ -27,7 +27,7 @@ paths:
     delete:
       operationId: deleteJob
       summary: Supprimer logiquement une offre
-      description: 'Positionne status=CLOSED et deleted_at=NOW(). Préserve toutes
+      description: 'Positionne status=CLOSED et deleted_at à la date courante UTC. Préserve toutes
         les relations
 
         historiques. Toute modification ou suppression ultérieure retourne 404.
