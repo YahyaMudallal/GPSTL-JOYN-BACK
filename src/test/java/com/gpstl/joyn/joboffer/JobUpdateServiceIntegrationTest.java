@@ -15,6 +15,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/** Vérifie les écritures JPA et leur atomicité sur un vrai PostgreSQL, dans un schéma isolé. */
 class JobUpdateServiceIntegrationTest extends JobDatabaseTestSupport {
     private static final String SCHEMA = "job_test_" + UUID.randomUUID().toString().replace("-", "");
     @DynamicPropertySource static void database(DynamicPropertyRegistry registry) { configureDatabase(registry, SCHEMA); }
@@ -97,6 +98,7 @@ class JobUpdateServiceIntegrationTest extends JobDatabaseTestSupport {
     @Test
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     void rollsBackJobAndSkillsIfAuditFails() {
+        // Provoquer l’échec de l’audit pour vérifier le rollback de l’offre et des compétences.
         jdbc.execute("ALTER TABLE job_offer_audit ADD CONSTRAINT test_audit_failure CHECK (action <> 'UPDATE')");
         String newSkill = "Rollback-" + UUID.randomUUID();
         try {

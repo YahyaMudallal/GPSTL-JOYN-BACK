@@ -6,7 +6,7 @@ import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Keeps the existing snake_case API response while the service works with JPA entities. */
+/** Convertit l’entité JPA au format JSON snake_case existant, sans exposer directement ses relations. */
 public final class JobUpdateResponse {
     private JobUpdateResponse() {}
 

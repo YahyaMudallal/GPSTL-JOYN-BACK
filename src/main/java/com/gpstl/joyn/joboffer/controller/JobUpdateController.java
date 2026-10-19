@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
+/** Reçoit le PATCH HTTP et délègue les règles métier au service de modification. */
 @RestController
 @RequestMapping("/api/v1/jobs")
 @Tag(name = "Jobs", description = "Job updates; authenticated subject is users.id")

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/** Vérifie les entrées et réponses HTTP du PATCH avec un service simulé. */
 class JobUpdateControllerTest {
     private JobUpdateService jobs;
     private MockMvc mvc;

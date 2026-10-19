@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 
-/** Presence-aware PATCH: omitted fields stay unchanged; nullable fields may be cleared. */
+/** Distingue un champ absent (conservé) d’un null explicite (effacé si la colonne l’autorise). */
 public record JobPatch(Map<String, Object> columns, List<String> skills) {
     private static final Set<String> TEXT = Set.of("title", "description", "location", "rhythm_type");
     private static final Map<String, Set<String>> ENUMS = Map.of(
@@ -24,6 +24,7 @@ public record JobPatch(Map<String, Object> columns, List<String> skills) {
     public static JobPatch parse(Map<String, Object> body) {
         Map<String, String> errors = new LinkedHashMap<>();
         Map<String, Object> values = new LinkedHashMap<>();
+        // null signifie « ne pas modifier les compétences » ; une liste vide retire tous les liens.
         List<String> skills = null;
         for (var entry : body.entrySet()) {
             String field = entry.getKey();
@@ -32,6 +33,7 @@ public record JobPatch(Map<String, Object> columns, List<String> skills) {
                 boolean supported = TEXT.contains(field) || ENUMS.containsKey(field)
                     || Set.of("salary_min", "salary_max", "salary_currency", "contract_type_id",
                         "start_date", "duration_months", "skills").contains(field);
+                // La liste autorisée exclut notamment id, company_id et les dates gérées par le serveur.
                 if (!supported) throw new IllegalArgumentException("Unknown or protected field");
                 if (value == null) {
                     if (!NULLABLE.contains(field)) throw new IllegalArgumentException("Must not be null");
@@ -79,6 +81,7 @@ public record JobPatch(Map<String, Object> columns, List<String> skills) {
                 errors.put(field, ex.getMessage() == null ? "Invalid value" : ex.getMessage());
             }
         }
+        // Regrouper les erreurs pour permettre au client de corriger plusieurs champs à la fois.
         if (!errors.isEmpty()) throw new JobApiException(400, "Invalid job patch", errors);
         return new JobPatch(Collections.unmodifiableMap(values), skills);
     }

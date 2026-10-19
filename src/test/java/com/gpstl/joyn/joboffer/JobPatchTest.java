@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import static org.assertj.core.api.Assertions.*;
 
+/** Vérifie la présence des champs, les types et les valeurs autorisées du PATCH. */
 class JobPatchTest {
     @Test void distinguishesOmittedAndExplicitNullFields() {
         Map<String, Object> body = new HashMap<>();

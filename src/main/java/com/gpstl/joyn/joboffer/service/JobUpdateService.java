@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 
+/** Modifie l’offre et ses compétences, puis écrit l’audit dans une transaction unique. */
 @Service
 public class JobUpdateService {
     private final JobOfferRepository offers;
@@ -41,6 +42,7 @@ public class JobUpdateService {
         JobOffer job = access.authorizedJob(userId, jobId);
         JobPatch patch = JobPatch.parse(body);
         Map<String, Object> columns = patch.columns();
+        // Comparer l’état final : une borne absente conserve sa valeur actuelle en base.
         BigDecimal min = columns.containsKey("salary_min") ? (BigDecimal) columns.get("salary_min") : job.getSalaryMin();
         BigDecimal max = columns.containsKey("salary_max") ? (BigDecimal) columns.get("salary_max") : job.getSalaryMax();
         if (min != null && max != null && min.compareTo(max) > 0)
@@ -50,12 +52,13 @@ public class JobUpdateService {
             ? contracts.findById(((Integer) columns.get("contract_type_id")).shortValue())
                 .orElseThrow(() -> new JobApiException(400, "Invalid contract type", Map.of("contract_type_id", "Unknown contract type")))
             : job.getContractType();
+        // Seuls les champs présents et validés sont appliqués à l’entité gérée par Hibernate.
         apply(job, columns, contract);
         if (patch.skills() != null) replaceSkills(job, patch.skills());
         job.touch();
         offers.saveAndFlush(job);
         audit.saveAndFlush(new JobOfferAudit(userId, job, "UPDATE", null));
-        // PostgreSQL's trigger owns updated_at; reload the database value for the response.
+        // Le trigger PostgreSQL fixe updated_at : recharger sa valeur réelle avant la réponse.
         entityManager.refresh(job);
         return JobUpdateResponse.from(job);
     }
@@ -90,7 +93,7 @@ public class JobUpdateService {
         }
         Set<Long> ids = new HashSet<>();
         desired.forEach(skill -> ids.add(skill.getId()));
-        // Mutate the managed Set in place: retained join rows keep their required_level.
+        // Modifier le Set géré sans recréer les liens conservés : leur required_level reste intact.
         job.getSkills().removeIf(skill -> !ids.contains(skill.getId()));
         job.getSkills().addAll(desired);
     }
