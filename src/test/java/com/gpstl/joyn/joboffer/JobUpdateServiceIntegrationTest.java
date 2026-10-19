@@ -48,9 +48,44 @@ class JobUpdateServiceIntegrationTest extends JobDatabaseTestSupport {
         var result = service.patch(recruiter, job, Map.of("skills", List.of(retained, newName, newName)));
         assertThat((List<?>) result.get("skills")).hasSize(2);
         assertThat(jdbc.queryForObject("SELECT required_level FROM job_offer_skills WHERE job_offer_id = ? AND skill_id = ?", String.class, job, skill)).isEqualTo("ADVANCED");
+        assertThat(jdbc.queryForObject("SELECT updated_at > created_at - INTERVAL '1 second' FROM job_offers WHERE id = ?", Boolean.class, job)).isTrue();
         service.patch(recruiter, job, Map.of("skills", List.of()));
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM job_offer_skills WHERE job_offer_id = ?", Integer.class, job)).isZero();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM skills WHERE id = ?", Integer.class, skill)).isEqualTo(1);
+    }
+
+    @Test void mapsAllEditableFieldsToJpaEntityAndSupportsClearingOptionalFields() {
+        int apprenticeship = jdbc.queryForObject("SELECT id FROM contract_types WHERE code = 'APPRENTICESHIP'", Integer.class);
+        Map<String, Object> body = new HashMap<>();
+        body.put("title", "Alternance Java"); body.put("description", "Updated description");
+        body.put("location", "Lyon"); body.put("contract_type_id", apprenticeship);
+        body.put("salary_min", 1500); body.put("salary_max", 1800);
+        body.put("salary_currency", "USD"); body.put("salary_period", "MONTH");
+        body.put("remote_mode", "HYBRID"); body.put("status", "DRAFT");
+        body.put("rhythm_type", "3/1"); body.put("start_date", "2027-09-01");
+        body.put("duration_months", 12); body.put("degree_level_required", "BAC_5");
+        body.put("experience_level_required", "MID");
+        var result = service.patch(recruiter, job, body);
+        assertThat(result).containsEntry("title", "Alternance Java").containsEntry("location", "Lyon")
+            .containsEntry("salary_currency", "USD").containsEntry("salary_period", "MONTH")
+            .containsEntry("remote_mode", "HYBRID").containsEntry("status", "DRAFT")
+            .containsEntry("rhythm_type", "3/1").containsEntry("start_date", "2027-09-01")
+            .containsEntry("degree_level_required", "BAC_5").containsEntry("experience_level_required", "MID");
+        assertThat(((Number) result.get("contract_type_id")).intValue()).isEqualTo(apprenticeship);
+        assertThat(((Number) result.get("duration_months")).intValue()).isEqualTo(12);
+        assertThat(jdbc.queryForObject("SELECT contract_type_id FROM job_offers WHERE id = ?", Integer.class, job)).isEqualTo(apprenticeship);
+        Map<String, Object> cleared = new HashMap<>();
+        for (String field : List.of("location", "salary_min", "salary_max", "rhythm_type", "start_date",
+                "duration_months", "degree_level_required", "experience_level_required")) cleared.put(field, null);
+        assertThat(service.patch(recruiter, job, cleared)).containsAllEntriesOf(cleared);
+    }
+
+    @Test void emptyPatchUpdatesTimestampAndResponseReflectsDatabaseTrigger() {
+        var result = service.patch(recruiter, job, Map.of());
+        var stored = jdbc.queryForObject("SELECT updated_at FROM job_offers WHERE id = ?",
+            (rs, row) -> rs.getObject(1, java.time.OffsetDateTime.class).toInstant().toString(), job);
+        assertThat(result).containsEntry("title", "Original").containsEntry("updated_at", stored);
+        assertThat(jdbc.queryForObject("SELECT updated_at > created_at - INTERVAL '1 second' FROM job_offers WHERE id = ?", Boolean.class, job)).isTrue();
     }
 
     @Test void ordinaryClosedStatusIsDistinctFromSoftDeletion() {
