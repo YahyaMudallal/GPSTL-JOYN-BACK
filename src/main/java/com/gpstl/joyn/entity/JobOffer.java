@@ -1,5 +1,6 @@
 package com.gpstl.joyn.entity;
-
+import com.gpstl.joyn.recruiter.models.Company;
+import com.gpstl.joyn.recruiter.models.RecruiterProfile;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

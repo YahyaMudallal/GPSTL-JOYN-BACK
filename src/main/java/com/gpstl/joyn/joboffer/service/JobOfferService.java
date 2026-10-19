@@ -6,7 +6,8 @@ import com.gpstl.joyn.entity.ContractType;
 import com.gpstl.joyn.entity.ExperienceLevel;
 import com.gpstl.joyn.entity.JobOffer;
 import com.gpstl.joyn.entity.OfferStatus;
-import com.gpstl.joyn.entity.RecruiterProfile;
+import com.gpstl.joyn.recruiter.models.RecruiterProfile;
+import com.gpstl.joyn.recruiter.repositories.RecruiterProfileRepository;
 import com.gpstl.joyn.entity.RemoteMode;
 import com.gpstl.joyn.entity.SalaryPeriod;
 import com.gpstl.joyn.entity.Skill;
@@ -14,7 +15,7 @@ import com.gpstl.joyn.joboffer.exception.InvalidFieldException;
 import com.gpstl.joyn.joboffer.exception.RecruiterProfileNotFoundException;
 import com.gpstl.joyn.repository.ContractTypeRepository;
 import com.gpstl.joyn.repository.JobOfferRepository;
-import com.gpstl.joyn.repository.RecruiterProfileRepository;
+
 import com.gpstl.joyn.repository.SkillRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
