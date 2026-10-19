@@ -20,6 +20,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/** Vérifie la conservation de l’historique, le rollback et le verrouillage sur PostgreSQL. */
 class JobClosureServiceIntegrationTest extends JobDatabaseTestSupport {
     private static final String SCHEMA = "job_test_" + UUID.randomUUID().toString().replace("-", "");
     @DynamicPropertySource static void database(DynamicPropertyRegistry registry) { configureDatabase(registry, SCHEMA); }
@@ -36,6 +37,7 @@ class JobClosureServiceIntegrationTest extends JobDatabaseTestSupport {
         var pending = new AtomicReference<Future<Integer>>();
         try {
             transaction.executeWithoutResult(status -> {
+                // La première transaction garde le verrou pendant l’arrivée de la seconde requête.
                 access.authorizedJob(recruiter, job);
                 pending.set(executor.submit(() -> {
                     started.countDown();
@@ -52,6 +54,7 @@ class JobClosureServiceIntegrationTest extends JobDatabaseTestSupport {
                     Thread.currentThread().interrupt();
                     throw new IllegalStateException(ex);
                 }
+                // La seconde clôture doit attendre le commit, puis constater la suppression (404).
                 assertThatThrownBy(() -> pending.get().get(300, TimeUnit.MILLISECONDS))
                     .isInstanceOf(TimeoutException.class);
                 service.close(recruiter, job, "First request");
@@ -82,6 +85,7 @@ class JobClosureServiceIntegrationTest extends JobDatabaseTestSupport {
     @Test
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     void rollsBackClosureIfAuditFails() {
+        // Simuler une panne d’audit pour vérifier que l’offre ne reste pas partiellement clôturée.
         jdbc.execute("ALTER TABLE job_offer_audit ADD CONSTRAINT test_close_audit_failure CHECK (action <> 'CLOSE')");
         try {
             assertThatThrownBy(() -> service.close(recruiter, job, "Must rollback"))

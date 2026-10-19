@@ -12,6 +12,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/** Vérifie le contrat HTTP du DELETE et son corps facultatif, avec un service simulé. */
 class JobClosureControllerTest {
     private JobClosureService jobs;
     private MockMvc mvc;

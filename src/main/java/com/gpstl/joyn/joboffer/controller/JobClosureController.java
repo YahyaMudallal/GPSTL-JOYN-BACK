@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
+/** Reçoit la demande de suppression logique et renvoie 204 lorsque la clôture a réussi. */
 @RestController
 @RequestMapping("/api/v1/jobs")
 @Tag(name = "Jobs", description = "Job soft deletion; authenticated subject is users.id")
