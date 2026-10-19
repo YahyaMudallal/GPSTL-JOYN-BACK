@@ -1,4 +1,4 @@
-package com.gpstl.joyn.entity;
+package com.gpstl.joyn.joboffer.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
