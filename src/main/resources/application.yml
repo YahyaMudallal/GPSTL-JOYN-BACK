@@ -29,3 +29,10 @@ spring:
 
   gemini:
     api-key: ${GOOGLE_API_KEY:}
+
+joyn:
+  security:
+    jwt:
+      # Clé secrète HS256 partagée avec la route de connexion qui génère les tokens.
+      # Au moins 32 caractères. À remplacer par la variable JWT_SECRET hors développement.
+      secret: ${JWT_SECRET:joyn-dev-secret-a-changer-en-production-32+}
