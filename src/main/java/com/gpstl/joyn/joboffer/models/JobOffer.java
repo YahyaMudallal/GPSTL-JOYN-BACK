@@ -105,6 +105,9 @@ public class JobOffer {
     @Column(name = "expires_at")
     private OffsetDateTime expiresAt;
 
+    @Column(name = "deleted_at")
+    private OffsetDateTime deletedAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
@@ -185,6 +188,8 @@ public class JobOffer {
 
     public OffsetDateTime getExpiresAt() { return expiresAt; }
     public void setExpiresAt(OffsetDateTime expiresAt) { this.expiresAt = expiresAt; }
+
+    public OffsetDateTime getDeletedAt() { return deletedAt; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
 
