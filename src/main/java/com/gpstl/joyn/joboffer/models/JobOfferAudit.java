@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.OffsetDateTime;
 
+/** Trace l’auteur et la date d’une opération, dans la même transaction que l’offre. */
 @Entity
 @Table(name = "job_offer_audit")
 public class JobOfferAudit {
