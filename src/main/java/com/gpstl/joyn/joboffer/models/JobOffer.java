@@ -197,7 +197,7 @@ public class JobOffer {
 
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
 
-    /** Marks empty or skills-only PATCH requests dirty so updated_at also changes. */
+    /** Force aussi la mise à jour de updated_at pour un PATCH vide ou limité aux compétences. */
     public void touch() { this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC); }
 
     public Set<Skill> getSkills() { return skills; }

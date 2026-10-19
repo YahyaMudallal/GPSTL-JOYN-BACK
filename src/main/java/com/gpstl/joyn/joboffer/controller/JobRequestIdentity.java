@@ -3,6 +3,7 @@ package com.gpstl.joyn.joboffer.controller;
 import com.gpstl.joyn.joboffer.exception.JobApiException;
 import java.security.Principal;
 
+/** Extrait users.id du Principal établi par la sécurité ; aucune identité ne vient du JSON client. */
 public final class JobRequestIdentity {
     private JobRequestIdentity() {}
 

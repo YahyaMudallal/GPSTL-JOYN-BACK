@@ -17,7 +17,7 @@ import java.time.Instant;
 import java.util.*;
 import static org.assertj.core.api.Assertions.*;
 
-/** Shared fixtures; each concrete test class supplies its own disposable schema. */
+/** Prépare les données communes ; chaque classe de test utilise son propre schéma temporaire. */
 @SpringBootTest
 @Transactional
 abstract class JobDatabaseTestSupport {
@@ -36,6 +36,7 @@ abstract class JobDatabaseTestSupport {
         registry.add("spring.jpa.properties.hibernate.default_schema", () -> schema);
     }
 
+    // Le SQL de test prépare et vérifie les données indépendamment du code JPA testé.
     @BeforeEach void seed() {
         admin = user("ADMIN"); recruiter = user("RECRUITER"); candidate = user("CANDIDATE"); outsider = user("RECRUITER");
         company = insert("INSERT INTO companies(name) VALUES ('Owner') RETURNING id");
@@ -52,12 +53,14 @@ abstract class JobDatabaseTestSupport {
         jdbc.update("INSERT INTO job_offer_skills(job_offer_id, skill_id, required_level) VALUES (?, ?, 'ADVANCED')", job, skill);
     }
 
+    // Le contrôle du nom empêche de supprimer par erreur un schéma applicatif.
     @AfterAll static void cleanup(@Autowired JdbcTemplate jdbc) {
         String schema = jdbc.queryForObject("SELECT current_schema()", String.class);
         if (schema == null || !schema.matches("job_test_[0-9a-f]+")) throw new IllegalStateException("Unexpected test schema");
         jdbc.execute("DROP SCHEMA " + schema + " CASCADE");
     }
 
+    /** Fabrique un JWT signé pour les tests ; ne remplace pas un endpoint de connexion. */
     protected String bearer(long userId) {
         var encoder = new NimbusJwtEncoder(new ImmutableSecret<>(SecurityConfig.secretKey(jwtSecret)));
         var claims = JwtClaimsSet.builder().subject(Long.toString(userId)).claim("role", "RECRUITER")

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Propagation;
 import java.util.Objects;
 
+/** Vérifie les droits sur une offre avant sa modification ou sa clôture. */
 @Service
 public class JobAccessService {
     private final UserRepository users;
@@ -24,9 +25,10 @@ public class JobAccessService {
         this.offers = offers;
     }
 
-    // The caller owns the transaction so the JPA row lock covers the complete mutation.
+    // Réutilise la transaction du service appelant : le verrou reste détenu jusqu’à sa fin.
     @Transactional(propagation = Propagation.MANDATORY)
     public JobOffer authorizedJob(long userId, long jobId) {
+        // L’identité vient du JWT vérifié, mais le rôle et l’état du compte sont relus en base.
         User actor = users.findById(userId)
             .orElseThrow(() -> new JobApiException(401, "Authenticated user does not exist"));
         if (!"ACTIVE".equals(actor.getStatus())) throw new JobApiException(403, "Account is suspended");

@@ -2,6 +2,7 @@ package com.gpstl.joyn.joboffer.exception;
 
 import java.util.Map;
 
+/** Transporte le statut HTTP et les erreurs par champ jusqu’au gestionnaire d’exceptions. */
 public class JobApiException extends RuntimeException {
     private final int status;
     private final Map<String, String> errors;

@@ -14,6 +14,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/** Teste les règles de rôle et d’entreprise avec des repositories simulés, sans base de données. */
 class JobAccessServiceTest {
     UserRepository users;
     RecruiterProfileRepository recruiters;

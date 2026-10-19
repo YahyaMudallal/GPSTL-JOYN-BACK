@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Map;
 
+/** Convertit les exceptions des endpoints de gestion en réponses HTTP JSON cohérentes. */
 @RestControllerAdvice(assignableTypes = JobManagementEndpoint.class)
 public class JobExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(JobExceptionHandler.class);
