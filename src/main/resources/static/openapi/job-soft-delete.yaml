@@ -1,0 +1,111 @@
+openapi: 3.0.3
+info:
+  title: Joyn - Gestion des offres
+  version: 1.0.0
+  description: 'Identifiants numériques et champs du schéma PostgreSQL existant.
+
+    Les opérations réutilisent la validation JWT HS256 de SecurityConfig (claim sub
+    = users.id).
+
+    Redis reste hors périmètre. Sans identité vérifiée, les routes retournent 401.
+
+    ADMIN actif : toutes les offres ; RECRUITER actif : offres de sa société uniquement.
+
+    '
+security:
+- bearerAuth: []
+paths:
+  /api/v1/jobs/{jobId}:
+    parameters:
+    - name: jobId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    delete:
+      operationId: deleteJob
+      summary: Supprimer logiquement une offre
+      description: 'Positionne status=CLOSED et deleted_at à la date courante UTC. Préserve toutes
+        les relations
+
+        historiques. Toute modification ou suppression ultérieure retourne 404.
+
+        '
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                reason:
+                  type: string
+                  nullable: true
+                  maxLength: 2000
+      responses:
+        '204':
+          description: Offre clôturée
+          aucun corps de réponse: null
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/Internal'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      required:
+      - message
+      - errors
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+  responses:
+    Invalid:
+      description: Requête invalide, erreurs par champ lorsque disponibles
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Token absent, expiré ou invalide, ou utilisateur inexistant
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Rôle non autorisé, compte suspendu ou entreprise différente
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Offre inexistante ou déjà supprimée
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Internal:
+      description: Erreur interne ; transaction annulée
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
