@@ -23,6 +23,7 @@ import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -105,6 +106,9 @@ public class JobOffer {
     @Column(name = "expires_at")
     private OffsetDateTime expiresAt;
 
+    @Column(name = "deleted_at")
+    private OffsetDateTime deletedAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
@@ -186,9 +190,15 @@ public class JobOffer {
     public OffsetDateTime getExpiresAt() { return expiresAt; }
     public void setExpiresAt(OffsetDateTime expiresAt) { this.expiresAt = expiresAt; }
 
+    public OffsetDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(OffsetDateTime deletedAt) { this.deletedAt = deletedAt; }
+
     public OffsetDateTime getCreatedAt() { return createdAt; }
 
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
+
+    /** Force aussi la mise à jour de updated_at pour un PATCH vide ou limité aux compétences. */
+    public void touch() { this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC); }
 
     public Set<Skill> getSkills() { return skills; }
 }
