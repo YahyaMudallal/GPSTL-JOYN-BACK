@@ -1,13 +1,11 @@
-package com.gpstl.joyn.joboffer;
+package com.gpstl.joyn.joboffer.controller;
 
-import com.gpstl.joyn.joboffer.controller.*;
 import com.gpstl.joyn.joboffer.exception.JobApiException;
 import com.gpstl.joyn.joboffer.service.JobClosureService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import java.util.Map;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;

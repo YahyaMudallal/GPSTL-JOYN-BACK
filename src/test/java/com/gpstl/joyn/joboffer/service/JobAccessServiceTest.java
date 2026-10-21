@@ -1,11 +1,10 @@
-package com.gpstl.joyn.joboffer;
+package com.gpstl.joyn.joboffer.service;
 
 import com.gpstl.joyn.common.models.User;
 import com.gpstl.joyn.common.repositories.UserRepository;
 import com.gpstl.joyn.joboffer.exception.JobApiException;
 import com.gpstl.joyn.joboffer.models.JobOffer;
 import com.gpstl.joyn.joboffer.repositories.JobOfferRepository;
-import com.gpstl.joyn.joboffer.service.JobAccessService;
 import com.gpstl.joyn.recruiter.models.Company;
 import com.gpstl.joyn.recruiter.models.RecruiterProfile;
 import com.gpstl.joyn.recruiter.repositories.RecruiterProfileRepository;

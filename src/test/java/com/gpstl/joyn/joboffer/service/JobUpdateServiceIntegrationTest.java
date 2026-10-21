@@ -1,6 +1,6 @@
-package com.gpstl.joyn.joboffer;
+package com.gpstl.joyn.joboffer.service;
 
-import com.gpstl.joyn.joboffer.service.JobUpdateService;
+import com.gpstl.joyn.joboffer.JobDatabaseTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.DynamicPropertyRegistry;

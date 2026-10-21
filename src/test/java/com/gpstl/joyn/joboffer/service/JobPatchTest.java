@@ -1,4 +1,4 @@
-package com.gpstl.joyn.joboffer;
+package com.gpstl.joyn.joboffer.service;
 
 import com.gpstl.joyn.joboffer.exception.JobApiException;
 import com.gpstl.joyn.joboffer.dto.JobPatch;
