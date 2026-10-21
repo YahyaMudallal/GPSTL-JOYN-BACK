@@ -68,4 +68,10 @@ public class Company {
     public void setVerificationStatus(String verificationStatus) { this.verificationStatus = verificationStatus; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public String getDescription() { return description; }
+    public String getWebsite() { return website; }
+    public String getLogoUrl() { return logoUrl; }
+    public String getSector() { return sector; }
+    public String getCompanySize() { return companySize; }
+    public String getAddress() { return address; }
 }
