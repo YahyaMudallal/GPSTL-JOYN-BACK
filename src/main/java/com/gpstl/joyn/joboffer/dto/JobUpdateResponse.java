@@ -1,7 +1,8 @@
 package com.gpstl.joyn.joboffer.dto;
 
-import com.gpstl.joyn.common.models.Skill;
-import com.gpstl.joyn.joboffer.models.JobOffer;
+import com.gpstl.joyn.common.model.Skill;
+import com.gpstl.joyn.joboffer.model.JobOffer;
+
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;

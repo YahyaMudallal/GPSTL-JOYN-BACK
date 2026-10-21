@@ -1,9 +1,9 @@
-package com.gpstl.joyn.recruiter.repositories;
+package com.gpstl.joyn.recruiter.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.gpstl.joyn.recruiter.models.RecruiterProfile;
+import com.gpstl.joyn.recruiter.model.RecruiterProfile;
 
 import java.util.List;
 import java.util.Optional;

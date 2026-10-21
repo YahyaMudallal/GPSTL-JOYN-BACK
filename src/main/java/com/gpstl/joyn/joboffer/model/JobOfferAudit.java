@@ -1,4 +1,4 @@
-package com.gpstl.joyn.joboffer.models;
+package com.gpstl.joyn.joboffer.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;

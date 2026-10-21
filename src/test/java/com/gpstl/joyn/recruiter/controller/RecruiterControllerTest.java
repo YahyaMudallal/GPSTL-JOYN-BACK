@@ -1,10 +1,10 @@
 package com.gpstl.joyn.recruiter.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gpstl.joyn.recruiter.controllers.RecruiterController;
 import com.gpstl.joyn.recruiter.dto.RecruiterRegisterRequest;
 import com.gpstl.joyn.recruiter.dto.RecruiterRegisterResponse;
-import com.gpstl.joyn.recruiter.services.RecruiterService;
+import com.gpstl.joyn.recruiter.service.RecruiterService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

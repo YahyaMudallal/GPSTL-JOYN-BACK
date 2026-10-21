@@ -1,8 +1,8 @@
-package com.gpstl.joyn.common.repositories;
+package com.gpstl.joyn.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.gpstl.joyn.common.models.Skill;
+import com.gpstl.joyn.common.model.Skill;
 
 import java.util.Optional;
 

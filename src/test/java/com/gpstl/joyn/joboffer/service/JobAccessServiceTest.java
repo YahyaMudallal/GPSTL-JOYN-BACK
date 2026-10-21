@@ -1,13 +1,14 @@
 package com.gpstl.joyn.joboffer.service;
 
-import com.gpstl.joyn.common.models.User;
-import com.gpstl.joyn.common.repositories.UserRepository;
+import com.gpstl.joyn.common.model.User;
+import com.gpstl.joyn.common.repository.UserRepository;
 import com.gpstl.joyn.joboffer.exception.JobApiException;
-import com.gpstl.joyn.joboffer.models.JobOffer;
-import com.gpstl.joyn.joboffer.repositories.JobOfferRepository;
-import com.gpstl.joyn.recruiter.models.Company;
-import com.gpstl.joyn.recruiter.models.RecruiterProfile;
-import com.gpstl.joyn.recruiter.repositories.RecruiterProfileRepository;
+import com.gpstl.joyn.joboffer.model.JobOffer;
+import com.gpstl.joyn.joboffer.repository.JobOfferRepository;
+import com.gpstl.joyn.recruiter.model.Company;
+import com.gpstl.joyn.recruiter.model.RecruiterProfile;
+import com.gpstl.joyn.recruiter.repository.RecruiterProfileRepository;
+
 import org.junit.jupiter.api.*;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
