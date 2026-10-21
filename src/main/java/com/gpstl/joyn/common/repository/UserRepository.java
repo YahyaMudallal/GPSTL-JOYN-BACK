@@ -1,9 +1,9 @@
-package com.gpstl.joyn.common.repositories;
+package com.gpstl.joyn.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.gpstl.joyn.common.models.User;
+import com.gpstl.joyn.common.model.User;
 
 import java.util.Optional;
 

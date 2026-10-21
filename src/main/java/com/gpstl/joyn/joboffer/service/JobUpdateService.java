@@ -1,14 +1,15 @@
 package com.gpstl.joyn.joboffer.service;
 
-import com.gpstl.joyn.common.models.Skill;
-import com.gpstl.joyn.common.repositories.SkillRepository;
+import com.gpstl.joyn.common.model.Skill;
+import com.gpstl.joyn.common.repository.SkillRepository;
 import com.gpstl.joyn.joboffer.dto.JobPatch;
 import com.gpstl.joyn.joboffer.dto.JobUpdateResponse;
 import com.gpstl.joyn.joboffer.exception.JobApiException;
-import com.gpstl.joyn.joboffer.models.*;
-import com.gpstl.joyn.joboffer.repositories.ContractTypeRepository;
-import com.gpstl.joyn.joboffer.repositories.JobOfferRepository;
-import com.gpstl.joyn.joboffer.repositories.JobOfferAuditRepository;
+import com.gpstl.joyn.joboffer.model.*;
+import com.gpstl.joyn.joboffer.repository.ContractTypeRepository;
+import com.gpstl.joyn.joboffer.repository.JobOfferAuditRepository;
+import com.gpstl.joyn.joboffer.repository.JobOfferRepository;
+
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

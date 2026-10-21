@@ -1,8 +1,8 @@
-package com.gpstl.joyn.joboffer.repositories;
+package com.gpstl.joyn.joboffer.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.gpstl.joyn.joboffer.models.ContractType;
+import com.gpstl.joyn.joboffer.model.ContractType;
 
 import java.util.Optional;
 

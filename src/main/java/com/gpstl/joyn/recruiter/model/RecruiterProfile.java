@@ -1,9 +1,9 @@
-package com.gpstl.joyn.recruiter.models;
+package com.gpstl.joyn.recruiter.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
 
-import com.gpstl.joyn.common.models.User;
+import com.gpstl.joyn.common.model.User;
 
 @Entity
 @Table(name = "recruiter_profiles")

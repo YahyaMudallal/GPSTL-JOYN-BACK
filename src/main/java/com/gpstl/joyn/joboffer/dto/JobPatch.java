@@ -1,10 +1,11 @@
 package com.gpstl.joyn.joboffer.dto;
 
 import com.gpstl.joyn.joboffer.exception.JobApiException;
-import com.gpstl.joyn.joboffer.models.OfferStatus;
-import com.gpstl.joyn.joboffer.models.RemoteMode;
-import com.gpstl.joyn.joboffer.models.SalaryPeriod;
-import com.gpstl.joyn.joboffer.models.ExperienceLevel;
+import com.gpstl.joyn.joboffer.model.ExperienceLevel;
+import com.gpstl.joyn.joboffer.model.OfferStatus;
+import com.gpstl.joyn.joboffer.model.RemoteMode;
+import com.gpstl.joyn.joboffer.model.SalaryPeriod;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;

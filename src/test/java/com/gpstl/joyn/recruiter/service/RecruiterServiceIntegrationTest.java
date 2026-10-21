@@ -3,7 +3,6 @@ package com.gpstl.joyn.recruiter.service;
 import com.gpstl.joyn.joboffer.JobDatabaseTestSupport;
 import com.gpstl.joyn.recruiter.dto.RecruiterRegisterRequest;
 import com.gpstl.joyn.recruiter.dto.RecruiterRegisterResponse;
-import com.gpstl.joyn.recruiter.services.RecruiterService;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

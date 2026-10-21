@@ -1,4 +1,4 @@
-package com.gpstl.joyn.common.models;
+package com.gpstl.joyn.common.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
