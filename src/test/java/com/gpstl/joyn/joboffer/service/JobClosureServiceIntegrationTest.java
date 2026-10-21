@@ -1,7 +1,6 @@
-package com.gpstl.joyn.joboffer;
+package com.gpstl.joyn.joboffer.service;
 
-import com.gpstl.joyn.joboffer.service.JobClosureService;
-import com.gpstl.joyn.joboffer.service.JobAccessService;
+import com.gpstl.joyn.joboffer.JobDatabaseTestSupport;
 import com.gpstl.joyn.joboffer.exception.JobApiException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
