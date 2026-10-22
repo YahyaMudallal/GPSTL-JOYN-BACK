@@ -1,7 +1,8 @@
 package com.gpstl.joyn.candidate.controller;
 
-import com.gpstl.joyn.candidate.service.CandidateEmailAlreadyRegisteredException;
-import com.gpstl.joyn.candidate.service.CandidateResumeNotFoundException;
+import com.gpstl.joyn.candidate.exception.CandidateEmailAlreadyRegisteredException;
+import com.gpstl.joyn.candidate.exception.CandidateResumeNotFoundException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

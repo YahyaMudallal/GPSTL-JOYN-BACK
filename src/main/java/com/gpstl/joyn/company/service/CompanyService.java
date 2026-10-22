@@ -1,10 +1,10 @@
 
-package com.gpstl.joyn.recruiter.service;
+package com.gpstl.joyn.company.service;
 
-import com.gpstl.joyn.recruiter.dto.CompanyProfileResponse;
-import com.gpstl.joyn.recruiter.model.Company;
-import com.gpstl.joyn.recruiter.repository.CompanyRepository;
-import com.gpstl.joyn.recruiter.repository.RecruiterProfileRepository;
+import com.gpstl.joyn.recruiter.repository.RecruiterRepository;
+import com.gpstl.joyn.company.dto.CompanyResponse;
+import com.gpstl.joyn.company.model.Company;
+import com.gpstl.joyn.company.repository.CompanyRepository;
 import com.gpstl.joyn.joboffer.model.OfferStatus;
 import com.gpstl.joyn.joboffer.repository.JobOfferRepository;
 
@@ -17,22 +17,22 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @Service
-public class CompanyProfileService {
+public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final JobOfferRepository jobOfferRepository;
-    private final RecruiterProfileRepository recruiterProfileRepository;
+    private final RecruiterRepository recruiterProfileRepository;
 
-    public CompanyProfileService(
+    public CompanyService(
             CompanyRepository companyRepository,
             JobOfferRepository jobOfferRepository,
-            RecruiterProfileRepository recruiterProfileRepository) {
+            RecruiterRepository recruiterProfileRepository) {
         this.companyRepository = companyRepository;
         this.jobOfferRepository = jobOfferRepository;
         this.recruiterProfileRepository = recruiterProfileRepository;
     }
 
-    public CompanyProfileResponse getProfile(
+    public CompanyResponse getProfile(
             Long companyId, boolean includeJobs, Authentication authentication) {
 
         Company company = companyRepository.findById(companyId)
@@ -67,9 +67,9 @@ public class CompanyProfileService {
 
         var activeOffers = jobOfferRepository.findPublicOffersByCompanyId(companyId, OfferStatus.PUBLISHED);
 
-        List<CompanyProfileResponse.ActiveJob> jobs = includeJobs
+        List<CompanyResponse.ActiveJob> jobs = includeJobs
                 ? activeOffers.stream()
-                    .map(job -> new CompanyProfileResponse.ActiveJob(
+                    .map(job -> new CompanyResponse.ActiveJob(
                             job.getId(),
                             job.getTitle(),
                             job.getContractType().getCode(),
@@ -80,7 +80,7 @@ public class CompanyProfileService {
                     .toList()
                 : List.of();
 
-        return new CompanyProfileResponse(
+        return new CompanyResponse(
                 company.getId(),
                 company.getName(),
                 company.getLogoUrl(),

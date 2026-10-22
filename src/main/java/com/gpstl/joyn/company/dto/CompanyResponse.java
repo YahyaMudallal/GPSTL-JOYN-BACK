@@ -1,10 +1,10 @@
 
-package com.gpstl.joyn.recruiter.dto;
+package com.gpstl.joyn.company.dto;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
-public record CompanyProfileResponse(
+public record CompanyResponse(
         Long id,
         String name,
         String logoUrl,

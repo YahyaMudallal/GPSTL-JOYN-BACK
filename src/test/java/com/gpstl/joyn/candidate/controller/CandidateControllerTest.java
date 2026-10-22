@@ -2,9 +2,9 @@ package com.gpstl.joyn.candidate.controller;
 
 import com.gpstl.joyn.candidate.dto.CandidateRegisterRequest;
 import com.gpstl.joyn.candidate.dto.CandidateRegisterResponse;
-import com.gpstl.joyn.candidate.service.CandidateEmailAlreadyRegisteredException;
+import com.gpstl.joyn.candidate.exception.CandidateEmailAlreadyRegisteredException;
 import com.gpstl.joyn.candidate.service.CandidateResumeStorage;
-import com.gpstl.joyn.candidate.service.RegistrationService;
+import com.gpstl.joyn.candidate.service.CandidateService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ByteArrayResource;
@@ -27,12 +27,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class CandidateControllerTest {
 
-    private RegistrationService registrationService;
+    private CandidateService registrationService;
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        registrationService = mock(RegistrationService.class);
+        registrationService = mock(CandidateService.class);
         mockMvc = MockMvcBuilders.standaloneSetup(
                         new CandidateController(registrationService))
                 .setControllerAdvice(new RegistrationExceptionHandler())

@@ -1,4 +1,4 @@
-package com.gpstl.joyn.candidate.service;
+package com.gpstl.joyn.candidate.exception;
 
 public class CandidateResumeNotFoundException extends RuntimeException {
 

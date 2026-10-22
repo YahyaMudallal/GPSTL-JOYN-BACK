@@ -1,4 +1,4 @@
-package com.gpstl.joyn.recruiter.model;
+package com.gpstl.joyn.company.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;

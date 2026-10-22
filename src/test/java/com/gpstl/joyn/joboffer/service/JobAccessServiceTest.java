@@ -2,12 +2,12 @@ package com.gpstl.joyn.joboffer.service;
 
 import com.gpstl.joyn.common.model.User;
 import com.gpstl.joyn.common.repository.UserRepository;
+import com.gpstl.joyn.company.model.Company;
 import com.gpstl.joyn.joboffer.exception.JobApiException;
 import com.gpstl.joyn.joboffer.model.JobOffer;
 import com.gpstl.joyn.joboffer.repository.JobOfferRepository;
-import com.gpstl.joyn.recruiter.model.Company;
-import com.gpstl.joyn.recruiter.model.RecruiterProfile;
-import com.gpstl.joyn.recruiter.repository.RecruiterProfileRepository;
+import com.gpstl.joyn.recruiter.model.Recruiter;
+import com.gpstl.joyn.recruiter.repository.RecruiterRepository;
 
 import org.junit.jupiter.api.*;
 import java.util.Optional;
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.*;
 /** Teste les règles de rôle et d’entreprise avec des repositories simulés, sans base de données. */
 class JobAccessServiceTest {
     UserRepository users;
-    RecruiterProfileRepository recruiters;
+    RecruiterRepository recruiters;
     JobOfferRepository offers;
     JobAccessService service;
     User user;
@@ -26,7 +26,7 @@ class JobAccessServiceTest {
 
     @BeforeEach void setup() {
         users = mock(UserRepository.class);
-        recruiters = mock(RecruiterProfileRepository.class);
+        recruiters = mock(RecruiterRepository.class);
         offers = mock(JobOfferRepository.class);
         service = new JobAccessService(users, recruiters, offers);
         user = mock(User.class); job = mock(JobOffer.class); company = mock(Company.class);
@@ -40,7 +40,7 @@ class JobAccessServiceTest {
     @Test void allowsAdministratorAndSameCompanyRecruiter() {
         when(user.getRole()).thenReturn("ADMIN");
         assertThat(service.authorizedJob(1, 10)).isSameAs(job);
-        RecruiterProfile recruiter = mock(RecruiterProfile.class);
+        Recruiter recruiter = mock(Recruiter.class);
         when(recruiter.getCompany()).thenReturn(company);
         when(recruiters.findByUserId(1L)).thenReturn(Optional.of(recruiter));
         when(user.getRole()).thenReturn("RECRUITER");
@@ -50,7 +50,7 @@ class JobAccessServiceTest {
     @Test void rejectsOtherCompanyMissingProfileCandidateAndSuspendedAccounts() {
         Company other = mock(Company.class);
         when(other.getId()).thenReturn(21L);
-        RecruiterProfile recruiter = mock(RecruiterProfile.class);
+        Recruiter recruiter = mock(Recruiter.class);
         when(recruiter.getCompany()).thenReturn(other);
         when(recruiters.findByUserId(1L)).thenReturn(Optional.of(recruiter));
         when(user.getRole()).thenReturn("RECRUITER");
