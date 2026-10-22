@@ -1,8 +1,8 @@
 package com.gpstl.joyn.joboffer.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.gpstl.joyn.common.models.Skill;
-import com.gpstl.joyn.joboffer.models.JobOffer;
+import com.gpstl.joyn.common.model.Skill;
+import com.gpstl.joyn.joboffer.model.JobOffer;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

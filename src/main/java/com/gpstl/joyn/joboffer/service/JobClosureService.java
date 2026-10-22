@@ -1,10 +1,11 @@
 package com.gpstl.joyn.joboffer.service;
 
-import com.gpstl.joyn.joboffer.models.JobOffer;
-import com.gpstl.joyn.joboffer.models.JobOfferAudit;
-import com.gpstl.joyn.joboffer.models.OfferStatus;
-import com.gpstl.joyn.joboffer.repositories.JobOfferAuditRepository;
-import com.gpstl.joyn.joboffer.repositories.JobOfferRepository;
+import com.gpstl.joyn.joboffer.model.JobOffer;
+import com.gpstl.joyn.joboffer.model.JobOfferAudit;
+import com.gpstl.joyn.joboffer.model.OfferStatus;
+import com.gpstl.joyn.joboffer.repository.JobOfferAuditRepository;
+import com.gpstl.joyn.joboffer.repository.JobOfferRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;

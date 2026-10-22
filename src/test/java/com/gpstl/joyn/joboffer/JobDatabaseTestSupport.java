@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -20,7 +21,8 @@ import static org.assertj.core.api.Assertions.*;
 /** Prépare les données communes ; chaque classe de test utilise son propre schéma temporaire. */
 @SpringBootTest
 @Transactional
-abstract class JobDatabaseTestSupport {
+@ActiveProfiles("local")
+public abstract class JobDatabaseTestSupport {
     @Autowired protected JdbcTemplate jdbc;
     @Autowired protected WebApplicationContext web;
     @Value("${joyn.security.jwt.secret}") String jwtSecret;
@@ -28,9 +30,24 @@ abstract class JobDatabaseTestSupport {
     protected int contract;
 
     protected static void configureDatabase(DynamicPropertyRegistry registry, String schema) {
-        String url = System.getenv().getOrDefault("SPRING_DATASOURCE_URL",
-            System.getenv().getOrDefault("DB_URL", "jdbc:postgresql://localhost:5432/joyn_db"));
-        registry.add("spring.datasource.url", () -> url + (url.contains("?") ? "&" : "?") + "currentSchema=" + schema);
+        registry.add("spring.datasource.url", () -> {
+            String baseUrl = System.getProperty("spring.datasource.url");
+            if (baseUrl == null) {
+                baseUrl = System.getenv("SPRING_DATASOURCE_URL");
+            }
+            if (baseUrl == null) {
+                baseUrl = System.getenv("DB_URL");
+            }
+            if (baseUrl == null) {
+                // On utilise la propriété standard résolue par Spring Boot depuis application.yml
+                baseUrl = "jdbc:postgresql://" 
+                    + System.getenv().getOrDefault("DB_HOST", "localhost") + ":"
+                    + System.getenv().getOrDefault("DB_PORT", "5432") + "/"
+                    + System.getenv().getOrDefault("DB_NAME", "joyn_db");
+            }
+            return baseUrl + (baseUrl.contains("?") ? "&" : "?") + "currentSchema=" + schema;
+        });
+
         registry.add("spring.flyway.schemas", () -> schema);
         registry.add("spring.flyway.default-schema", () -> schema);
         registry.add("spring.jpa.properties.hibernate.default_schema", () -> schema);
