@@ -3,6 +3,7 @@ package com.gpstl.joyn.company.service;
 
 import com.gpstl.joyn.recruiter.repository.RecruiterRepository;
 import com.gpstl.joyn.company.dto.CompanyResponse;
+import com.gpstl.joyn.company.dto.CompanyStatusUpdateRequest;
 import com.gpstl.joyn.company.model.Company;
 import com.gpstl.joyn.company.repository.CompanyRepository;
 import com.gpstl.joyn.joboffer.model.OfferStatus;
@@ -91,6 +92,55 @@ public class CompanyService {
                 company.getAddress(),
                 activeOffers.size(),
                 jobs
+        );
+    }
+
+    private static final java.util.Set<String> ALLOWED_STATUSES = 
+        java.util.Set.of("NOT_VERIFIED", "VERIFIED", "REJECTED");
+
+    @org.springframework.transaction.annotation.Transactional
+    public CompanyResponse updateVerificationStatus(
+            Long companyId,
+            CompanyStatusUpdateRequest request,
+            Authentication authentication) {
+
+        // Contrôle d'accès ADMIN via JWT
+        if (authentication == null || !authentication.isAuthenticated()
+                || !(authentication.getPrincipal() instanceof Jwt jwt)
+                || !"ADMIN".equals(jwt.getClaimAsString("role"))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réservé aux administrateurs.");
+        }
+
+        // Validation du payload
+        if (request == null || request.verificationStatus() == null || request.verificationStatus().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le statut de vérification est requis.");
+        }
+
+        String normalizedStatus = request.verificationStatus().trim().toUpperCase();
+        if (!ALLOWED_STATUSES.contains(normalizedStatus)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Statut invalide. Valeurs acceptées : NOT_VERIFIED, VERIFIED, REJECTED."
+            );
+        }
+
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entreprise introuvable."));
+
+        company.setVerificationStatus(normalizedStatus);
+        Company updated = companyRepository.save(company);
+
+        return new CompanyResponse(
+                updated.getId(),
+                updated.getName(),
+                updated.getLogoUrl(),
+                updated.getSector(),
+                updated.getCompanySize(),
+                updated.getWebsite(),
+                updated.getDescription(),
+                updated.getAddress(),
+                0,
+                List.of()
         );
     }
 }
