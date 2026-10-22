@@ -1,6 +1,7 @@
 package com.gpstl.joyn.company.service;
 
 import com.gpstl.joyn.company.dto.CompanyResponse;
+import com.gpstl.joyn.company.dto.CompanyStatusUpdateRequest;
 import com.gpstl.joyn.company.model.Company;
 import com.gpstl.joyn.company.repository.CompanyRepository;
 import com.gpstl.joyn.joboffer.model.OfferStatus;
@@ -22,6 +23,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -99,5 +101,62 @@ class CompanyServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.id()).isEqualTo(3L);
         assertThat(response.name()).isEqualTo("SecretStartup");
+    }
+
+    @Test
+    @DisplayName("updateVerificationStatus() - 200 OK quand l'admin met à jour le statut vers VERIFIED")
+    void updateVerificationStatus_AdminSuccess() {
+        Company company = new Company("JoynCorp");
+        when(companyRepository.findById(1L)).thenReturn(Optional.of(company));
+        when(companyRepository.save(any(Company.class))).thenAnswer(i -> i.getArgument(0));
+
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("role")).thenReturn("ADMIN");
+        Authentication auth = mock(Authentication.class);
+        when(auth.isAuthenticated()).thenReturn(true);
+        when(auth.getPrincipal()).thenReturn(jwt);
+
+        CompanyResponse response = companyService.updateVerificationStatus(
+                1L,
+                new CompanyStatusUpdateRequest("VERIFIED"),
+                auth
+        );
+
+        assertThat(response.id()).isEqualTo(company.getId());
+        assertThat(company.getVerificationStatus()).isEqualTo("VERIFIED");
+    }
+
+    @Test
+    @DisplayName("updateVerificationStatus() - 403 Forbidden si l'utilisateur n'est pas ADMIN")
+    void updateVerificationStatus_NonAdmin_ThrowsForbidden() {
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("role")).thenReturn("RECRUITER");
+        Authentication auth = mock(Authentication.class);
+        when(auth.isAuthenticated()).thenReturn(true);
+        when(auth.getPrincipal()).thenReturn(jwt);
+
+        assertThatThrownBy(() -> companyService.updateVerificationStatus(
+                1L,
+                new CompanyStatusUpdateRequest("VERIFIED"),
+                auth
+        )).isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("403 FORBIDDEN");
+    }
+
+    @Test
+    @DisplayName("updateVerificationStatus() - 400 Bad Request pour un statut invalide")
+    void updateVerificationStatus_InvalidStatus_ThrowsBadRequest() {
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("role")).thenReturn("ADMIN");
+        Authentication auth = mock(Authentication.class);
+        when(auth.isAuthenticated()).thenReturn(true);
+        when(auth.getPrincipal()).thenReturn(jwt);
+
+        assertThatThrownBy(() -> companyService.updateVerificationStatus(
+                1L,
+                new CompanyStatusUpdateRequest("INVALID_STATUS"),
+                auth
+        )).isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("400 BAD_REQUEST");
     }
 }
