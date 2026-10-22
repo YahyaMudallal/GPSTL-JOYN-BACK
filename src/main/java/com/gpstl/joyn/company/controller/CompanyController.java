@@ -1,8 +1,8 @@
 
-package com.gpstl.joyn.recruiter.controller;
+package com.gpstl.joyn.company.controller;
 
-import com.gpstl.joyn.recruiter.dto.CompanyProfileResponse;
-import com.gpstl.joyn.recruiter.service.CompanyProfileService;
+import com.gpstl.joyn.company.dto.CompanyResponse;
+import com.gpstl.joyn.company.service.CompanyService;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
@@ -13,22 +13,22 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/v1/companies")
-public class CompanyProfileController {
+public class CompanyController {
 
-    private final CompanyProfileService service;
+    private final CompanyService service;
 
-    public CompanyProfileController(CompanyProfileService service) {
+    public CompanyController(CompanyService service) {
         this.service = service;
     }
 
     @GetMapping("/{companyId}")
-    public ResponseEntity<CompanyProfileResponse> getCompany(
+    public ResponseEntity<CompanyResponse> getCompany(
             @PathVariable Long companyId,
             @RequestParam(name = "include_jobs", defaultValue = "true")
             boolean includeJobs,
             Authentication authentication) {
 
-        CompanyProfileResponse response =
+        CompanyResponse response =
                 service.getProfile(companyId, includeJobs, authentication);
 
         return ResponseEntity.ok()

@@ -4,8 +4,8 @@ import com.gpstl.joyn.joboffer.dto.CreateJobOfferRequest;
 import com.gpstl.joyn.joboffer.dto.JobOfferResponse;
 import com.gpstl.joyn.common.model.Skill;
 import com.gpstl.joyn.common.repository.SkillRepository;
-import com.gpstl.joyn.recruiter.model.RecruiterProfile;
-import com.gpstl.joyn.recruiter.repository.RecruiterProfileRepository;
+import com.gpstl.joyn.recruiter.model.Recruiter;
+import com.gpstl.joyn.recruiter.repository.RecruiterRepository;
 import com.gpstl.joyn.joboffer.exception.InvalidFieldException;
 import com.gpstl.joyn.joboffer.exception.RecruiterProfileNotFoundException;
 import com.gpstl.joyn.joboffer.model.ContractType;
@@ -34,12 +34,12 @@ import java.util.stream.Collectors;
 @Service
 public class JobOfferService {
 
-    private final RecruiterProfileRepository recruiterProfileRepository;
+    private final RecruiterRepository recruiterProfileRepository;
     private final ContractTypeRepository contractTypeRepository;
     private final SkillRepository skillRepository;
     private final JobOfferRepository jobOfferRepository;
 
-    public JobOfferService(RecruiterProfileRepository recruiterProfileRepository,
+    public JobOfferService(RecruiterRepository recruiterProfileRepository,
                            ContractTypeRepository contractTypeRepository,
                            SkillRepository skillRepository,
                            JobOfferRepository jobOfferRepository) {
@@ -61,7 +61,7 @@ public class JobOfferService {
     public JobOfferResponse createJobOffer(Long userId, CreateJobOfferRequest request) {
         // 1. Le recruteur et son entreprise viennent du token, jamais du corps de la requête :
         //    impossible de créer une offre pour le compte d'une autre entreprise.
-        RecruiterProfile recruiter = recruiterProfileRepository.findByUserId(userId)
+        Recruiter recruiter = recruiterProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RecruiterProfileNotFoundException(String.valueOf(userId)));
 
         // 2. Le type de contrat doit exister dans la table de référence contract_types.

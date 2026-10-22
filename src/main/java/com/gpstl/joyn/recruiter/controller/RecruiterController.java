@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/recruiters")
+@RequestMapping("/api/v1/recruiters")
 @CrossOrigin(origins = "*") // Permet les appels depuis Flutter en dev local
 public class RecruiterController {
 
@@ -24,7 +24,7 @@ public class RecruiterController {
 
     /**
      * Endpoint d'inscription du recruteur (User Story R55)
-     * URL : POST http://localhost:8080/api/recruiters/register
+     * URL : POST http://localhost:8080/api/v1/recruiters/register
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RecruiterRegisterRequest request) {

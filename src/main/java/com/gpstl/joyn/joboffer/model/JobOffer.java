@@ -1,7 +1,7 @@
 package com.gpstl.joyn.joboffer.model;
 import com.gpstl.joyn.common.model.Skill;
-import com.gpstl.joyn.recruiter.model.Company;
-import com.gpstl.joyn.recruiter.model.RecruiterProfile;
+import com.gpstl.joyn.company.model.Company;
+import com.gpstl.joyn.recruiter.model.Recruiter;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -45,7 +45,7 @@ public class JobOffer {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "recruiter_id", nullable = false)
-    private RecruiterProfile recruiter;
+    private Recruiter recruiter;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "contract_type_id", nullable = false)
@@ -137,8 +137,8 @@ public class JobOffer {
     public Company getCompany() { return company; }
     public void setCompany(Company company) { this.company = company; }
 
-    public RecruiterProfile getRecruiter() { return recruiter; }
-    public void setRecruiter(RecruiterProfile recruiter) { this.recruiter = recruiter; }
+    public Recruiter getRecruiter() { return recruiter; }
+    public void setRecruiter(Recruiter recruiter) { this.recruiter = recruiter; }
 
     public ContractType getContractType() { return contractType; }
     public void setContractType(ContractType contractType) { this.contractType = contractType; }

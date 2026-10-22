@@ -2,35 +2,30 @@ package com.gpstl.joyn.candidate.service;
 
 import com.gpstl.joyn.candidate.dto.CandidateRegisterRequest;
 import com.gpstl.joyn.candidate.dto.CandidateRegisterResponse;
+import com.gpstl.joyn.candidate.exception.CandidateResumeNotFoundException;
 import com.gpstl.joyn.candidate.model.Candidate;
 import com.gpstl.joyn.candidate.repository.CandidateRepository;
 import com.gpstl.joyn.common.model.User;
-import com.gpstl.joyn.common.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.gpstl.joyn.common.service.UserAccountService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Locale;
-
 @Service
-public class RegistrationService {
+public class CandidateService {
 
     private static final long MAX_RESUME_SIZE = 5L * 1024 * 1024;
 
-    private final UserRepository userRepository;
     private final CandidateRepository candidateRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserAccountService userAccountService;
     private final CandidateResumeStorage resumeStorage;
 
-    public RegistrationService(
-            UserRepository userRepository,
+    public CandidateService(
             CandidateRepository candidateRepository,
-            PasswordEncoder passwordEncoder,
+            UserAccountService userAccountService,
             CandidateResumeStorage resumeStorage) {
-        this.userRepository = userRepository;
         this.candidateRepository = candidateRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.userAccountService = userAccountService;
         this.resumeStorage = resumeStorage;
     }
 
@@ -38,28 +33,24 @@ public class RegistrationService {
     public CandidateRegisterResponse register(
             CandidateRegisterRequest request,
             MultipartFile resume) {
-        validateRegistration(request, resume);
+        validateCandidateInfo(request, resume);
 
-        String email = request.email().trim().toLowerCase(Locale.ROOT);
-        if (userRepository.existsByEmailIgnoreCase(email)) {
-            throw new CandidateEmailAlreadyRegisteredException();
-        }
+        User user = userAccountService.createUserAccount(
+                request.email(),
+                request.password(),
+                "CANDIDATE"
+        );
 
-        // The storage key is saved in the profile and exposed through the resume route.
-        String resumeUrl = resume == null || resume.isEmpty()
+        String resumeUrl = (resume == null || resume.isEmpty())
                 ? null
                 : "/api/v1/candidates/resumes/" + resumeStorage.store(resume);
-
-        User user = userRepository.saveAndFlush(new User(
-                email,
-                passwordEncoder.encode(request.password()),
-                "CANDIDATE"));
 
         Candidate candidate = candidateRepository.saveAndFlush(new Candidate(
                 user,
                 request.firstName().trim(),
                 request.lastName().trim(),
-                resumeUrl));
+                resumeUrl
+        ));
 
         return new CandidateRegisterResponse(
                 candidate.getId(),
@@ -67,7 +58,8 @@ public class RegistrationService {
                 user.getEmail(),
                 candidate.getFirstName(),
                 candidate.getLastName(),
-                candidate.getResumeUrl());
+                candidate.getResumeUrl()
+        );
     }
 
     public CandidateResumeStorage.StoredCandidateResume loadResume(String storageKey) {
@@ -75,20 +67,13 @@ public class RegistrationService {
                 .orElseThrow(CandidateResumeNotFoundException::new);
     }
 
-    private void validateRegistration(
+    private void validateCandidateInfo(
             CandidateRegisterRequest request,
             MultipartFile resume) {
         if (request == null
                 || isBlank(request.firstName())
-                || isBlank(request.lastName())
-                || isBlank(request.email())
-                || request.password() == null
-                || request.password().length() < 12) {
-            throw new IllegalArgumentException("Invalid registration information");
-        }
-
-        if (!request.email().trim().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
-            throw new IllegalArgumentException("Invalid email address");
+                || isBlank(request.lastName())) {
+            throw new IllegalArgumentException("Les informations du candidat sont incomplètes.");
         }
 
         if (resume != null && !resume.isEmpty() && resume.getSize() > MAX_RESUME_SIZE) {

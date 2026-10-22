@@ -3,7 +3,6 @@ package com.gpstl.joyn.recruiter.service;
 import com.gpstl.joyn.joboffer.JobDatabaseTestSupport;
 import com.gpstl.joyn.recruiter.dto.RecruiterRegisterRequest;
 import com.gpstl.joyn.recruiter.dto.RecruiterRegisterResponse;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,7 @@ class RecruiterServiceIntegrationTest extends JobDatabaseTestSupport {
 
         RecruiterRegisterRequest request = new RecruiterRegisterRequest(
                 uniqueEmail,
-                "secret-pass",
+                "secret-password-123", // >= 12 caractères
                 "Alice",
                 "Durand",
                 companyName
@@ -48,7 +47,6 @@ class RecruiterServiceIntegrationTest extends JobDatabaseTestSupport {
         assertThat(response.email()).isEqualTo(uniqueEmail);
         assertThat(response.companyName()).isEqualTo(companyName);
 
-        // Vérification directe dans PostgreSQL via JdbcTemplate
         Integer userCount = jdbc.queryForObject(
                 "SELECT COUNT(*) FROM users WHERE email = ? AND role = 'RECRUITER'",
                 Integer.class,
@@ -75,13 +73,12 @@ class RecruiterServiceIntegrationTest extends JobDatabaseTestSupport {
     @DisplayName("register() - Réutilise l'entreprise existante sans en créer une deuxième")
     void shouldReuseExistingCompanyWhenRegistering() {
         String existingCompanyName = "ExistingCorp-" + UUID.randomUUID();
-        // Pré-création d'une entreprise existante
         insert("INSERT INTO companies(name) VALUES (?) RETURNING id", existingCompanyName);
 
         String email = "recruiter2." + UUID.randomUUID() + "@joyn.test";
         RecruiterRegisterRequest request = new RecruiterRegisterRequest(
                 email,
-                "secret-pass",
+                "secret-password-123", // >= 12 caractères
                 "Bob",
                 "Lemoine",
                 existingCompanyName
@@ -91,7 +88,6 @@ class RecruiterServiceIntegrationTest extends JobDatabaseTestSupport {
 
         assertThat(response.companyName()).isEqualTo(existingCompanyName);
 
-        // On vérifie qu'il n'y a toujours qu'une seule entreprise de ce nom
         Integer companyCount = jdbc.queryForObject(
                 "SELECT COUNT(*) FROM companies WHERE name = ?",
                 Integer.class,
@@ -104,12 +100,11 @@ class RecruiterServiceIntegrationTest extends JobDatabaseTestSupport {
     @DisplayName("register() - Lève IllegalArgumentException en cas d'email déjà utilisé")
     void shouldThrowExceptionWhenEmailAlreadyExists() {
         String email = "shared." + UUID.randomUUID() + "@joyn.test";
-        // Pré-création de l'utilisateur
         insert("INSERT INTO users(email, password_hash, role) VALUES (?, 'hash', 'CANDIDATE') RETURNING id", email);
 
         RecruiterRegisterRequest request = new RecruiterRegisterRequest(
                 email,
-                "password",
+                "long-valid-password-123", // >= 12 caractères
                 "Paul",
                 "Bernard",
                 "SomeCorp"

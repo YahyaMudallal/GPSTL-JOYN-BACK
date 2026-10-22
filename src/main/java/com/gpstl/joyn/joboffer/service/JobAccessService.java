@@ -5,8 +5,8 @@ import com.gpstl.joyn.common.repository.UserRepository;
 import com.gpstl.joyn.joboffer.exception.JobApiException;
 import com.gpstl.joyn.joboffer.model.JobOffer;
 import com.gpstl.joyn.joboffer.repository.JobOfferRepository;
-import com.gpstl.joyn.recruiter.model.RecruiterProfile;
-import com.gpstl.joyn.recruiter.repository.RecruiterProfileRepository;
+import com.gpstl.joyn.recruiter.model.Recruiter;
+import com.gpstl.joyn.recruiter.repository.RecruiterRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,10 +17,10 @@ import java.util.Objects;
 @Service
 public class JobAccessService {
     private final UserRepository users;
-    private final RecruiterProfileRepository recruiters;
+    private final RecruiterRepository recruiters;
     private final JobOfferRepository offers;
 
-    public JobAccessService(UserRepository users, RecruiterProfileRepository recruiters, JobOfferRepository offers) {
+    public JobAccessService(UserRepository users, RecruiterRepository recruiters, JobOfferRepository offers) {
         this.users = users;
         this.recruiters = recruiters;
         this.offers = offers;
@@ -39,7 +39,7 @@ public class JobAccessService {
         JobOffer job = offers.findActiveByIdForUpdate(jobId)
             .orElseThrow(() -> new JobApiException(404, "Job not found"));
         if (!"ADMIN".equals(role)) {
-            RecruiterProfile recruiter = recruiters.findByUserId(userId)
+            Recruiter recruiter = recruiters.findByUserId(userId)
                 .orElseThrow(() -> new JobApiException(403, "Recruiter profile is required"));
             if (!Objects.equals(job.getCompany().getId(), recruiter.getCompany().getId()))
                 throw new JobApiException(403, "Job belongs to another company");

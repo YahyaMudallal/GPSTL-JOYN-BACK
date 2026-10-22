@@ -4,10 +4,11 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 import com.gpstl.joyn.common.model.User;
+import com.gpstl.joyn.company.model.Company;
 
 @Entity
 @Table(name = "recruiter_profiles")
-public class RecruiterProfile {
+public class Recruiter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,9 +34,9 @@ public class RecruiterProfile {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt = Instant.now();
 
-    public RecruiterProfile() {}
+    public Recruiter() {}
 
-    public RecruiterProfile(User user, Company company, String firstName, String lastName) {
+    public Recruiter(User user, Company company, String firstName, String lastName) {
         this.user = user;
         this.company = company;
         this.firstName = firstName;

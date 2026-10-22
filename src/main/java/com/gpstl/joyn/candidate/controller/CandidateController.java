@@ -3,7 +3,7 @@ package com.gpstl.joyn.candidate.controller;
 import com.gpstl.joyn.candidate.dto.CandidateRegisterRequest;
 import com.gpstl.joyn.candidate.dto.CandidateRegisterResponse;
 import com.gpstl.joyn.candidate.service.CandidateResumeStorage;
-import com.gpstl.joyn.candidate.service.RegistrationService;
+import com.gpstl.joyn.candidate.service.CandidateService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -24,9 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 @CrossOrigin(origins = "*")
 public class CandidateController {
 
-    private final RegistrationService registrationService;
+    private final CandidateService registrationService;
 
-    public CandidateController(RegistrationService registrationService) {
+    public CandidateController(CandidateService registrationService) {
         this.registrationService = registrationService;
     }
 

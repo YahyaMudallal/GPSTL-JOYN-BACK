@@ -40,7 +40,7 @@ class RecruiterControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/recruiters/register - Succès 201 avec retour du profil créé")
+    @DisplayName("POST /api/v1/recruiters/register - Succès 201 avec retour du profil créé")
     void register_Success() throws Exception {
         RecruiterRegisterRequest request = new RecruiterRegisterRequest(
                 "recruiter@entreprise.com",
@@ -61,7 +61,7 @@ class RecruiterControllerTest {
 
         when(recruiterService.register(any(RecruiterRegisterRequest.class))).thenReturn(mockResponse);
 
-        mockMvc.perform(post("/api/recruiters/register")
+        mockMvc.perform(post("/api/v1/recruiters/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -74,7 +74,7 @@ class RecruiterControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/recruiters/register - Échec 409 quand l'email existe déjà")
+    @DisplayName("POST /api/v1/recruiters/register - Échec 409 quand l'email existe déjà")
     void register_EmailAlreadyExists_Returns409() throws Exception {
         RecruiterRegisterRequest request = new RecruiterRegisterRequest(
                 "duplicate@entreprise.com",
@@ -87,7 +87,7 @@ class RecruiterControllerTest {
         when(recruiterService.register(any(RecruiterRegisterRequest.class)))
                 .thenThrow(new IllegalArgumentException("Cet email est déjà associé à un compte."));
 
-        mockMvc.perform(post("/api/recruiters/register")
+        mockMvc.perform(post("/api/v1/recruiters/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
