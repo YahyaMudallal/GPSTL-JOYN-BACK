@@ -8,7 +8,7 @@ import com.gpstl.joyn.recruiter.models.Company;
 import com.gpstl.joyn.recruiter.models.RecruiterProfile;
 import com.gpstl.joyn.recruiter.repositories.CompanyRepository;
 import com.gpstl.joyn.recruiter.repositories.RecruiterProfileRepository;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,15 +18,17 @@ public class RecruiterService {
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final RecruiterProfileRepository recruiterProfileRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // Injection des 3 repositories nécessaires via le constructeur
     public RecruiterService(
             UserRepository userRepository,
             CompanyRepository companyRepository,
-            RecruiterProfileRepository recruiterProfileRepository) {
+            RecruiterProfileRepository recruiterProfileRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.recruiterProfileRepository = recruiterProfileRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -43,8 +45,8 @@ public class RecruiterService {
         }
 
         // Création et sauvegarde du compte générique User
-        // TODO: ajouter le hash du mot de passe (BCrypt) quand Spring Security sera en place
-        User user = new User(request.email(), request.password(), "RECRUITER");
+        // Le mot de passe est haché avec BCrypt : on ne stocke jamais le mot de passe en clair (U16)
+        User user = new User(request.email(), passwordEncoder.encode(request.password()), "RECRUITER");
         User savedUser = userRepository.save(user);
 
         // Récupération ou création de l'entreprise
