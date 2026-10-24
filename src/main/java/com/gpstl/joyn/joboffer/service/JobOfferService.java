@@ -2,20 +2,20 @@ package com.gpstl.joyn.joboffer.service;
 
 import com.gpstl.joyn.joboffer.dto.CreateJobOfferRequest;
 import com.gpstl.joyn.joboffer.dto.JobOfferResponse;
-import com.gpstl.joyn.common.models.Skill;
-import com.gpstl.joyn.common.repositories.SkillRepository;
-import com.gpstl.joyn.recruiter.models.RecruiterProfile;
-import com.gpstl.joyn.recruiter.repositories.RecruiterProfileRepository;
+import com.gpstl.joyn.common.model.Skill;
+import com.gpstl.joyn.common.repository.SkillRepository;
+import com.gpstl.joyn.recruiter.model.Recruiter;
+import com.gpstl.joyn.recruiter.repository.RecruiterRepository;
 import com.gpstl.joyn.joboffer.exception.InvalidFieldException;
 import com.gpstl.joyn.joboffer.exception.RecruiterProfileNotFoundException;
-import com.gpstl.joyn.joboffer.models.ContractType;
-import com.gpstl.joyn.joboffer.models.ExperienceLevel;
-import com.gpstl.joyn.joboffer.models.JobOffer;
-import com.gpstl.joyn.joboffer.models.OfferStatus;
-import com.gpstl.joyn.joboffer.models.RemoteMode;
-import com.gpstl.joyn.joboffer.models.SalaryPeriod;
-import com.gpstl.joyn.joboffer.repositories.ContractTypeRepository;
-import com.gpstl.joyn.joboffer.repositories.JobOfferRepository;
+import com.gpstl.joyn.joboffer.model.ContractType;
+import com.gpstl.joyn.joboffer.model.ExperienceLevel;
+import com.gpstl.joyn.joboffer.model.JobOffer;
+import com.gpstl.joyn.joboffer.model.OfferStatus;
+import com.gpstl.joyn.joboffer.model.RemoteMode;
+import com.gpstl.joyn.joboffer.model.SalaryPeriod;
+import com.gpstl.joyn.joboffer.repository.ContractTypeRepository;
+import com.gpstl.joyn.joboffer.repository.JobOfferRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,12 +34,12 @@ import java.util.stream.Collectors;
 @Service
 public class JobOfferService {
 
-    private final RecruiterProfileRepository recruiterProfileRepository;
+    private final RecruiterRepository recruiterProfileRepository;
     private final ContractTypeRepository contractTypeRepository;
     private final SkillRepository skillRepository;
     private final JobOfferRepository jobOfferRepository;
 
-    public JobOfferService(RecruiterProfileRepository recruiterProfileRepository,
+    public JobOfferService(RecruiterRepository recruiterProfileRepository,
                            ContractTypeRepository contractTypeRepository,
                            SkillRepository skillRepository,
                            JobOfferRepository jobOfferRepository) {
@@ -61,7 +61,7 @@ public class JobOfferService {
     public JobOfferResponse createJobOffer(Long userId, CreateJobOfferRequest request) {
         // 1. Le recruteur et son entreprise viennent du token, jamais du corps de la requête :
         //    impossible de créer une offre pour le compte d'une autre entreprise.
-        RecruiterProfile recruiter = recruiterProfileRepository.findByUserId(userId)
+        Recruiter recruiter = recruiterProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RecruiterProfileNotFoundException(String.valueOf(userId)));
 
         // 2. Le type de contrat doit exister dans la table de référence contract_types.

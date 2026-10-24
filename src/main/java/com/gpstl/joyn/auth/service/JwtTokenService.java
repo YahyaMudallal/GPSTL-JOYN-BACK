@@ -1,6 +1,6 @@
 package com.gpstl.joyn.auth.service;
 
-import com.gpstl.joyn.common.models.User;
+import com.gpstl.joyn.common.model.User;
 import com.gpstl.joyn.config.SecurityConfig;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.beans.factory.annotation.Value;

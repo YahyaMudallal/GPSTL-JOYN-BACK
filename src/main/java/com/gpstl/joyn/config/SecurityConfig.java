@@ -5,8 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -14,7 +13,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-
+import org.springframework.http.HttpMethod;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +39,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll() //connexion: pas de token avant de se connecter
+                        .requestMatchers("/api/v1/auth/**").permitAll().requestMatchers(HttpMethod.POST, "/api/v1/recruiters/register").permitAll() //connexion: pas de token avant de se connecter
                         .requestMatchers("/api/v1/recruiters/**").hasRole("RECRUITER")
                         .anyRequest().permitAll())
                 // Sans token -> 401 ; token valide sans le rôle -> 403
@@ -56,12 +55,6 @@ public class SecurityConfig {
                 .build();
     }
 
-
-/** Outil de hachage des mots de passe (BCrypt), partagé par l'inscription et la connexion. */
-@Bean
-public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-}
 
 
 

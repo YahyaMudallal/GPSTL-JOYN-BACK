@@ -61,7 +61,7 @@ class RegisterThenLoginTest {
         String registration = """
                 {"email": "%s", "password": "%s", "firstName": "Camille", "lastName": "Martin", "companyName": "%s"}"""
                 .formatted(email, PASSWORD, companyName);
-        mockMvc.perform(post("/api/recruiters/register").contentType(MediaType.APPLICATION_JSON).content(registration))
+        mockMvc.perform(post("/api/v1/recruiters/register").contentType(MediaType.APPLICATION_JSON).content(registration))
                 .andExpect(status().isCreated());
 
         // Le mot de passe n'est plus stocké en clair, mais sous forme de hash BCrypt.
