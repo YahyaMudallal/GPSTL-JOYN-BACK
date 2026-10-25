@@ -3,9 +3,9 @@ package com.gpstl.joyn.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -13,7 +13,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-import org.springframework.http.HttpMethod;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +39,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll().requestMatchers(HttpMethod.POST, "/api/v1/recruiters/register").permitAll() //connexion: pas de token avant de se connecter
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/recruiters/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/applications").hasRole("CANDIDATE")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/applications/*/status")
+                                .hasAnyRole("RECRUITER", "ADMIN")
                         .requestMatchers("/api/v1/recruiters/**").hasRole("RECRUITER")
                         // Profil du candidat connecté ; /candidates/register reste public.
                         .requestMatchers("/api/v1/candidates/profile", "/api/v1/candidates/profile/**").hasRole("CANDIDATE")
@@ -59,12 +62,6 @@ public class SecurityConfig {
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
     }
-
-
-
-
-
-
 
     /** Transforme le claim "role": "RECRUITER" en autorité Spring "ROLE_RECRUITER". */
     @Bean
