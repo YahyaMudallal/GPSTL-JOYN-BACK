@@ -15,11 +15,11 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Migration V3 sur une base existante qui contient des compétences ne différant que par la casse.
+ * Migration V4 sur une base existante qui contient des compétences ne différant que par la casse.
  * Flyway est lancé à la main sur un schéma dédié : d'abord jusqu'à V2, puis on insère les doublons,
- * puis on applique V3 comme le ferait un déploiement.
+ * puis on applique les migrations jusqu’à V4 comme le ferait un déploiement.
  */
-class V3SkillMergeMigrationTest extends JobDatabaseTestSupport {
+class V4SkillMergeMigrationTest extends JobDatabaseTestSupport {
     private static final String SCHEMA = "job_test_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
     @DynamicPropertySource
