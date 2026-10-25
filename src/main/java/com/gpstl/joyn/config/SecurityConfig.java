@@ -3,9 +3,9 @@ package com.gpstl.joyn.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -13,7 +13,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-import org.springframework.http.HttpMethod;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -26,9 +25,10 @@ import java.nio.charset.StandardCharsets;
  *  - claim "sub"  = id de l'utilisateur dans la table users (ex. "42") ;
  *  - claim "role" = CANDIDATE, RECRUITER ou ADMIN (comme la colonne users.role).
  *
- * Seules les routes /api/v1/recruiters/** sont protégées pour l'instant, afin de ne pas
- * bloquer les autres routes de l'équipe (inscription, connexion...). L'équipe pourra
- * resserrer les règles quand toutes les routes existeront.
+ * Les candidatures sont réservées aux candidats connectés à la création et aux recruteurs
+ * ou administrateurs pour leur mise à jour. Les routes /api/v1/recruiters/** restent
+ * réservées aux recruteurs ; les autres règles d'accès sont définies au fur et à mesure
+ * de l'implémentation des routes.
  */
 @Configuration
 public class SecurityConfig {
@@ -39,7 +39,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll().requestMatchers(HttpMethod.POST, "/api/v1/recruiters/register").permitAll() //connexion: pas de token avant de se connecter
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/recruiters/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/applications").hasRole("CANDIDATE")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/applications/*/status")
+                                .hasAnyRole("RECRUITER", "ADMIN")
                         .requestMatchers("/api/v1/recruiters/**").hasRole("RECRUITER")
                         .anyRequest().permitAll())
                 // Sans token -> 401 ; token valide sans le rôle -> 403
@@ -54,12 +58,6 @@ public class SecurityConfig {
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
     }
-
-
-
-
-
-
 
     /** Transforme le claim "role": "RECRUITER" en autorité Spring "ROLE_RECRUITER". */
     @Bean
