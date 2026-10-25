@@ -31,7 +31,9 @@ class LocalCandidateResumeStorageTest {
                 storage.load(key).orElseThrow();
 
         assertTrue(key.endsWith(".pdf"));
-        assertArrayEquals(content, stored.resource().getInputStream().readAllBytes());
+                try (var input = stored.resource().getInputStream()) {
+            assertArrayEquals(content, input.readAllBytes());
+        }
         assertEquals("application/pdf", stored.mediaType().toString());
     }
 
