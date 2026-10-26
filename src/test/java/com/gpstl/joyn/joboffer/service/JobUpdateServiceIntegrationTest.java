@@ -10,6 +10,13 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.*;
 import java.math.BigDecimal;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import com.gpstl.joyn.candidate.service.CandidateProfileService;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -145,6 +152,32 @@ class JobUpdateServiceIntegrationTest extends JobDatabaseTestSupport {
             .andExpect(status().isOk()).andExpect(jsonPath("$.title").value("Updated created offer"))
             .andExpect(jsonPath("$.skills[0]").value(name));
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM skills WHERE LOWER(name) = LOWER(?)", Integer.class, name)).isEqualTo(1);
+    }
+
+    @Autowired CandidateProfileService profiles;
+    @Autowired PlatformTransactionManager transactions;
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void sameNewSkillCreatedConcurrentlyByAProfileAndAJobIsSharedWithoutError() throws Exception {
+        insert("INSERT INTO candidate_profiles(user_id, first_name, last_name) VALUES (?, 'C', 'D') RETURNING id", candidate);
+        String name = "Kotlin-" + UUID.randomUUID();
+        var executor = Executors.newSingleThreadExecutor();
+        var second = new java.util.concurrent.atomic.AtomicReference<Future<Map<String, Object>>>();
+        try {
+            new TransactionTemplate(transactions).executeWithoutResult(status -> {
+                profiles.updateProfile(candidate, Map.of("skills", List.of(name)));
+                // Même nom, autre casse, côté offre : l'INSERT ... ON CONFLICT attend la fin du profil.
+                second.set(executor.submit(() -> service.patch(recruiter, job, Map.of("skills", List.of(name.toLowerCase())))));
+                assertThatThrownBy(() -> second.get().get(500, TimeUnit.MILLISECONDS)).isInstanceOf(TimeoutException.class);
+            });
+            // Avant la correction : DataIntegrityViolationException sur uq_skills_name_lower.
+            assertThat(second.get().get(5, TimeUnit.SECONDS).get("skills")).isEqualTo(List.of(name));
+            assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM skills WHERE LOWER(name) = LOWER(?)", Integer.class, name)).isEqualTo(1);
+        } finally {
+            executor.shutdownNow();
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        }
     }
 
 }

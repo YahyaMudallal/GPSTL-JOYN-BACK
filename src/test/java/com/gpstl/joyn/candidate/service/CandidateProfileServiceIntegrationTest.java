@@ -183,51 +183,73 @@ class CandidateProfileServiceIntegrationTest extends JobDatabaseTestSupport {
         assertThat(status(() -> service.getProfile(candidate))).isEqualTo(403);
     }
 
-    @Test
-    void adminReadsAndUpdatesAGivenProfileAndTheChangeIsAudited() {
-        assertThat(service.getProfileAsAdmin(admin, profile).firstName()).isEqualTo("Old");
-        var response = service.updateProfileAsAdmin(admin, profile, body("{\"bio\":null,\"skills\":[]}"));
-        assertThat(response.bio()).isNull();
-        assertThat(response.skills()).isEmpty();
-        assertThat(jdbc.queryForMap("SELECT actor_user_id, action, changed_fields FROM candidate_profile_audit WHERE candidate_id = ?", profile))
-                .containsEntry("actor_user_id", admin)
-                .containsEntry("action", "ADMIN_UPDATE")
-                .containsEntry("changed_fields", "bio,skills");
+    private void contactDetails() {
+        jdbc.update("""
+            UPDATE candidate_profiles SET phone = '+33612345678', adress = 'Paris 9e',
+                github_url = 'https://github.com/old' WHERE id = ?""", profile);
     }
 
     @Test
-    void onlyAdministratorChangesAreAudited() {
-        service.updateProfile(candidate, body("{\"bio\":\"Mine\"}"));
-        // Un corps vide ne modifie rien : pas de trace non plus.
-        service.updateProfileAsAdmin(admin, profile, body("{}"));
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM candidate_profile_audit WHERE candidate_id = ?", Integer.class, profile)).isZero();
+    void recruiterSeesTheFullProfileWhenTheCandidateHidesNothing() {
+        contactDetails();
+        var seen = service.getProfileById(recruiter, profile);
+        assertThat(seen.lastName()).isEqualTo("Name");
+        assertThat(seen.email()).endsWith("@example.test");
+        assertThat(seen.phone()).isEqualTo("+33612345678");
+        assertThat(seen.links().github()).isEqualTo("https://github.com/old");
+        assertThat(seen.skills()).containsExactly(goName());
+        // Les réglages eux-mêmes restent privés.
+        assertThat(seen.visibility()).isNull();
     }
 
     @Test
-    void adminAccessIsReservedToActiveAdministrators() {
-        assertThat(status(() -> service.getProfileAsAdmin(candidate, profile))).isEqualTo(403);
-        assertThat(status(() -> service.updateProfileAsAdmin(recruiter, profile, body("{\"bio\":5}")))).isEqualTo(403);
-        assertThat(status(() -> service.getProfileAsAdmin(999_999_999L, profile))).isEqualTo(401);
-        assertThat(status(() -> service.getProfileAsAdmin(admin, 999_999_999L))).isEqualTo(404);
-        // La route du candidat reste réservée aux candidats, même pour un administrateur.
-        assertThat(status(() -> service.getProfile(admin))).isEqualTo(403);
-        jdbc.update("UPDATE users SET status = 'SUSPENDED' WHERE id = ?", admin);
+    void recruiterViewAppliesTheCandidateVisibilitySettings() {
+        contactDetails();
+        jdbc.update("UPDATE candidate_profiles SET show_last_name = FALSE, show_contact_links = FALSE WHERE id = ?", profile);
+        var seen = service.getProfileById(recruiter, profile);
+        assertThat(seen.firstName()).isEqualTo("Old");
+        assertThat(seen.lastName()).isEqualTo("N.");
+        assertThat(seen.email()).isNull();
+        assertThat(seen.phone()).isNull();
+        assertThat(seen.address()).isNull();
+        assertThat(seen.links().github()).isNull();
+        // Le reste du profil est inchangé.
+        assertThat(seen.bio()).isEqualTo("Old bio");
+        assertThat(seen.experiences()).hasSize(2);
+    }
+
+    @Test
+    void profileHiddenFromRecruitersOrSuspendedLooksMissing() {
+        jdbc.update("UPDATE candidate_profiles SET is_visible_to_recruiters = FALSE WHERE id = ?", profile);
+        assertThat(status(() -> service.getProfileById(recruiter, profile))).isEqualTo(404);
+        jdbc.update("UPDATE candidate_profiles SET is_visible_to_recruiters = TRUE WHERE id = ?", profile);
+        jdbc.update("UPDATE users SET status = 'SUSPENDED' WHERE id = ?", candidate);
         entityManager.clear();
-        assertThat(status(() -> service.getProfileAsAdmin(admin, profile))).isEqualTo(403);
+        assertThat(status(() -> service.getProfileById(recruiter, profile))).isEqualTo(404);
     }
 
     @Test
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    void adminChangeIsRolledBackIfTheAuditFails() {
-        // Provoquer l'échec du journal pour vérifier que la modification est annulée avec lui.
-        jdbc.execute("ALTER TABLE candidate_profile_audit ADD CONSTRAINT test_audit_failure CHECK (action <> 'ADMIN_UPDATE')");
-        try {
-            assertThatThrownBy(() -> service.updateProfileAsAdmin(admin, profile, Map.of("bio", "Must rollback")))
-                    .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
-            assertThat(jdbc.queryForObject("SELECT bio FROM candidate_profiles WHERE id = ?", String.class, profile)).isEqualTo("Old bio");
-        } finally {
-            jdbc.execute("ALTER TABLE candidate_profile_audit DROP CONSTRAINT test_audit_failure");
-        }
+    void administratorAlwaysSeesTheFullProfile() {
+        contactDetails();
+        jdbc.update("""
+            UPDATE candidate_profiles SET is_visible_to_recruiters = FALSE, show_last_name = FALSE,
+                show_contact_links = FALSE WHERE id = ?""", profile);
+        var seen = service.getProfileById(admin, profile);
+        assertThat(seen.lastName()).isEqualTo("Name");
+        assertThat(seen.phone()).isEqualTo("+33612345678");
+        assertThat(seen.visibility().visibleToRecruiters()).isFalse();
+    }
+
+    @Test
+    void readingByIdIsReservedToActiveRecruitersAndAdministrators() {
+        assertThat(status(() -> service.getProfileById(candidate, profile))).isEqualTo(403);
+        assertThat(status(() -> service.getProfileById(999_999_999L, profile))).isEqualTo(401);
+        assertThat(status(() -> service.getProfileById(recruiter, 999_999_999L))).isEqualTo(404);
+        // La route du candidat reste réservée aux candidats.
+        assertThat(status(() -> service.getProfile(admin))).isEqualTo(403);
+        jdbc.update("UPDATE users SET status = 'SUSPENDED' WHERE id = ?", recruiter);
+        entityManager.clear();
+        assertThat(status(() -> service.getProfileById(recruiter, profile))).isEqualTo(403);
     }
 
     @Test

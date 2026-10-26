@@ -71,15 +71,7 @@ class CandidateProfilePatchTest {
     void acceptsAnEmptyPatch() {
         var patch = parse("{}");
         assertThat(patch.values()).isEmpty();
-        assertThat(patch.changedFields()).isEmpty();
         assertThat(patch.changesMatchingCriteria()).isFalse();
-    }
-
-    @Test
-    void listsChangedFieldsForTheAdminAudit() {
-        var patch = parse("{\"educations\":[],\"bio\":null,\"preferences\":{\"currency\":\"USD\",\"contract_types\":[]},\"skills\":[\"Go\"]}");
-        assertThat(patch.changedFields())
-                .containsExactly("bio", "preferences.currency", "preferences.contract_types", "skills", "educations");
     }
 
     @Test

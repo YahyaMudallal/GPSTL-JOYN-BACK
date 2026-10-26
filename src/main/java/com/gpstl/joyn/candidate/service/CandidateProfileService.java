@@ -7,9 +7,7 @@ import com.gpstl.joyn.candidate.exception.CandidateProfileException;
 import com.gpstl.joyn.candidate.model.Candidate;
 import com.gpstl.joyn.candidate.model.CandidateEducation;
 import com.gpstl.joyn.candidate.model.CandidateExperience;
-import com.gpstl.joyn.candidate.model.CandidateProfileAudit;
 import com.gpstl.joyn.candidate.model.CandidateSkill;
-import com.gpstl.joyn.candidate.repository.CandidateProfileAuditRepository;
 import com.gpstl.joyn.candidate.repository.CandidateRepository;
 import com.gpstl.joyn.common.model.Skill;
 import com.gpstl.joyn.common.model.User;
@@ -31,16 +29,15 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
  * Lecture et mise à jour du profil candidat (CA56, CA68).
- * Candidat : le profil est toujours celui du token (sub = users.id), aucun identifiant ne vient du client.
- * Administrateur : le profil est désigné par son id dans l'URL, et chaque modification est journalisée.
+ * Candidat : lit et modifie son propre profil, toujours celui du token (sub = users.id).
+ * Recruteur et administrateur : lecture seule d'un profil désigné par son id ; seul le candidat
+ * peut modifier son profil.
  */
 @Service
 public class CandidateProfileService {
@@ -48,19 +45,16 @@ public class CandidateProfileService {
     private final CandidateRepository candidates;
     private final ContractTypeRepository contractTypes;
     private final SkillRepository skills;
-    private final CandidateProfileAuditRepository audit;
     private final EntityManager entityManager;
     private final ApplicationEventPublisher events;
 
     public CandidateProfileService(UserRepository users, CandidateRepository candidates,
             ContractTypeRepository contractTypes, SkillRepository skills,
-            CandidateProfileAuditRepository audit,
             EntityManager entityManager, ApplicationEventPublisher events) {
         this.users = users;
         this.candidates = candidates;
         this.contractTypes = contractTypes;
         this.skills = skills;
-        this.audit = audit;
         this.entityManager = entityManager;
         this.events = events;
     }
@@ -79,43 +73,32 @@ public class CandidateProfileService {
         // Le compte d'abord : un recruteur reçoit 403 même si son JSON est invalide.
         checkCandidateAccount(userId);
         CandidateProfilePatch patch = CandidateProfilePatch.parse(body);
-        return CandidateProfileResponse.from(applyPatch(patch, () -> candidates.findByUserIdForUpdate(userId)));
+        return CandidateProfileResponse.from(applyPatch(patch, userId));
     }
 
     /**
-     * Lecture du profil d'un candidat désigné par son id (candidate_profiles.id), réservée aux administrateurs.
-     * Les réglages de visibilité ne s'appliquent pas : l'administrateur voit tout pour pouvoir modérer.
-     * Les simples lectures ne sont pas journalisées, seules les modifications le sont.
+     * Lecture d'un profil désigné par son id (candidate_profiles.id), réservée aux recruteurs et administrateurs.
+     *  - administrateur : profil complet, quels que soient les réglages et l'état du compte (modération) ;
+     *  - recruteur : profil masqué (is_visible_to_recruiters = false) ou compte suspendu → 404, sans révéler
+     *    que le profil existe ; sinon vue filtrée par les réglages de visibilité (voir forRecruiter).
      */
     @Transactional(readOnly = true)
-    public CandidateProfileResponse getProfileAsAdmin(long adminUserId, long candidateId) {
-        checkAdminAccount(adminUserId);
+    public CandidateProfileResponse getProfileById(long viewerUserId, long candidateId) {
+        User viewer = checkAccount(viewerUserId, Set.of("RECRUITER", "ADMIN"),
+                "Only recruiters and administrators can view another candidate's profile");
         Candidate candidate = candidates.findProfileById(candidateId)
                 .orElseThrow(CandidateProfileService::profileNotFound);
-        return CandidateProfileResponse.from(candidate);
-    }
-
-    /**
-     * Mise à jour par un administrateur : mêmes règles que pour le candidat, plus une trace
-     * (qui, quels champs) écrite dans la même transaction que la modification.
-     */
-    @Transactional
-    public CandidateProfileResponse updateProfileAsAdmin(long adminUserId, long candidateId, Map<String, Object> body) {
-        checkAdminAccount(adminUserId);
-        CandidateProfilePatch patch = CandidateProfilePatch.parse(body);
-        Candidate candidate = applyPatch(patch, () -> candidates.findByIdForUpdate(candidateId));
-        // Un corps vide ne modifie rien : pas de trace. Un échec ici annule aussi la modification.
-        if (!patch.changedFields().isEmpty()) {
-            audit.saveAndFlush(new CandidateProfileAudit(adminUserId, candidate, "ADMIN_UPDATE", patch.changedFields()));
+        if ("ADMIN".equals(viewer.getRole())) {
+            return CandidateProfileResponse.from(candidate);
         }
-        return CandidateProfileResponse.from(candidate);
+        if (!candidate.isVisibleToRecruiters() || !"ACTIVE".equals(candidate.getUser().getStatus())) {
+            throw profileNotFound();
+        }
+        return CandidateProfileResponse.forRecruiter(candidate);
     }
 
-    /**
-     * Étapes communes au candidat et à l'administrateur ; seul le moyen de trouver le profil change.
-     * Le corps a déjà été validé (sans accès à la base) par l'appelant.
-     */
-    private Candidate applyPatch(CandidateProfilePatch patch, Supplier<Optional<Candidate>> lockedProfile) {
+    /** Étapes de la mise à jour ; le corps a déjà été validé (sans accès à la base) par l'appelant. */
+    private Candidate applyPatch(CandidateProfilePatch patch, long userId) {
         // 1. Références résolues AVANT le verrou du profil. findOrCreate peut attendre une autre
         //    transaction qui insère la même compétence : si on détenait déjà le verrou du profil,
         //    deux mises à jour pourraient s'attendre mutuellement (interblocage).
@@ -124,7 +107,7 @@ public class CandidateProfileService {
         List<Skill> desiredSkills = patch.skills() == null ? null : resolveSkills(patch.skills());
 
         // 2. SELECT ... FOR UPDATE : une autre mise à jour du même profil attend notre commit.
-        Candidate candidate = lockedProfile.get().orElseThrow(CandidateProfileService::profileNotFound);
+        Candidate candidate = candidates.findByUserIdForUpdate(userId).orElseThrow(CandidateProfileService::profileNotFound);
 
         // 3. Seuls les champs présents et validés sont appliqués à l'entité gérée par Hibernate.
         patch.values().forEach((field, value) -> apply(candidate, field, value));
@@ -145,28 +128,24 @@ public class CandidateProfileService {
 
     /** Routes /api/v1/candidates/profile : seul un candidat actif accède à son propre profil. */
     private void checkCandidateAccount(long userId) {
-        checkAccount(userId, "CANDIDATE", "Only candidates have a candidate profile");
-    }
-
-    /** Routes /api/v1/admin/candidates/** : seul un administrateur actif peut viser le profil d'un tiers. */
-    private void checkAdminAccount(long userId) {
-        checkAccount(userId, "ADMIN", "Administrator role is required");
+        checkAccount(userId, Set.of("CANDIDATE"), "Only candidates have a candidate profile");
     }
 
     /**
      * Le rôle et l'état du compte sont relus en base, en plus du contrôle du token par SecurityConfig :
      * un token émis avant une suspension ou un changement de rôle ne suffit pas.
-     * Utilisateur absent : 401 ; compte suspendu ou mauvais rôle : 403.
+     * Utilisateur absent : 401 ; compte suspendu ou rôle non autorisé : 403.
      */
-    private void checkAccount(long userId, String requiredRole, String forbiddenMessage) {
+    private User checkAccount(long userId, Set<String> allowedRoles, String forbiddenMessage) {
         User user = users.findById(userId)
                 .orElseThrow(() -> new CandidateProfileException(401, "Authenticated user does not exist"));
         if (!"ACTIVE".equals(user.getStatus())) {
             throw new CandidateProfileException(403, "Account is suspended");
         }
-        if (!requiredRole.equals(user.getRole())) {
+        if (!allowedRoles.contains(user.getRole())) {
             throw new CandidateProfileException(403, forbiddenMessage);
         }
+        return user;
     }
 
     private static CandidateProfileException profileNotFound() {

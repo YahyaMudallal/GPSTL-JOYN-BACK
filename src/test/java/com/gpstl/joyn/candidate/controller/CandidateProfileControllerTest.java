@@ -46,8 +46,8 @@ class CandidateProfileControllerTest extends JobDatabaseTestSupport {
         profile = insert("INSERT INTO candidate_profiles(user_id, first_name, last_name) VALUES (?, 'Old', 'Name') RETURNING id", candidate);
     }
 
-    private String adminRoute() {
-        return "/api/v1/admin/candidates/" + profile + "/profile";
+    private String byIdRoute() {
+        return "/api/v1/candidates/" + profile + "/profile";
     }
 
     private String token(long userId, String role, String key) {
@@ -136,31 +136,46 @@ class CandidateProfileControllerTest extends JobDatabaseTestSupport {
     }
 
     @Test
-    void administratorReadsAndUpdatesAGivenProfile() throws Exception {
-        mvc.perform(get(adminRoute()).header("Authorization", token(admin, "ADMIN")))
+    void recruiterAndAdministratorReadAGivenProfile() throws Exception {
+        jdbc.update("UPDATE candidate_profiles SET show_last_name = FALSE WHERE id = ?", profile);
+        // Recruteur : vue filtrée par les réglages du candidat, sans les réglages eux-mêmes.
+        mvc.perform(get(byIdRoute()).header("Authorization", token(recruiter, "RECRUITER")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(profile))
-                .andExpect(jsonPath("$.first_name").value("Old"));
-        mvc.perform(patch(adminRoute()).header("Authorization", token(admin, "ADMIN"))
-                        .contentType("application/json").content("{\"headline\":\"Moderated\"}"))
+                .andExpect(jsonPath("$.last_name").value("N."))
+                .andExpect(jsonPath("$.visibility").doesNotExist());
+        // Administrateur : vue complète.
+        mvc.perform(get(byIdRoute()).header("Authorization", token(admin, "ADMIN")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.headline").value("Moderated"));
-        mvc.perform(get("/api/v1/admin/candidates/999999999/profile").header("Authorization", token(admin, "ADMIN")))
+                .andExpect(jsonPath("$.last_name").value("Name"))
+                .andExpect(jsonPath("$.visibility.show_last_name").value(false));
+        mvc.perform(get("/api/v1/candidates/999999999/profile").header("Authorization", token(recruiter, "RECRUITER")))
                 .andExpect(status().isNotFound());
+        mvc.perform(get("/api/v1/candidates/abc/profile").header("Authorization", token(recruiter, "RECRUITER")))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void adminRouteIsClosedToCandidatesAndCandidateRouteToAdministrators() throws Exception {
-        mvc.perform(get(adminRoute()).header("Authorization", token(candidate, "CANDIDATE")))
+    void onlyTheCandidateCanModifyTheProfile() throws Exception {
+        // Aucune route PATCH par identifiant : un recruteur ou un admin ne peut pas modifier un profil.
+        mvc.perform(patch(byIdRoute()).header("Authorization", token(admin, "ADMIN"))
+                        .contentType("application/json").content("{\"bio\":\"x\"}"))
+                .andExpect(status().isMethodNotAllowed());
+        // Un admin n'a pas de profil candidat : la route /profile lui est fermée.
+        mvc.perform(patch(ROUTE).header("Authorization", token(admin, "ADMIN"))
+                        .contentType("application/json").content("{\"bio\":\"x\"}"))
                 .andExpect(status().isForbidden());
-        mvc.perform(get(adminRoute())).andExpect(status().isUnauthorized());
-        // Un admin n'a pas de profil candidat : il passe par la route dédiée, jamais par /profile.
-        mvc.perform(get(ROUTE).header("Authorization", token(admin, "ADMIN")))
+    }
+
+    @Test
+    void readingByIdIsClosedToCandidatesAndAnonymousCallers() throws Exception {
+        mvc.perform(get(byIdRoute()).header("Authorization", token(candidate, "CANDIDATE")))
                 .andExpect(status().isForbidden());
-        // Token qui annonce ADMIN pour un compte CANDIDATE en base : refusé par le service.
-        mvc.perform(get(adminRoute()).header("Authorization", token(candidate, "ADMIN")))
+        mvc.perform(get(byIdRoute())).andExpect(status().isUnauthorized());
+        // Token qui annonce RECRUITER pour un compte CANDIDATE en base : refusé par le service.
+        mvc.perform(get(byIdRoute()).header("Authorization", token(candidate, "RECRUITER")))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("Administrator role is required"));
+                .andExpect(jsonPath("$.message").value("Only recruiters and administrators can view another candidate's profile"));
     }
 
     @Test
@@ -169,7 +184,7 @@ class CandidateProfileControllerTest extends JobDatabaseTestSupport {
                 .andReturn().getResponse().getContentAsString();
         var api = io.swagger.v3.core.util.Yaml.mapper().readValue(yaml, io.swagger.v3.oas.models.OpenAPI.class);
         org.assertj.core.api.Assertions.assertThat(api.getPaths())
-                .containsKeys(ROUTE, "/api/v1/admin/candidates/{candidateId}/profile");
+                .containsKeys(ROUTE, "/api/v1/candidates/{candidateId}/profile");
         // Chaque référence interne du document doit exister.
         var refs = java.util.regex.Pattern.compile("#/components/(schemas|responses)/([A-Za-z]+)").matcher(yaml);
         while (refs.find()) {
@@ -178,7 +193,8 @@ class CandidateProfileControllerTest extends JobDatabaseTestSupport {
         }
         mvc.perform(get("/v3/api-docs")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.paths['/api/v1/candidates/profile'].patch.operationId").value("updateCandidateProfile"))
-                .andExpect(jsonPath("$.paths['/api/v1/admin/candidates/{candidateId}/profile'].patch.operationId").value("updateCandidateProfileAsAdmin"))
+                .andExpect(jsonPath("$.paths['/api/v1/candidates/{candidateId}/profile'].get.operationId").value("getCandidateProfileById"))
+                .andExpect(jsonPath("$.paths['/api/v1/candidates/{candidateId}/profile'].patch").doesNotExist())
                 .andExpect(jsonPath("$.paths['/api/v1/candidates/profile'].patch.requestBody.content['application/json'].schema['$ref']")
                         .value("/openapi/candidate-profile.yaml#/components/schemas/CandidateProfilePatch"));
     }

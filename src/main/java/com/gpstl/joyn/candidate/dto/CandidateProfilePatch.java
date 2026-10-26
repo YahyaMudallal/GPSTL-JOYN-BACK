@@ -76,16 +76,6 @@ public record CandidateProfilePatch(
                 parser.skills, parser.contractTypes, parser.experiences, parser.educations);
     }
 
-    /** Chemins JSON envoyés, dans l'ordre : champs simples puis sections remplacées (pour le journal admin). */
-    public List<String> changedFields() {
-        List<String> fields = new ArrayList<>(values.keySet());
-        if (contractTypes != null) fields.add("preferences.contract_types");
-        if (skills != null) fields.add("skills");
-        if (experiences != null) fields.add("experiences");
-        if (educations != null) fields.add("educations");
-        return List.copyOf(fields);
-    }
-
     /** Vrai si le cache de recommandations doit être invalidé (compétences ou préférences modifiées). */
     public boolean changesMatchingCriteria() {
         return skills != null || contractTypes != null

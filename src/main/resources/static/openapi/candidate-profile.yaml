@@ -2,13 +2,15 @@ openapi: 3.0.3
 info:
   title: Joyn - Profil candidat
   version: 1.0.0
-  description: 'Lecture (CA56) et mise à jour partielle (CA68) du profil du candidat connecté,
-    et intervention d''un administrateur sur un profil désigné.
+  description: 'Lecture (CA56) et mise à jour partielle (CA68) du profil candidat.
 
-    Le profil est celui du token JWT HS256 (claim sub = users.id) ; aucun identifiant
-    n''est accepté dans l''URL ou le corps.
+    /candidates/profile : le candidat lit et modifie son propre profil, celui du token JWT
+    HS256 (claim sub = users.id) ; aucun identifiant n''est accepté dans l''URL ou le corps.
 
-    Rôle CANDIDATE exigé par SecurityConfig, puis compte relu en base (rôle, statut ACTIVE).
+    /candidates/{candidateId}/profile : lecture seule pour les recruteurs et administrateurs ;
+    seul le candidat peut modifier son profil.
+
+    Rôle exigé par SecurityConfig, puis compte relu en base (rôle, statut ACTIVE).
 
     '
 security:
@@ -129,7 +131,7 @@ paths:
           description: Content-Type différent de application/json
         '500':
           $ref: '#/components/responses/Internal'
-  /api/v1/admin/candidates/{candidateId}/profile:
+  /api/v1/candidates/{candidateId}/profile:
     parameters:
     - name: candidateId
       in: path
@@ -140,67 +142,44 @@ paths:
         format: int64
         minimum: 1
     get:
-      operationId: getCandidateProfileAsAdmin
-      summary: Lire le profil d'un candidat désigné (administrateur)
-      description: 'Rôle ADMIN exigé par SecurityConfig, puis compte relu en base (rôle ADMIN,
-        statut ACTIVE). Même réponse que GET /api/v1/candidates/profile.
+      operationId: getCandidateProfileById
+      summary: Lire le profil d'un candidat désigné (recruteur ou administrateur)
+      description: 'Lecture seule ; il n''existe pas de PATCH sur cette route.
+
+        Administrateur : profil complet, quels que soient les réglages de visibilité et l''état
+        du compte (modération).
+
+        Recruteur : les réglages de visibilité du candidat s''appliquent (story sécurité) :
+
+        - is_visible_to_recruiters = false, ou compte du candidat suspendu : 404, sans révéler
+        que le profil existe ;
+
+        - show_last_name = false : last_name réduit à l''initiale (« M. ») ;
+
+        - show_contact_links = false : email, phone, address et links à null ;
+
+        - visibility n''est jamais renvoyé au recruteur (null).
 
         '
       responses:
         '200':
-          description: Profil du candidat
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CandidateProfile'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/AdminForbidden'
-        '404':
-          $ref: '#/components/responses/AdminNotFound'
-        '500':
-          $ref: '#/components/responses/Internal'
-    patch:
-      operationId: updateCandidateProfileAsAdmin
-      summary: Modifier partiellement le profil d'un candidat désigné (administrateur, journalisé)
-      description: 'Même corps et mêmes règles que PATCH /api/v1/candidates/profile.
-
-        L''administrateur et les chemins des champs envoyés sont enregistrés dans
-        candidate_profile_audit, dans la même transaction que la modification ; un corps vide
-        n''est pas journalisé.
-
-        Les champs du compte (email, rôle, statut, mot de passe) restent protégés ici aussi.
-
-        '
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CandidateProfilePatch'
-            examples:
-              moderation:
-                summary: Retirer une bio inappropriée
-                value:
-                  bio: null
-      responses:
-        '200':
-          description: Profil mis à jour
+          description: Profil du candidat (vue complète ou filtrée selon le rôle)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CandidateProfile'
         '400':
-          $ref: '#/components/responses/Invalid'
+          description: candidateId n'est pas un entier positif
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/AdminForbidden'
+          $ref: '#/components/responses/ViewerForbidden'
         '404':
-          $ref: '#/components/responses/AdminNotFound'
-        '415':
-          description: Content-Type différent de application/json
+          $ref: '#/components/responses/ViewerNotFound'
         '500':
           $ref: '#/components/responses/Internal'
 components:
@@ -485,10 +464,13 @@ components:
         email:
           type: string
           format: email
+          nullable: true
+          description: null dans la vue recruteur si show_contact_links = false
         first_name:
           type: string
         last_name:
           type: string
+          description: Réduit à l'initiale (« M. ») dans la vue recruteur si show_last_name = false
         headline:
           type: string
           nullable: true
@@ -498,12 +480,14 @@ components:
         phone:
           type: string
           nullable: true
+          description: null dans la vue recruteur si show_contact_links = false
         location:
           type: string
           nullable: true
         address:
           type: string
           nullable: true
+          description: null dans la vue recruteur si show_contact_links = false
         years_of_experience:
           type: integer
           nullable: true
@@ -516,6 +500,7 @@ components:
           description: Modifiable uniquement par le dépôt de CV, pas par PATCH.
         links:
           type: object
+          description: Liens à null dans la vue recruteur si show_contact_links = false
           properties:
             github:
               type: string
@@ -561,6 +546,8 @@ components:
               type: string
         visibility:
           type: object
+          nullable: true
+          description: Réglages du candidat ; null dans la vue recruteur
           properties:
             visible_to_recruiters:
               type: boolean
@@ -741,18 +728,20 @@ components:
           example:
             message: Account is suspended
             errors: {}
-    AdminForbidden:
-      description: 'Token sans le rôle ADMIN : corps vide (Spring Security). Compte qui n''est
-        pas administrateur ou compte suspendu en base : corps JSON Error.'
+    ViewerForbidden:
+      description: 'Token sans le rôle RECRUITER ou ADMIN : corps vide (Spring Security).
+        Compte qui n''est ni recruteur ni administrateur, ou compte suspendu en base : corps
+        JSON Error.'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            message: Administrator role is required
+            message: Only recruiters and administrators can view another candidate's profile
             errors: {}
-    AdminNotFound:
-      description: Aucun profil candidat avec cet identifiant
+    ViewerNotFound:
+      description: Aucun profil avec cet identifiant, ou profil masqué au recruteur (réglage ou
+        compte suspendu)
       content:
         application/json:
           schema:

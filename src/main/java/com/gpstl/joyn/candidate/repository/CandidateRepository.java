@@ -36,12 +36,7 @@ public interface CandidateRepository
     @Query("select c from Candidate c where c.user.id = :userId")
     Optional<Candidate> findByUserIdForUpdate(@Param("userId") Long userId);
 
-    /** Variante administrateur : le profil est désigné par son id (candidate_profiles.id), même verrou. */
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select c from Candidate c where c.id = :id")
-    Optional<Candidate> findByIdForUpdate(@Param("id") Long id);
-
-    /** Lecture administrateur : même chargement groupé que findProfileByUserId. */
+    /** Lecture par un recruteur ou un administrateur (profil désigné par son id) : même chargement groupé. */
     @EntityGraph(attributePaths = {"user", "skills", "skills.skill"})
     Optional<Candidate> findProfileById(Long id);
 

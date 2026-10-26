@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,21 +22,24 @@ import java.security.Principal;
 import java.util.Map;
 
 /**
- * Profil du candidat connecté (CA56 lecture, CA68 mise à jour partielle).
- * Pas d'identifiant dans l'URL : le profil est celui du token, un candidat ne peut pas viser un tiers.
- * Le rôle CANDIDATE est exigé dès SecurityConfig ; le service revérifie le compte en base.
+ * Profil candidat (CA56 lecture, CA68 mise à jour partielle).
+ *  - /profile : le candidat lit et modifie SON profil. Pas d'identifiant dans l'URL : le profil est
+ *    celui du token, un candidat ne peut pas viser un tiers.
+ *  - /{candidateId}/profile : lecture seule pour les recruteurs et administrateurs. Seul le candidat
+ *    peut modifier son profil, il n'existe donc pas de PATCH sur cette route.
+ * Les rôles sont exigés dès SecurityConfig ; le service revérifie le compte en base.
  */
 @RestController
-@RequestMapping("/api/v1/candidates/profile")
-@Tag(name = "Candidate profile", description = "Profile of the authenticated candidate; subject is users.id")
+@RequestMapping("/api/v1/candidates")
+@Tag(name = "Candidate profile", description = "Candidate profile; subject is users.id")
 @SecurityRequirement(name = "bearerAuth")
 // Sans « content » explicite, springdoc décrirait les erreurs avec le type de retour (le profil).
 @ApiResponses({
     @ApiResponse(responseCode = "401", description = "Token missing, invalid or expired, or user no longer exists",
         content = @Content(schema = @Schema(ref = CandidateProfileController.SPEC + "Error"))),
-    @ApiResponse(responseCode = "403", description = "Not a candidate, or account suspended",
+    @ApiResponse(responseCode = "403", description = "Role not allowed on this route, or account suspended",
         content = @Content(schema = @Schema(ref = CandidateProfileController.SPEC + "Error"))),
-    @ApiResponse(responseCode = "404", description = "The account has no candidate profile",
+    @ApiResponse(responseCode = "404", description = "Candidate profile not found (or hidden from recruiters)",
         content = @Content(schema = @Schema(ref = CandidateProfileController.SPEC + "Error"))),
     @ApiResponse(responseCode = "500", description = "Internal error; transaction rolled back",
         content = @Content(schema = @Schema(ref = CandidateProfileController.SPEC + "Error")))
@@ -50,7 +54,7 @@ public class CandidateProfileController {
         this.profiles = profiles;
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(operationId = "getCandidateProfile", summary = "Get the full profile of the authenticated candidate")
     @ApiResponse(responseCode = "200", description = "Candidate profile", content =
         @Content(schema = @Schema(ref = SPEC + "CandidateProfile")))
@@ -59,10 +63,26 @@ public class CandidateProfileController {
     }
 
     /**
+     * Profil du candidat {candidateId} (candidate_profiles.id) vu par un recruteur ou un administrateur.
+     * Le recruteur reçoit une vue filtrée par les réglages de visibilité du candidat ; l'administrateur, la vue complète.
+     */
+    @GetMapping(value = "/{candidateId}/profile", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(operationId = "getCandidateProfileById", summary = "Get a given candidate's profile (recruiter or administrator)",
+        description = "Recruiters get a view filtered by the candidate's visibility settings; administrators get the full profile.")
+    @ApiResponse(responseCode = "200", description = "Candidate profile", content =
+        @Content(schema = @Schema(ref = SPEC + "CandidateProfile")))
+    @ApiResponse(responseCode = "400", description = "candidateId is not a positive integer",
+        content = @Content(schema = @Schema(ref = SPEC + "Error")))
+    public CandidateProfileResponse getById(@PathVariable long candidateId, Principal principal) {
+        if (candidateId <= 0) throw new CandidateProfileException(400, "candidateId must be a positive integer");
+        return profiles.getProfileById(userId(principal), candidateId);
+    }
+
+    /**
      * Map plutôt qu'un DTO typé : distinguer un champ absent (conservé) d'un null explicite (effacé).
      * springdoc ne peut pas décrire une Map : le schéma détaillé vient de candidate-profile.yaml.
      */
-    @PatchMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/profile", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(operationId = "updateCandidateProfile", summary = "Partially update the profile of the authenticated candidate",
         description = "Absent field: kept. Explicit null: cleared. Nested objects are merged field by field; "
             + "lists (skills, experiences, educations, preferences.contract_types) are replaced. "
@@ -79,8 +99,8 @@ public class CandidateProfileController {
         return profiles.updateProfile(userId(principal), body);
     }
 
-    /** users.id vient du claim « sub » du token vérifié, jamais du corps JSON. Partagé avec la route admin. */
-    static long userId(Principal principal) {
+    /** users.id vient du claim « sub » du token vérifié, jamais du corps JSON. */
+    private static long userId(Principal principal) {
         if (principal == null) throw new CandidateProfileException(401, "Authentication is required");
         try {
             long id = Long.parseLong(principal.getName());

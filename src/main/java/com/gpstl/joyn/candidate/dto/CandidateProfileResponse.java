@@ -117,6 +117,46 @@ public record CandidateProfileResponse(
                 c.getUpdatedAt());
     }
 
+    /**
+     * Vue d'un recruteur : les données du candidat, filtrées par ses réglages de visibilité
+     * (« story sécurité »). Le cas is_visible_to_recruiters = false (profil masqué) est traité
+     * par le service, qui répond 404. Ici :
+     *  - show_last_name = false : nom réduit à son initiale (« Mudallal » devient « M. ») ;
+     *  - show_contact_links = false : email, téléphone, adresse et liens externes masqués,
+     *    pour que le premier contact passe par la plateforme ;
+     *  - les réglages eux-mêmes (visibility) ne sont pas exposés au recruteur.
+     * L'administrateur, lui, reçoit la vue complète (from).
+     */
+    public static CandidateProfileResponse forRecruiter(Candidate c) {
+        CandidateProfileResponse full = from(c);
+        boolean contact = c.isShowContactLinks();
+        return new CandidateProfileResponse(
+                full.id(),
+                contact ? full.email() : null,
+                full.firstName(),
+                c.isShowLastName() ? full.lastName() : initial(full.lastName()),
+                full.headline(),
+                full.bio(),
+                contact ? full.phone() : null,
+                full.location(),
+                contact ? full.address() : null,
+                full.yearsOfExperience(),
+                full.photoUrl(),
+                full.cvUrl(),
+                contact ? full.links() : new Links(null, null, null),
+                full.alternance(),
+                full.preferences(),
+                null,
+                full.skills(),
+                full.experiences(),
+                full.educations(),
+                full.updatedAt());
+    }
+
+    private static String initial(String lastName) {
+        return lastName == null || lastName.isBlank() ? null : lastName.substring(0, 1).toUpperCase() + ".";
+    }
+
     private static Experience toExperience(CandidateExperience e) {
         return new Experience(e.getId(), e.getTitle(), e.getOrganization(), e.getDescription(),
                 e.getStartDate(), e.getEndDate(), e.isCurrentlyWorking());
