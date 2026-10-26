@@ -24,7 +24,11 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ApplicationServiceTest {
@@ -113,7 +117,6 @@ class ApplicationServiceTest {
         when(viewed.getCode()).thenReturn("VIEWED");
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(applicationRepository.findByIdForUpdate(7L)).thenReturn(Optional.of(application));
-        when(jobAccessService.authorizedJob(1L, 34L)).thenReturn(jobOffer);
         when(statusRepository.findByCode("VIEWED")).thenReturn(Optional.of(viewed));
         when(applicationRepository.saveAndFlush(any(Application.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -122,6 +125,9 @@ class ApplicationServiceTest {
 
         assertThat(response.status()).isEqualTo("VIEWED");
         assertThat(application.getViewedAt()).isNotNull();
+        // Company check on the application's job offer, without locking or excluding closed jobs.
+        verify(jobAccessService).checkCompanyAccess(1L, jobOffer);
+        verify(jobAccessService, never()).authorizedJob(anyLong(), anyLong());
     }
 
     @Test
@@ -147,8 +153,8 @@ class ApplicationServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(applicationRepository.findByIdForUpdate(7L)).thenReturn(Optional.of(application));
         when(jobOffer.getId()).thenReturn(34L);
-        when(jobAccessService.authorizedJob(1L, 34L))
-                .thenThrow(new JobApiException(403, "Job belongs to another company"));
+        doThrow(new JobApiException(403, "Job belongs to another company"))
+                .when(jobAccessService).checkCompanyAccess(1L, jobOffer);
 
         assertThatThrownBy(() -> service.updateStatus(1L, 7L, new UpdateApplicationStatusRequest("VIEWED")))
                 .isInstanceOf(ApplicationException.class)
