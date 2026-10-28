@@ -1,3 +1,4 @@
+
 package com.gpstl.joyn.company.service;
 
 import com.gpstl.joyn.company.dto.CompanyResponse;
@@ -19,6 +20,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -158,5 +160,97 @@ class CompanyServiceTest {
                 auth
         )).isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("400 BAD_REQUEST");
+    }
+
+    // Tests R79 - Modification du profil d'une entreprise
+
+    @Test
+    @DisplayName("updateProfile() - Le recruteur peut modifier le profil de son entreprise")
+    void updateProfile_RecruiterOwner_Success() {
+        Company company = mock(Company.class);
+        when(company.getId()).thenReturn(1L);
+        when(company.getVerificationStatus()).thenReturn("VERIFIED");
+
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("role")).thenReturn("RECRUITER");
+        when(jwt.getSubject()).thenReturn("42");
+
+        Authentication auth = mock(Authentication.class);
+when(auth.getPrincipal()).thenReturn(jwt);
+
+        Recruiter recruiter = mock(Recruiter.class);
+        when(recruiter.getCompany()).thenReturn(company);
+
+        when(recruiterProfileRepository.findByUserId(42L)).thenReturn(Optional.of(recruiter));
+        when(companyRepository.findById(1L)).thenReturn(Optional.of(company));
+        when(jobOfferRepository.findPublicOffersByCompanyId(1L, OfferStatus.PUBLISHED))
+                .thenReturn(List.of());
+
+        CompanyResponse response = companyService.updateProfile(
+                1L,
+                Map.of("description", "Nouvelle description"),
+                auth
+        );
+
+        verify(company).setDescription("Nouvelle description");
+        verify(companyRepository).save(company);
+        assertThat(response.id()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("updateProfile() - Un recruteur ne peut pas modifier une autre entreprise")
+    void updateProfile_OtherCompany_ThrowsForbidden() {
+        Company company = mock(Company.class);
+        when(company.getId()).thenReturn(2L);
+
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("role")).thenReturn("RECRUITER");
+        when(jwt.getSubject()).thenReturn("42");
+
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(jwt);
+
+        Recruiter recruiter = mock(Recruiter.class);
+        when(recruiter.getCompany()).thenReturn(company);
+
+        when(recruiterProfileRepository.findByUserId(42L)).thenReturn(Optional.of(recruiter));
+
+        assertThatThrownBy(() -> companyService.updateProfile(
+                1L,
+                Map.of("name", "Autre entreprise"),
+                auth
+        )).isInstanceOf(ResponseStatusException.class)
+          .hasMessageContaining("403 FORBIDDEN");
+
+        verify(companyRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateProfile() - Le recruteur ne peut pas modifier le statut de vérification")
+    void updateProfile_ProtectedField_ThrowsBadRequest() {
+        Company company = mock(Company.class);
+        when(company.getId()).thenReturn(1L);
+
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("role")).thenReturn("RECRUITER");
+        when(jwt.getSubject()).thenReturn("42");
+
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(jwt);
+
+        Recruiter recruiter = mock(Recruiter.class);
+        when(recruiter.getCompany()).thenReturn(company);
+
+        when(recruiterProfileRepository.findByUserId(42L)).thenReturn(Optional.of(recruiter));
+        when(companyRepository.findById(1L)).thenReturn(Optional.of(company));
+
+        assertThatThrownBy(() -> companyService.updateProfile(
+                1L,
+                Map.of("verificationStatus", "VERIFIED"),
+                auth
+        )).isInstanceOf(ResponseStatusException.class)
+          .hasMessageContaining("400 BAD_REQUEST");
+
+        verify(companyRepository, never()).save(any());
     }
 }
