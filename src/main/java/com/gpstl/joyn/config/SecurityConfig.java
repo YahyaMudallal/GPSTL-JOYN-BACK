@@ -45,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/applications/*/status")
                                 .hasAnyRole("RECRUITER", "ADMIN")
                         .requestMatchers("/api/v1/recruiters/**").hasRole("RECRUITER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/companies/*")
+                                .hasRole("RECRUITER")
                         .anyRequest().permitAll())
                 // Sans token -> 401 ; token valide sans le rôle -> 403
                 .oauth2ResourceServer(oauth2 -> oauth2
