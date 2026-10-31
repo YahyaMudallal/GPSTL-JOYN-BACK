@@ -74,4 +74,6 @@ public class Company {
     public String getSector() { return sector; }
     public String getCompanySize() { return companySize; }
     public String getAddress() { return address; }
+    public String getEmailDomain() { return emailDomain; }
+    public boolean isCheckSiretFound() { return checkSiretFound; }
 }
