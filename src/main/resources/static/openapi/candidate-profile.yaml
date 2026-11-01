@@ -1,0 +1,769 @@
+openapi: 3.0.3
+info:
+  title: Joyn - Profil candidat
+  version: 1.0.0
+  description: 'Lecture (CA56) et mise à jour partielle (CA68) du profil candidat.
+
+    /candidates/profile : le candidat lit et modifie son propre profil, celui du token JWT
+    HS256 (claim sub = users.id) ; aucun identifiant n''est accepté dans l''URL ou le corps.
+
+    /candidates/{candidateId}/profile : lecture seule pour les recruteurs et administrateurs ;
+    seul le candidat peut modifier son profil.
+
+    Rôle exigé par SecurityConfig, puis compte relu en base (rôle, statut ACTIVE).
+
+    '
+security:
+- bearerAuth: []
+paths:
+  /api/v1/candidates/profile:
+    get:
+      operationId: getCandidateProfile
+      summary: Lire le profil complet du candidat connecté
+      description: 'Agrège candidate_profiles, l''email du compte, les compétences, les
+        types de contrat recherchés, les expériences et les formations.
+
+        '
+      responses:
+        '200':
+          description: Profil du candidat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/Internal'
+    patch:
+      operationId: updateCandidateProfile
+      summary: Modifier partiellement le profil du candidat connecté
+      description: 'Tous les champs sont optionnels. Champ absent : conservé ; null explicite
+        : effacé si le champ l''autorise.
+
+        Objets imbriqués (links, alternance, preferences, visibility) : fusion champ par
+        champ.
+
+        Listes (skills, experiences, educations, preferences.contract_types) : remplacement
+        complet ; [] vide la section.
+
+        Champs système (id, email, role, status, password, cv_url, updated_at) et champs
+        inconnus : 400.
+
+        Profil et sections modifiés dans une transaction unique, sous verrou de ligne (SELECT
+        ... FOR UPDATE).
+
+        Si skills ou preferences changent, l''événement CandidateMatchingCriteriaChanged
+        est publié pour invalider le cache de recommandations.
+
+        '
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CandidateProfilePatch'
+            examples:
+              ticket:
+                summary: Exemple de la user story CA68
+                value:
+                  first_name: Yahya
+                  last_name: Mudallal
+                  headline: Ingénieur Logiciel & Observabilité
+                  phone: '+33612345678'
+                  location: Paris, France
+                  years_of_experience: 2
+                  skills:
+                  - Go
+                  - Python
+                  - Docker
+                  - Prometheus
+                  preferences:
+                    contract_types:
+                    - CDI
+                    - FREELANCE
+                    remote_policy: HYBRID
+                    min_salary: 48000
+                    currency: EUR
+                  bio: Spécialisé dans l'architecture distribuée et le monitoring d'infrastructures
+                    cloud.
+              sections:
+                summary: Remplacer les expériences et formations
+                value:
+                  experiences:
+                  - title: Stage SRE
+                    organization: Beta
+                    start_date: '2025-06-01'
+                    end_date: '2025-12-31'
+                    currently_working: false
+                  educations:
+                  - school_name: Sorbonne Université
+                    field_of_study: Informatique
+                    degree: MASTERS
+                    postbac_year: BAC_5
+                    start_year: 2024
+                    currently_studying: true
+              clear:
+                summary: Effacer un champ et vider une section
+                value:
+                  bio: null
+                  skills: []
+      responses:
+        '200':
+          description: Profil mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateProfile'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          description: Content-Type différent de application/json
+        '500':
+          $ref: '#/components/responses/Internal'
+  /api/v1/candidates/{candidateId}/profile:
+    parameters:
+    - name: candidateId
+      in: path
+      required: true
+      description: Identifiant du profil (candidate_profiles.id, champ « id » de la réponse), pas users.id
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    get:
+      operationId: getCandidateProfileById
+      summary: Lire le profil d'un candidat désigné (recruteur ou administrateur)
+      description: 'Lecture seule ; il n''existe pas de PATCH sur cette route.
+
+        Administrateur : profil complet, quels que soient les réglages de visibilité et l''état
+        du compte (modération).
+
+        Recruteur : les réglages de visibilité du candidat s''appliquent (story sécurité) :
+
+        - is_visible_to_recruiters = false, ou compte du candidat suspendu : 404, sans révéler
+        que le profil existe ;
+
+        - show_last_name = false : last_name réduit à l''initiale (« M. ») ;
+
+        - show_contact_links = false : email, phone, address et links à null ;
+
+        - visibility n''est jamais renvoyé au recruteur (null).
+
+        '
+      responses:
+        '200':
+          description: Profil du candidat (vue complète ou filtrée selon le rôle)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateProfile'
+        '400':
+          description: candidateId n'est pas un entier positif
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ViewerForbidden'
+        '404':
+          $ref: '#/components/responses/ViewerNotFound'
+        '500':
+          $ref: '#/components/responses/Internal'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CandidateProfilePatch:
+      type: object
+      additionalProperties: false
+      # Exemple au niveau du schéma : affiché par Swagger UI quand le contrôleur référence ce schéma.
+      example:
+        first_name: Yahya
+        last_name: Mudallal
+        headline: Ingénieur Logiciel & Observabilité
+        phone: '+33612345678'
+        location: Paris, France
+        years_of_experience: 2
+        skills:
+        - Go
+        - Python
+        - Docker
+        - Prometheus
+        preferences:
+          contract_types:
+          - CDI
+          - FREELANCE
+          remote_policy: HYBRID
+          min_salary: 48000
+          currency: EUR
+        bio: Spécialisé dans l'architecture distribuée et le monitoring d'infrastructures
+          cloud.
+      properties:
+        first_name:
+          type: string
+          minLength: 1
+        last_name:
+          type: string
+          minLength: 1
+        headline:
+          type: string
+          maxLength: 255
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+          description: 'Format international E.164. Espaces, points, tirets et parenthèses
+            sont retirés : « +33 6 12-34-56-78 » devient « +33612345678 ».'
+          example: '+33612345678'
+        photo_url:
+          type: string
+          format: uri
+          nullable: true
+          description: URL http ou https
+        years_of_experience:
+          type: integer
+          minimum: 0
+          maximum: 32767
+          nullable: true
+        links:
+          $ref: '#/components/schemas/LinksPatch'
+        alternance:
+          $ref: '#/components/schemas/AlternancePatch'
+        preferences:
+          $ref: '#/components/schemas/PreferencesPatch'
+        visibility:
+          $ref: '#/components/schemas/VisibilityPatch'
+        skills:
+          type: array
+          maxItems: 100
+          description: Remplace les compétences ; doublons ignorés sans tenir compte de
+            la casse. Les compétences conservées gardent leur niveau, les nouvelles prennent
+            INTERMEDIATE.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 100
+        experiences:
+          type: array
+          maxItems: 100
+          description: Remplace toutes les expériences, dans l'ordre envoyé.
+          items:
+            $ref: '#/components/schemas/ExperienceInput'
+        educations:
+          type: array
+          maxItems: 100
+          description: Remplace toutes les formations, dans l'ordre envoyé.
+          items:
+            $ref: '#/components/schemas/EducationInput'
+    LinksPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        github:
+          type: string
+          format: uri
+          nullable: true
+        linkedin:
+          type: string
+          format: uri
+          nullable: true
+        portfolio:
+          type: string
+          format: uri
+          nullable: true
+    AlternancePatch:
+      type: object
+      additionalProperties: false
+      properties:
+        rhythm_type:
+          type: string
+          nullable: true
+          example: 3 semaines entreprise / 1 semaine école
+        available_from:
+          type: string
+          format: date
+          nullable: true
+        contract_duration_months:
+          type: integer
+          minimum: 1
+          maximum: 32767
+          nullable: true
+    PreferencesPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        contract_types:
+          type: array
+          maxItems: 100
+          description: Codes existants de contract_types ; remplace la liste.
+          items:
+            type: string
+            enum:
+            - CDI
+            - CDD
+            - INTERNSHIP
+            - APPRENTICESHIP
+            - PROFESSIONALIZATION
+            - FREELANCE
+            - TEMPORARY
+        remote_policy:
+          type: string
+          enum:
+          - ONSITE
+          - HYBRID
+          - REMOTE
+          nullable: true
+        min_salary:
+          type: integer
+          minimum: 0
+          maximum: 9999999999
+          nullable: true
+        currency:
+          type: string
+          pattern: ^[A-Z]{3}$
+    VisibilityPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        visible_to_recruiters:
+          type: boolean
+        visible_to_others:
+          type: boolean
+        show_last_name:
+          type: boolean
+        show_contact_links:
+          type: boolean
+    ExperienceInput:
+      type: object
+      additionalProperties: false
+      required:
+      - title
+      description: '« id » est toléré et ignoré : les éléments reçus par GET peuvent être
+        renvoyés tels quels.'
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Ignoré
+        title:
+          type: string
+          minLength: 1
+        organization:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          description: Postérieure ou égale à start_date ; vide si currently_working.
+        currently_working:
+          type: boolean
+          default: false
+    EducationInput:
+      type: object
+      additionalProperties: false
+      required:
+      - school_name
+      - field_of_study
+      - degree
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Ignoré
+        school_name:
+          type: string
+          minLength: 1
+        school_address:
+          type: string
+          nullable: true
+        field_of_study:
+          type: string
+          minLength: 1
+        degree:
+          type: string
+          enum:
+          - BACHELORS
+          - MASTERS
+          - ENGINEERING
+          - DOCTORATE
+          - OTHER
+        postbac_year:
+          type: string
+          enum:
+          - BAC_2
+          - BAC_3
+          - BAC_4
+          - BAC_5
+          nullable: true
+        start_year:
+          type: integer
+          minimum: 1950
+          maximum: 2100
+          nullable: true
+        end_year:
+          type: integer
+          minimum: 1950
+          maximum: 2100
+          nullable: true
+          description: Supérieure ou égale à start_year ; vide si currently_studying.
+        currently_studying:
+          type: boolean
+          default: false
+    CandidateProfile:
+      type: object
+      required:
+      - id
+      - email
+      - first_name
+      - last_name
+      - links
+      - alternance
+      - preferences
+      - visibility
+      - skills
+      - experiences
+      - educations
+      - updated_at
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: null dans la vue recruteur si show_contact_links = false
+        first_name:
+          type: string
+        last_name:
+          type: string
+          description: Réduit à l'initiale (« M. ») dans la vue recruteur si show_last_name = false
+        headline:
+          type: string
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+          description: null dans la vue recruteur si show_contact_links = false
+        location:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+          description: null dans la vue recruteur si show_contact_links = false
+        years_of_experience:
+          type: integer
+          nullable: true
+        photo_url:
+          type: string
+          nullable: true
+        cv_url:
+          type: string
+          nullable: true
+          description: Modifiable uniquement par le dépôt de CV, pas par PATCH.
+        links:
+          type: object
+          description: Liens à null dans la vue recruteur si show_contact_links = false
+          properties:
+            github:
+              type: string
+              nullable: true
+            linkedin:
+              type: string
+              nullable: true
+            portfolio:
+              type: string
+              nullable: true
+        alternance:
+          type: object
+          properties:
+            rhythm_type:
+              type: string
+              nullable: true
+            available_from:
+              type: string
+              format: date
+              nullable: true
+            contract_duration_months:
+              type: integer
+              nullable: true
+        preferences:
+          type: object
+          properties:
+            contract_types:
+              type: array
+              description: Triés par code
+              items:
+                type: string
+            remote_policy:
+              type: string
+              enum:
+              - ONSITE
+              - HYBRID
+              - REMOTE
+              nullable: true
+            min_salary:
+              type: integer
+              nullable: true
+            currency:
+              type: string
+        visibility:
+          type: object
+          nullable: true
+          description: Réglages du candidat ; null dans la vue recruteur
+          properties:
+            visible_to_recruiters:
+              type: boolean
+            visible_to_others:
+              type: boolean
+            show_last_name:
+              type: boolean
+            show_contact_links:
+              type: boolean
+        skills:
+          type: array
+          description: Noms triés par ordre alphabétique
+          items:
+            type: string
+        experiences:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                format: int64
+              title:
+                type: string
+              organization:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              start_date:
+                type: string
+                format: date
+                nullable: true
+              end_date:
+                type: string
+                format: date
+                nullable: true
+              currently_working:
+                type: boolean
+        educations:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                format: int64
+              school_name:
+                type: string
+              school_address:
+                type: string
+                nullable: true
+              field_of_study:
+                type: string
+              degree:
+                type: string
+              postbac_year:
+                type: string
+                nullable: true
+              start_year:
+                type: integer
+                nullable: true
+              end_year:
+                type: integer
+                nullable: true
+              currently_studying:
+                type: boolean
+        updated_at:
+          type: string
+          format: date-time
+          description: Valeur fixée par le trigger PostgreSQL
+      example:
+        id: 42
+        email: yahya@example.com
+        first_name: Yahya
+        last_name: Mudallal
+        headline: Ingénieur Logiciel & Observabilité
+        bio: Spécialisé dans l'architecture distribuée et le monitoring d'infrastructures
+          cloud.
+        phone: '+33612345678'
+        location: Paris, France
+        address: null
+        years_of_experience: 2
+        photo_url: null
+        cv_url: /api/v1/candidates/resumes/3f2c9a1e-0b7d-4e8a-9c1f-2d6e5a4b3c21.pdf
+        links:
+          github: https://github.com/yahya
+          linkedin: null
+          portfolio: null
+        alternance:
+          rhythm_type: null
+          available_from: '2027-09-01'
+          contract_duration_months: null
+        preferences:
+          contract_types:
+          - CDI
+          - FREELANCE
+          remote_policy: HYBRID
+          min_salary: 48000
+          currency: EUR
+        visibility:
+          visible_to_recruiters: true
+          visible_to_others: true
+          show_last_name: true
+          show_contact_links: true
+        skills:
+        - Docker
+        - Go
+        - Prometheus
+        - Python
+        experiences:
+        - id: 7
+          title: Stage SRE
+          organization: Beta
+          description: null
+          start_date: '2025-06-01'
+          end_date: '2025-12-31'
+          currently_working: false
+        educations:
+        - id: 3
+          school_name: Sorbonne Université
+          school_address: null
+          field_of_study: Informatique
+          degree: MASTERS
+          postbac_year: BAC_5
+          start_year: 2024
+          end_year: null
+          currently_studying: true
+        updated_at: '2026-10-13T10:56:00Z'
+    Error:
+      type: object
+      required:
+      - message
+      - errors
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          description: Erreurs par champ ; chemin complet pour les objets et listes
+            (preferences.min_salary, experiences[1].end_date).
+          additionalProperties:
+            type: string
+  responses:
+    Invalid:
+      description: Corps invalide ; toutes les erreurs sont renvoyées ensemble
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Invalid profile patch
+            errors:
+              email: 'Protected field: it cannot be modified by this route'
+              phone: Expected an international phone number, e.g. +33612345678
+              preferences.contract_types: 'Unknown contract types [CDII]; allowed values:
+                [APPRENTICESHIP, CDD, CDI, FREELANCE, INTERNSHIP, PROFESSIONALIZATION,
+                TEMPORARY]'
+              experiences[1].end_date: Must not be before start_date
+    Unauthorized:
+      description: 'Token absent, expiré ou mal signé : corps vide (Spring Security).
+        Utilisateur du token inexistant en base : corps JSON Error.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Authenticated user does not exist
+            errors: {}
+    Forbidden:
+      description: 'Token sans le rôle CANDIDATE : corps vide (Spring Security). Compte
+        qui n''est pas candidat ou compte suspendu en base : corps JSON Error.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Account is suspended
+            errors: {}
+    ViewerForbidden:
+      description: 'Token sans le rôle RECRUITER ou ADMIN : corps vide (Spring Security).
+        Compte qui n''est ni recruteur ni administrateur, ou compte suspendu en base : corps
+        JSON Error.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Only recruiters and administrators can view another candidate's profile
+            errors: {}
+    ViewerNotFound:
+      description: Aucun profil avec cet identifiant, ou profil masqué au recruteur (réglage ou
+        compte suspendu)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Candidate profile not found
+            errors: {}
+    NotFound:
+      description: Compte candidat sans profil
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Candidate profile not found
+            errors: {}
+    Internal:
+      description: Erreur interne ; transaction annulée
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Internal server error
+            errors: {}

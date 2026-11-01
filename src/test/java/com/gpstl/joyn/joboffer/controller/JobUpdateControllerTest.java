@@ -45,5 +45,11 @@ class JobUpdateControllerTest {
         mvc.perform(patch("/api/v1/jobs/1").principal(() -> "7").contentType("application/json").content("{}"))
             .andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.salary_max").value("Too small"));
     }
+    @Test void keepsFrameworkStatusInsteadOf500() throws Exception {
+        // Avant la correction, le gestionnaire générique transformait ce 415 en 500.
+        mvc.perform(patch("/api/v1/jobs/1").principal(() -> "7").contentType("text/plain").content("title"))
+            .andExpect(status().isUnsupportedMediaType()).andExpect(jsonPath("$.message").exists());
+        verifyNoInteractions(jobs);
+    }
 
 }

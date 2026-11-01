@@ -39,4 +39,15 @@ public class CompanyController {
         .eTag("\"" + Integer.toHexString(response.hashCode()) + "\"")
         .body(response);
     }
+        @PatchMapping("/{companyId}")
+    public ResponseEntity<CompanyResponse> updateCompany(
+            @PathVariable Long companyId,
+            @RequestBody java.util.Map<String, Object> changes,
+            Authentication authentication) {
+
+        CompanyResponse response =
+                service.updateProfile(companyId, changes, authentication);
+
+        return ResponseEntity.ok(response);
+    }
 }

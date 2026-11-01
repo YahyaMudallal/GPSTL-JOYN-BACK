@@ -76,4 +76,13 @@ public class Company {
     public String getAddress() { return address; }
     public String getEmailDomain() { return emailDomain; }
     public boolean isCheckSiretFound() { return checkSiretFound; }
+
+    // Setters ajoutés pour R79
+    public void setDescription(String description) { this.description = description; }
+    public void setWebsite(String website) { this.website = website; }
+    public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
+    public void setSector(String sector) { this.sector = sector; }
+    public void setCompanySize(String companySize) { this.companySize = companySize; }
+    public void setAddress(String address) { this.address = address; }
 }
+
