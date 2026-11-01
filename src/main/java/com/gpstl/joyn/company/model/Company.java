@@ -74,6 +74,8 @@ public class Company {
     public String getSector() { return sector; }
     public String getCompanySize() { return companySize; }
     public String getAddress() { return address; }
+    public String getEmailDomain() { return emailDomain; }
+    public boolean isCheckSiretFound() { return checkSiretFound; }
 
     // Setters ajoutés pour R79
     public void setDescription(String description) { this.description = description; }
@@ -83,3 +85,4 @@ public class Company {
     public void setCompanySize(String companySize) { this.companySize = companySize; }
     public void setAddress(String address) { this.address = address; }
 }
+
