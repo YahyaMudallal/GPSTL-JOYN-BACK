@@ -74,4 +74,12 @@ public class Company {
     public String getSector() { return sector; }
     public String getCompanySize() { return companySize; }
     public String getAddress() { return address; }
+
+    // Setters ajoutés pour R79
+    public void setDescription(String description) { this.description = description; }
+    public void setWebsite(String website) { this.website = website; }
+    public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
+    public void setSector(String sector) { this.sector = sector; }
+    public void setCompanySize(String companySize) { this.companySize = companySize; }
+    public void setAddress(String address) { this.address = address; }
 }

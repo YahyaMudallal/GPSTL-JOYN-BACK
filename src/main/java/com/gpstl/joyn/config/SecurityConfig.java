@@ -45,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/applications/*/status")
                                 .hasAnyRole("RECRUITER", "ADMIN")
                         .requestMatchers("/api/v1/recruiters/**").hasRole("RECRUITER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/companies/*")
+                                .hasRole("RECRUITER")
                         // Profil du candidat connecté ; /candidates/register reste public.
                         .requestMatchers("/api/v1/candidates/profile", "/api/v1/candidates/profile/**").hasRole("CANDIDATE")
                         // Lecture seule d'un profil désigné par son id (« * » = un seul segment : ne couvre pas /profile).
