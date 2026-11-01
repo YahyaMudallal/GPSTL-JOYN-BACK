@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -40,6 +41,12 @@ public class ApplicationExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApplicationErrorResponse> handleUnexpectedException(Exception exception) {
+        // Framework errors (415 wrong Content-Type, 405 wrong method, ...) keep their own status
+        // instead of being reported as 500.
+        if (exception instanceof ErrorResponse framework) {
+            HttpStatus status = HttpStatus.valueOf(framework.getStatusCode().value());
+            return error(status, framework.getBody().getDetail(), List.of());
+        }
         LOG.error("Application endpoint failed unexpectedly", exception);
         return error(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", List.of());
     }

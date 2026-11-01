@@ -1,0 +1,13 @@
+-- ---------------------------------------------------------------------
+-- Suppression du journal des modifications de profil par un administrateur
+-- ---------------------------------------------------------------------
+-- Décision d'équipe : seul le candidat modifie son profil ; recruteurs et
+-- administrateurs ne font que le lire. Le PATCH administrateur a été retiré,
+-- la table candidate_profile_audit créée en V4 n'a donc plus d'usage.
+--
+-- On ne modifie pas V4 : elle est déjà appliquée sur des bases existantes.
+-- Flyway compare le checksum de chaque migration appliquée avec le fichier ;
+-- modifier V4 bloquerait le démarrage (« checksum mismatch ») et, sans ce
+-- contrôle, laisserait des bases avec et d'autres sans la table.
+-- On corrige donc la structure par une nouvelle version.
+DROP TABLE IF EXISTS candidate_profile_audit;

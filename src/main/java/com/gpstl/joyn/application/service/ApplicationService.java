@@ -88,9 +88,12 @@ public class ApplicationService {
         Application application = applicationRepository.findByIdForUpdate(applicationId)
                 .orElseThrow(() -> ApplicationException.notFound("Application not found"));
 
-        // The recruiter or administrator must also have access to this job offer.
+        // A recruiter must belong to the company of this job offer; an administrator can process
+        // any application (no company check for ADMIN, see JobAccessService).
+        // checkCompanyAccess (not authorizedJob): applications stay manageable after the job is
+        // closed (soft-deleted), and updating a status does not need to lock the job offer.
         try {
-            jobAccessService.authorizedJob(userId, application.getJobOffer().getId());
+            jobAccessService.checkCompanyAccess(userId, application.getJobOffer());
         } catch (JobApiException ex) {
             HttpStatus status = HttpStatus.resolve(ex.getStatus());
             if (status == null || status.is5xxServerError()) {

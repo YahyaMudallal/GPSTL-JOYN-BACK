@@ -25,10 +25,10 @@ import java.nio.charset.StandardCharsets;
  *  - claim "sub"  = id de l'utilisateur dans la table users (ex. "42") ;
  *  - claim "role" = CANDIDATE, RECRUITER ou ADMIN (comme la colonne users.role).
  *
- * Les candidatures sont réservées aux candidats connectés à la création et aux recruteurs
- * ou administrateurs pour leur mise à jour. Les routes /api/v1/recruiters/** restent
- * réservées aux recruteurs ; les autres règles d'accès sont définies au fur et à mesure
- * de l'implémentation des routes.
+ * Seules les routes /api/v1/recruiters/**, /api/v1/candidates/profile et /api/v1/candidates/{id}/profile
+ * sont protégées pour l'instant, afin de ne pas
+ * bloquer les autres routes de l'équipe (inscription, connexion...). L'équipe pourra
+ * resserrer les règles quand toutes les routes existeront.
  */
 @Configuration
 public class SecurityConfig {
@@ -45,6 +45,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/applications/*/status")
                                 .hasAnyRole("RECRUITER", "ADMIN")
                         .requestMatchers("/api/v1/recruiters/**").hasRole("RECRUITER")
+                        // Profil du candidat connecté ; /candidates/register reste public.
+                        .requestMatchers("/api/v1/candidates/profile", "/api/v1/candidates/profile/**").hasRole("CANDIDATE")
+                        // Lecture seule d'un profil désigné par son id (« * » = un seul segment : ne couvre pas /profile).
+                        .requestMatchers("/api/v1/candidates/*/profile").hasAnyRole("RECRUITER", "ADMIN")
                         .anyRequest().permitAll())
                 // Sans token -> 401 ; token valide sans le rôle -> 403
                 .oauth2ResourceServer(oauth2 -> oauth2
