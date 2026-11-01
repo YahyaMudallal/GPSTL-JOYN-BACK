@@ -3,6 +3,7 @@ package com.gpstl.joyn.application.controller;
 import com.gpstl.joyn.application.dto.ApplicationErrorResponse;
 import com.gpstl.joyn.application.dto.ApplicationErrorResponse.FieldError;
 import com.gpstl.joyn.application.exception.ApplicationException;
+import com.gpstl.joyn.candidate.controller.CandidateApplicationsController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.util.List;
 
-@RestControllerAdvice(assignableTypes = ApplicationController.class)
+@RestControllerAdvice(assignableTypes = {ApplicationController.class, CandidateApplicationsController.class})
 public class ApplicationExceptionHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationExceptionHandler.class);
@@ -36,7 +37,7 @@ public class ApplicationExceptionHandler {
 
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
     public ResponseEntity<ApplicationErrorResponse> handleMalformedRequest(Exception exception) {
-        return error(HttpStatus.BAD_REQUEST, "Request body or path parameter is invalid", List.of());
+        return error(HttpStatus.BAD_REQUEST, "Request parameter, body, or path parameter is invalid", List.of());
     }
 
     @ExceptionHandler(Exception.class)
