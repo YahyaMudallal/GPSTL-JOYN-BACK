@@ -60,6 +60,7 @@ public class User {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
+    public Instant getEmailVerifiedAt() { return emailVerifiedAt; }
     public Instant getLastLoginAt() { return lastLoginAt; }
     public void setLastLoginAt(Instant lastLoginAt) { this.lastLoginAt = lastLoginAt; }
 
