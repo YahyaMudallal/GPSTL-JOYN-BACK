@@ -7,6 +7,7 @@ import com.gpstl.joyn.application.model.Application;
 import com.gpstl.joyn.application.model.ApplicationStatus;
 import com.gpstl.joyn.application.repository.ApplicationRepository;
 import com.gpstl.joyn.application.repository.ApplicationStatusRepository;
+import com.gpstl.joyn.application.repository.CandidateApplicationHistoryProjection;
 import com.gpstl.joyn.candidate.model.Candidate;
 import com.gpstl.joyn.candidate.repository.CandidateRepository;
 import com.gpstl.joyn.common.model.User;
@@ -15,15 +16,22 @@ import com.gpstl.joyn.joboffer.exception.JobApiException;
 import com.gpstl.joyn.joboffer.model.JobOffer;
 import com.gpstl.joyn.joboffer.repository.JobOfferRepository;
 import com.gpstl.joyn.joboffer.service.JobAccessService;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -182,5 +190,137 @@ class ApplicationServiceTest {
                 .isInstanceOf(ApplicationException.class)
                 .extracting(exception -> ((ApplicationException) exception).getStatus())
                 .isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    void returnsMappedHistoryPageAndUsesAuthenticatedUserAndRequestedFilters() {
+        User user = mock(User.class);
+        Candidate candidate = mock(Candidate.class);
+        CandidateApplicationHistoryProjection application = mock(CandidateApplicationHistoryProjection.class);
+        Instant timestamp = Instant.parse("2026-10-24T14:03:10Z");
+        when(user.getStatus()).thenReturn("ACTIVE");
+        when(user.getRole()).thenReturn("CANDIDATE");
+        when(userRepository.findById(9L)).thenReturn(Optional.of(user));
+        when(candidateRepository.findByUserId(9L)).thenReturn(Optional.of(candidate));
+        when(application.getId()).thenReturn(52L);
+        when(application.getJobOfferId()).thenReturn(34L);
+        when(application.getJobTitle()).thenReturn("Software Engineer");
+        when(application.getCompanyId()).thenReturn(12L);
+        when(application.getCompanyName()).thenReturn("Example Company");
+        when(application.getStatus()).thenReturn("PENDING");
+        when(application.getViewedAt()).thenReturn(timestamp);
+        when(application.getCoverMessage()).thenReturn("Please consider my application.");
+        when(application.getResumeUrl()).thenReturn("https://example.com/resume.pdf");
+        when(application.getCreatedAt()).thenReturn(timestamp);
+        when(application.getUpdatedAt()).thenReturn(timestamp);
+        when(application.getConversationId()).thenReturn(81L);
+        when(applicationRepository.findCandidateHistory(9L, "PENDING", false, PageRequest.of(1, 10)))
+                .thenReturn(new PageImpl<>(List.of(application), PageRequest.of(1, 10), 11));
+
+        var result = service.findCandidateHistory(9L, 2, 10, "PENDING", "created_at,desc");
+
+        assertThat(result.page()).isEqualTo(2);
+        assertThat(result.limit()).isEqualTo(10);
+        assertThat(result.totalElements()).isEqualTo(11);
+        assertThat(result.totalPages()).isEqualTo(2);
+        assertThat(result.hasNext()).isFalse();
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.content().getFirst())
+                .satisfies(item -> {
+                    assertThat(item.id()).isEqualTo(52L);
+                    assertThat(item.jobOfferId()).isEqualTo(34L);
+                    assertThat(item.jobTitle()).isEqualTo("Software Engineer");
+                    assertThat(item.companyId()).isEqualTo(12L);
+                    assertThat(item.companyName()).isEqualTo("Example Company");
+                    assertThat(item.status()).isEqualTo("PENDING");
+                    assertThat(item.viewedAt()).isEqualTo(OffsetDateTime.ofInstant(timestamp, ZoneOffset.UTC));
+                    assertThat(item.coverMessage()).isEqualTo("Please consider my application.");
+                    assertThat(item.resumeUrl()).isEqualTo("https://example.com/resume.pdf");
+                    assertThat(item.createdAt()).isEqualTo(OffsetDateTime.ofInstant(timestamp, ZoneOffset.UTC));
+                    assertThat(item.updatedAt()).isEqualTo(OffsetDateTime.ofInstant(timestamp, ZoneOffset.UTC));
+                    assertThat(item.conversationId()).isEqualTo(81L);
+                });
+        verify(applicationRepository).findCandidateHistory(
+                9L, "PENDING", false, PageRequest.of(1, 10));
+    }
+
+    @Test
+    void rejectsHistoryRequestsWhenUserIsNotAnActiveCandidateWithAProfile() {
+        User recruiter = mock(User.class);
+        when(recruiter.getStatus()).thenReturn("ACTIVE");
+        when(recruiter.getRole()).thenReturn("RECRUITER");
+        when(userRepository.findById(2L)).thenReturn(Optional.of(recruiter));
+
+        assertHistoryError(2L, 1, 20, null, "created_at,desc", HttpStatus.FORBIDDEN);
+
+        User suspendedCandidate = mock(User.class);
+        when(suspendedCandidate.getStatus()).thenReturn("SUSPENDED");
+        when(userRepository.findById(3L)).thenReturn(Optional.of(suspendedCandidate));
+        assertHistoryError(3L, 1, 20, null, "created_at,desc", HttpStatus.FORBIDDEN);
+
+        User candidateWithoutProfile = mock(User.class);
+        when(candidateWithoutProfile.getStatus()).thenReturn("ACTIVE");
+        when(candidateWithoutProfile.getRole()).thenReturn("CANDIDATE");
+        when(userRepository.findById(4L)).thenReturn(Optional.of(candidateWithoutProfile));
+        when(candidateRepository.findByUserId(4L)).thenReturn(Optional.empty());
+        assertHistoryError(4L, 1, 20, null, "created_at,desc", HttpStatus.FORBIDDEN);
+
+        when(userRepository.findById(5L)).thenReturn(Optional.empty());
+        assertHistoryError(5L, 1, 20, null, "created_at,desc", HttpStatus.UNAUTHORIZED);
+        verify(applicationRepository, never()).findCandidateHistory(
+                any(), any(), anyBoolean(), any());
+    }
+
+    @Test
+    void rejectsOutOfRangePaginationAndUnsupportedHistoryFiltersBeforeQuerying() {
+        User user = mock(User.class);
+        Candidate candidate = mock(Candidate.class);
+        when(user.getStatus()).thenReturn("ACTIVE");
+        when(user.getRole()).thenReturn("CANDIDATE");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(candidateRepository.findByUserId(1L)).thenReturn(Optional.of(candidate));
+
+        assertHistoryError(1L, 0, 20, null, "created_at,desc", HttpStatus.BAD_REQUEST);
+        assertHistoryError(1L, -1, 20, null, "created_at,desc", HttpStatus.BAD_REQUEST);
+        assertHistoryError(1L, 1, 0, null, "created_at,desc", HttpStatus.BAD_REQUEST);
+        assertHistoryError(1L, 1, 51, null, "created_at,desc", HttpStatus.BAD_REQUEST);
+        assertHistoryError(1L, 1, 20, "UNKNOWN", "created_at,desc", HttpStatus.BAD_REQUEST);
+        assertHistoryError(1L, 1, 20, null, "id,desc", HttpStatus.BAD_REQUEST);
+
+        verify(applicationRepository, never()).findCandidateHistory(
+                any(), any(), anyBoolean(), any());
+    }
+
+    @Test
+    void acceptsMaximumPageSizeAndAscendingCreationSort() {
+        User user = mock(User.class);
+        Candidate candidate = mock(Candidate.class);
+        when(user.getStatus()).thenReturn("ACTIVE");
+        when(user.getRole()).thenReturn("CANDIDATE");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(candidateRepository.findByUserId(1L)).thenReturn(Optional.of(candidate));
+        when(applicationRepository.findCandidateHistory(1L, null, true, PageRequest.of(0, 50)))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 50), 0));
+
+        var result = service.findCandidateHistory(1L, 1, 50, null, "created_at,asc");
+
+        assertThat(result.content()).isEmpty();
+        assertThat(result.totalElements()).isZero();
+        assertThat(result.hasNext()).isFalse();
+        verify(applicationRepository).findCandidateHistory(
+                1L, null, true, PageRequest.of(0, 50));
+    }
+
+    private void assertHistoryError(
+            Long userId,
+            int page,
+            int limit,
+            String status,
+            String sort,
+            HttpStatus expectedStatus) {
+        assertThatThrownBy(() -> service.findCandidateHistory(userId, page, limit, status, sort))
+                .isInstanceOf(ApplicationException.class)
+                .extracting(exception -> ((ApplicationException) exception).getStatus())
+                .isEqualTo(expectedStatus);
     }
 }
