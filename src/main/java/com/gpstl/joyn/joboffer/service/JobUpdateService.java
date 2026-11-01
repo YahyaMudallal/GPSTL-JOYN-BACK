@@ -90,7 +90,9 @@ public class JobUpdateService {
     private void replaceSkills(JobOffer job, List<String> names) {
         Set<Skill> desired = new LinkedHashSet<>();
         for (String name : names.stream().sorted().toList()) {
-            desired.add(skills.findByNameIgnoreCase(name).orElseGet(() -> skills.saveAndFlush(new Skill(name))));
+            // findOrCreate (INSERT ... ON CONFLICT) : une création simultanée du même nom, par une offre
+            // ou par un profil candidat, est réutilisée au lieu de violer l'index unique LOWER(name).
+            desired.add(skills.findOrCreate(name));
         }
         Set<Long> ids = new HashSet<>();
         desired.forEach(skill -> ids.add(skill.getId()));
