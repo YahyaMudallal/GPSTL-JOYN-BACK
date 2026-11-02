@@ -49,6 +49,9 @@ public abstract class JobDatabaseTestSupport {
             return baseUrl + (baseUrl.contains("?") ? "&" : "?") + "currentSchema=" + schema;
         });
 
+        // Chaque classe garde son propre contexte Spring et son pool : avec le pool par défaut (10),
+        // quelques classes suffisent à dépasser les 100 connexions autorisées par PostgreSQL.
+        registry.add("spring.datasource.hikari.maximum-pool-size", () -> 5);
         registry.add("spring.flyway.schemas", () -> schema);
         registry.add("spring.flyway.default-schema", () -> schema);
         registry.add("spring.jpa.properties.hibernate.default_schema", () -> schema);
