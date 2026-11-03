@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/auth")
-@Tag(name = "Authentification", description = "Connexion et obtention du token JWT")
+@Tag(name = "Authentification", description = "Authentification des utilisateurs et génération des jetons sécurisés")
 public class AuthController {
 
     private final AuthService authService;
@@ -33,9 +33,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Se connecter",
-            description = "Vérifie l'email et le mot de passe, puis renvoie un token JWT à envoyer ensuite "
-                    + "dans l'en-tête Authorization: Bearer <token>.",
+    @Operation(summary = "Authenticate user and obtain a JWT token",
+            description = "Validates user credentials and issues a signed JSON Web Token containing roles and identity claims",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
                     examples = @ExampleObject(value = """
                             {"email": "admin@joyn.dev", "password": "JoynAdmin2026!"}"""))))

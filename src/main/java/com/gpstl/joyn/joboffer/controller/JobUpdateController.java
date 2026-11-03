@@ -1,8 +1,6 @@
 package com.gpstl.joyn.joboffer.controller;
 
-import com.gpstl.joyn.joboffer.exception.JobApiException;
 import com.gpstl.joyn.joboffer.service.JobUpdateService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.Map;
@@ -17,7 +15,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 /** Reçoit le PATCH HTTP et délègue les règles métier au service de modification. */
 @RestController
 @RequestMapping("/api/v1/jobs")
-@Tag(name = "Jobs", description = "Job updates; authenticated subject is users.id")
+@Tag(name = "Jobs", description = "Cycle de vie des offres d'emploi, de leur publication à leur clôture")
 @SecurityRequirement(name = "bearerAuth")
 @ApiResponses({
     @ApiResponse(responseCode = "400", description = "Invalid request or protected field"),
@@ -31,7 +29,9 @@ public class JobUpdateController implements JobManagementEndpoint {
     public JobUpdateController(JobUpdateService jobs) { this.jobs = jobs; }
 
     @PatchMapping("/{jobId}")
-    @Operation(summary = "Update a job partially", requestBody =
+    @Operation(summary = "Update details of an existing job offer", 
+    description = "Modifies specific fields of an existing job offer such as salary range, description, or remote policy",
+    requestBody =
         @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true,
             content = @Content(schema = @Schema(ref = "/openapi/job-update.yaml#/components/schemas/JobPatch"))))
     @ApiResponse(responseCode = "200", description = "Updated job", content =

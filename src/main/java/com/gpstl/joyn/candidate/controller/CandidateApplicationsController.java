@@ -29,7 +29,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/v1/candidates")
 @CrossOrigin(origins = "*")
-@Tag(name = "Candidates", description = "Candidate account and application history")
+@Tag(name = "Candidates", description = "Gestion du compte candidat, profil et historique de candidatures")
 @SecurityRequirement(name = "bearerAuth")
 public class CandidateApplicationsController {
 

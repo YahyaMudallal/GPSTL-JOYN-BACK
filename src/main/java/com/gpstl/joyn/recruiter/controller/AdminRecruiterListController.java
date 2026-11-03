@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/admin/recruiters")
-@Tag(name = "Admin – Recruteurs", description = "Gestion et modération des recruteurs par l'administrateur")
+@Tag(name = "Admin – Recruiters", description = "Gestion et modération des recruteurs par l'administrateur")
 @SecurityRequirement(name = "bearerAuth")
 public class AdminRecruiterListController {
 
@@ -30,7 +30,7 @@ public class AdminRecruiterListController {
     }
 
     @GetMapping
-    @Operation(summary = "Lister les recruteurs",
+    @Operation(summary = "Get all recruiters",
             description = "Liste paginée avec recherche textuelle (email, nom, prénom, entreprise), filtres et tri.")
     @ApiResponse(responseCode = "200", description = "Page de recruteurs (data + pagination)")
     @ApiResponse(responseCode = "400", description = "Paramètre invalide (page, limit, status, sort_by, order)",

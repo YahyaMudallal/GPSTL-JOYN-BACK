@@ -31,7 +31,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/v1/candidates")
-@Tag(name = "Candidate profile", description = "Candidate profile; subject is users.id")
+@Tag(name = "Candidates", description = "Récupération du profil candidat")
 @SecurityRequirement(name = "bearerAuth")
 // Sans « content » explicite, springdoc décrirait les erreurs avec le type de retour (le profil).
 @ApiResponses({
@@ -55,7 +55,8 @@ public class CandidateProfileController {
     }
 
     @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(operationId = "getCandidateProfile", summary = "Get the full profile of the authenticated candidate")
+    @Operation(operationId = "getCandidateProfile", summary = "Get the full profile of the authenticated candidate",
+        description = "returns personal information, experiences, and preferences for the currently logged-in candidate")
     @ApiResponse(responseCode = "200", description = "Candidate profile", content =
         @Content(schema = @Schema(ref = SPEC + "CandidateProfile")))
     public CandidateProfileResponse get(Principal principal) {

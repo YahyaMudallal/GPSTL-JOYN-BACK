@@ -1,7 +1,6 @@
 package com.gpstl.joyn.candidate.repository;
 
 import com.gpstl.joyn.candidate.model.Candidate;
-import com.gpstl.joyn.candidate.repository.CandidateRepository;
 import com.gpstl.joyn.common.model.User;
 import com.gpstl.joyn.common.repository.UserRepository;
 import com.gpstl.joyn.joboffer.JobDatabaseTestSupport;

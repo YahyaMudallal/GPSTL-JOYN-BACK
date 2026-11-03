@@ -27,7 +27,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/v1/recruiters")
-@Tag(name = "Recruiter profile", description = "Recruiter profile; subject is users.id")
+@Tag(name = "Recruiters", description = "Permet aux recruteurs de s'enregistrer et de gérer les informations de leur profil")
 @SecurityRequirement(name = "bearerAuth")
 public class RecruiterProfileController {
     private final RecruiterProfileService profiles;
@@ -37,7 +37,8 @@ public class RecruiterProfileController {
     }
 
     @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(operationId = "getRecruiterProfile", summary = "Get the profile of the authenticated recruiter")
+    @Operation(operationId = "getRecruiterProfile", summary = "Retrieve the authenticated recruiter's profile",
+        description = "Returns account credentials and affiliation data for the currently logged-in recruiter")
     @ApiResponse(responseCode = "200", description = "Recruiter profile")
     @ApiResponse(responseCode = "401", description = "Token missing, invalid or expired, or user no longer exists", content = @Content)
     @ApiResponse(responseCode = "403", description = "Role not allowed on this route, or account suspended", content = @Content)
