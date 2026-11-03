@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 /** Reçoit la demande de suppression logique et renvoie 204 lorsque la clôture a réussi. */
 @RestController
 @RequestMapping("/api/v1/jobs")
-@Tag(name = "Jobs", description = "Job soft deletion; authenticated subject is users.id")
+@Tag(name = "Jobs", description = "Cycle de vie des offres d'emploi, de leur publication à leur clôture")
 @SecurityRequirement(name = "bearerAuth")
 @ApiResponses({
     @ApiResponse(responseCode = "400", description = "Invalid request or protected field"),
@@ -29,7 +29,8 @@ public class JobClosureController implements JobManagementEndpoint {
     public JobClosureController(JobClosureService jobs) { this.jobs = jobs; }
 
     @DeleteMapping("/{jobId}")
-    @Operation(summary = "Soft delete a job while preserving its history")
+    @Operation(summary = "Soft delete a job while preserving its history",
+        description = "Closes and archives a job offer while safely preserving historical matches and conversations")
     @ApiResponse(responseCode = "204", description = "Job closed; no response body")
     public ResponseEntity<Void> close(@PathVariable long jobId,
             @RequestBody(required = false) Map<String, Object> body, Principal principal) {

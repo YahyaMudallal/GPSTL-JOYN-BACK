@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/admin/companies")
-@Tag(name = "Admin – Entreprises", description = "Gestion des entreprises par l'administrateur")
+@Tag(name = "Admin – Companies", description = "Administration et modération des entreprises")
 @SecurityRequirement(name = "bearerAuth")
 public class AdminCompanyListController {
 
@@ -35,8 +35,8 @@ public class AdminCompanyListController {
     }
 
     @GetMapping
-    @Operation(summary = "Lister les entreprises",
-            description = "Liste paginée, avec recherche (nom, SIRET, domaine email), filtres et tri.")
+    @Operation(summary = "List companies with pagination and filters",
+            description = "Returns a paginated list of companies supporting text search, verification status filters, and sorting")
     @ApiResponse(responseCode = "200", description = "Page d'entreprises (data + pagination)")
     @ApiResponse(responseCode = "400", description = "Paramètre invalide (page, limit, status, company_size, sort_by, order)",
             content = @Content(schema = @Schema(implementation = ApiError.class)))

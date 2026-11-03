@@ -29,7 +29,7 @@ import java.net.URI;
  */
 @RestController
 @RequestMapping("/api/v1/recruiters/jobs")
-@Tag(name = "Offres (recruteur)", description = "Gestion des offres par le recruteur connecté")
+@Tag(name = "Jobs", description = "Cycle de vie des offres d'emploi, de leur publication à leur clôture")
 @SecurityRequirement(name = "bearerAuth")
 public class RecruiterJobOfferController {
 
@@ -41,9 +41,8 @@ public class RecruiterJobOfferController {
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     @Operation(
-            summary = "Créer une offre",
-            description = "Crée une offre pour l'entreprise du recruteur connecté. "
-                    + "L'entreprise et le recruteur sont déduits du token JWT, jamais du corps de la requête.",
+            summary = "Create a new job offer",
+            description = "Publishes a new recruitment opportunity linked to the authenficated recruiter's affiliated company.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
                     content = @Content(examples = @ExampleObject(name = "Alternance", value = """

@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/applications")
-@Tag(name = "Applications", description = "Application creation and status management")
+@Tag(name = "Applications", description = "Postuler, mettre à jour une candidature")
 @SecurityRequirement(name = "bearerAuth")
 public class ApplicationController {
 

@@ -16,8 +16,12 @@ import com.gpstl.joyn.resume.parser.ResumeParsingException;
 import com.gpstl.joyn.resume.service.InvalidResumeException;
 import com.gpstl.joyn.resume.service.ResumeService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/v1/resumes")
+@Tag(name = "Candidates", description = "Traitement d'un CV par l'API de Gemini pour en extraire les informations de création de compte")
 public class ResumeController {
     
     private final ResumeService resumeService;
@@ -32,8 +36,10 @@ public class ResumeController {
     @PostMapping(
         value = "/parse",
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
-    )
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+        summary = "Parse an uploaded resume file",
+        description = "Extracts structured professional details and skills from an uploaded CV document")
     public ResponseEntity<?> parseResume(
         @RequestParam("file") MultipartFile file
     ){

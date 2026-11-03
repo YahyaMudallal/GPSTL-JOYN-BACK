@@ -4,6 +4,10 @@ import com.gpstl.joyn.candidate.dto.CandidateRegisterRequest;
 import com.gpstl.joyn.candidate.dto.CandidateRegisterResponse;
 import com.gpstl.joyn.candidate.service.CandidateResumeStorage;
 import com.gpstl.joyn.candidate.service.CandidateService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/candidates")
+@Tag(name = "Candidates", description = "Gestion complète du compte candidat, de son profil, de ses CVs et de ses candidatures")
 @CrossOrigin(origins = "*")
 public class CandidateController {
 
@@ -35,6 +40,9 @@ public class CandidateController {
      * "cv" remains accepted as an alias for older clients; neither field is parsed.
      */
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+        summary = "Register a new candidate account",
+        description = "Creates a new candidate user account with credentials and an initial profile")
     public ResponseEntity<CandidateRegisterResponse> register(
             @RequestParam String firstName,
             @RequestParam String lastName,
@@ -68,6 +76,9 @@ public class CandidateController {
     /**
      * Serves locally stored resumes until a media-server adapter is configured.
      */
+    @Operation(
+        summary = "Download a stored resume file",
+        description = "Retrieves the binary content of a candidate's uploaded resume from object storage")
     @GetMapping("/resumes/{storageKey}")
     public ResponseEntity<Resource> getResume(
             @PathVariable String storageKey) {

@@ -4,6 +4,7 @@ package com.gpstl.joyn.company.controller;
 import com.gpstl.joyn.company.dto.CompanyResponse;
 import com.gpstl.joyn.company.service.CompanyService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.CacheControl;
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/v1/companies")
-@Tag(name = "Companies", description = "Gestion des informations d'une entreprise (modification possible par un recruteur de l'entreprise ou par un admin)")
+@Tag(name = "Companies", description = "Consultation publique des entreprises et la mise à jour de leurs données par les admins ou par les recruteurs habilités")
 public class CompanyController {
 
     private final CompanyService service;
@@ -25,6 +26,9 @@ public class CompanyController {
     }
 
     @GetMapping("/{companyId}")
+    @Operation(
+        summary = "Retrieve public profile and active jobs of a company",
+        description = "Returns company identity, description, address, and optionally all published job openings")
     public ResponseEntity<CompanyResponse> getCompany(
             @PathVariable Long companyId,
             @RequestParam(name = "include_jobs", defaultValue = "true")
@@ -42,7 +46,11 @@ public class CompanyController {
         .eTag("\"" + Integer.toHexString(response.hashCode()) + "\"")
         .body(response);
     }
-        @PatchMapping("/{companyId}")
+    
+    @PatchMapping("/{companyId}")
+    @Operation(
+        summary = "Update company information",
+        description = "Updates general corporate details such as address, size, or website. Restricted to affiliated recruiters or administrators")
     public ResponseEntity<CompanyResponse> updateCompany(
             @PathVariable Long companyId,
             @RequestBody java.util.Map<String, Object> changes,

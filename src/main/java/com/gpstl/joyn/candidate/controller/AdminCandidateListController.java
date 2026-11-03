@@ -30,7 +30,7 @@ import java.time.LocalDate;
  */
 @RestController
 @RequestMapping("/api/v1/admin/candidates")
-@Tag(name = "Admin – Candidats", description = "Gestion des candidats par l'administrateur")
+@Tag(name = "Admin – Candidates", description = "Gestion des candidats par l'administrateur")
 @SecurityRequirement(name = "bearerAuth")
 public class AdminCandidateListController {
 
@@ -41,8 +41,8 @@ public class AdminCandidateListController {
     }
 
     @GetMapping
-    @Operation(summary = "Lister les candidats",
-            description = "Liste paginée, avec recherche (email, prénom, nom), filtres sur le compte et le profil, et tri.")
+    @Operation(summary = "List registered candidates with pagination",
+            description = "Retrieves all registered candidate accounts with support for text search, account status, and custom pagination")
     @ApiResponse(responseCode = "200", description = "Page de candidats (data + pagination)")
     @ApiResponse(responseCode = "400", description = "Paramètre invalide (pagination, filtre, sort_by ou order)",
             content = @Content(schema = @Schema(implementation = ApiError.class)))
