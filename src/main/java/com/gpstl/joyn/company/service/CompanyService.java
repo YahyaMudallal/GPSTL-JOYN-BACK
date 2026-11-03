@@ -144,81 +144,92 @@ public class CompanyService {
                 List.of()
         );
     }
+
     @Transactional
-public CompanyResponse updateProfile(
-        Long companyId,
-        java.util.Map<String, Object> changes,
-        Authentication authentication) {
+    public CompanyResponse updateProfile(
+            Long companyId,
+            java.util.Map<String, Object> changes,
+            Authentication authentication) {
 
-    if (authentication == null
-            || !(authentication.getPrincipal() instanceof Jwt jwt)
-            || !"RECRUITER".equals(jwt.getClaimAsString("role"))) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-    }
-
-    Long userId;
-    try {
-        userId = Long.valueOf(jwt.getSubject());
-    } catch (NumberFormatException e) {
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-    }
-
-    boolean belongsToCompany = recruiterProfileRepository.findByUserId(userId)
-            .map(recruiter -> recruiter.getCompany().getId().equals(companyId))
-            .orElse(false);
-
-    if (!belongsToCompany) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-    }
-
-    Company company = companyRepository.findById(companyId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-    if (changes == null || changes.isEmpty()) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-    }
-
-    java.util.Set<String> allowedFields = java.util.Set.of(
-            "name", "description", "website", "logoUrl",
-            "sector", "companySize", "address");
-
-    for (String field : changes.keySet()) {
-        if (!allowedFields.contains(field)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Champ non modifiable : " + field);
+        //  Vérification du JWT
+        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt jwt)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentification requise.");
         }
-        Object value = changes.get(field);
-        if (value != null && !(value instanceof String)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Valeur invalide : " + field);
+
+        String role = jwt.getClaimAsString("role");
+
+        // Gestion des rôles : CANDIDATE bloqué, ADMIN autorisé d'office, RECRUITER sous condition
+        if ("ADMIN".equals(role)) {
+            // L'administrateur a tous les droits
+        } else if ("RECRUITER".equals(role)) {
+            Long userId;
+            try {
+                userId = Long.valueOf(jwt.getSubject());
+            } catch (NumberFormatException e) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Identifiant utilisateur invalide.");
+            }
+
+            boolean belongsToCompany = recruiterProfileRepository.findByUserId(userId)
+                    .map(recruiter -> recruiter.getCompany().getId().equals(companyId))
+                    .orElse(false);
+
+            if (!belongsToCompany) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vous n'appartenez pas à cette entreprise.");
+            }
+        } else {
+            // Rôle CANDIDATE ou inconnu
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès interdit pour ce rôle.");
         }
-    }
+        // Vérification de l'existence de l'entreprise
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entreprise introuvable."));
 
-    if (changes.containsKey("name")) {
-        String name = (String) changes.get("name");
-        if (name == null || name.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Le nom est obligatoire.");
+        // Validation des changements
+        if (changes == null || changes.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aucune modification fournie.");
         }
-        company.setName(name);
-    }
 
-    if (changes.containsKey("description"))
-        company.setDescription((String) changes.get("description"));
-    if (changes.containsKey("website"))
-        company.setWebsite((String) changes.get("website"));
-    if (changes.containsKey("logoUrl"))
-        company.setLogoUrl((String) changes.get("logoUrl"));
-    if (changes.containsKey("sector"))
-        company.setSector((String) changes.get("sector"));
-    if (changes.containsKey("companySize"))
-        company.setCompanySize((String) changes.get("companySize"));
-    if (changes.containsKey("address"))
-        company.setAddress((String) changes.get("address"));
+        java.util.Set<String> allowedFields = java.util.Set.of(
+                "name", "description", "website", "logoUrl",
+                "sector", "companySize", "address");
 
-    companyRepository.save(company);
+        for (String field : changes.keySet()) {
+            if (!allowedFields.contains(field)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Champ non modifiable : " + field);
+            }
+            Object value = changes.get(field);
+            if (value != null && !(value instanceof String)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Valeur invalide pour le champ : " + field);
+            }
+        }
 
-    return getProfile(companyId, true, authentication);
+        if (changes.containsKey("name")) {
+            String name = (String) changes.get("name");
+            if (name == null || name.isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Le nom est obligatoire.");
+            }
+            company.setName(name);
+        }
+
+        if (changes.containsKey("description"))
+            company.setDescription((String) changes.get("description"));
+        if (changes.containsKey("website"))
+            company.setWebsite((String) changes.get("website"));
+        if (changes.containsKey("logoUrl"))
+            company.setLogoUrl((String) changes.get("logoUrl"));
+        if (changes.containsKey("sector"))
+            company.setSector((String) changes.get("sector"));
+        if (changes.containsKey("companySize"))
+            company.setCompanySize((String) changes.get("companySize"));
+        if (changes.containsKey("address"))
+            company.setAddress((String) changes.get("address"));
+
+        companyRepository.save(company);
+
+        return getProfile(companyId, true, authentication);
     }
 }
 

@@ -4,6 +4,8 @@ package com.gpstl.joyn.company.controller;
 import com.gpstl.joyn.company.dto.CompanyResponse;
 import com.gpstl.joyn.company.service.CompanyService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -13,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/v1/companies")
+@Tag(name = "Companies", description = "Gestion des informations d'une entreprise (modification possible par un recruteur de l'entreprise ou par un admin)")
 public class CompanyController {
 
     private final CompanyService service;
