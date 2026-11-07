@@ -47,6 +47,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/applications").hasRole("CANDIDATE")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/applications/*/status")
                                 .hasAnyRole("RECRUITER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/recruiters/jobs/*/recommendations")
+                                .hasRole("RECRUITER")
                         .requestMatchers("/api/v1/recruiters/**").hasRole("RECRUITER")
                         // Back-office : toutes les routes /api/v1/admin/** sont réservées aux administrateurs
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
