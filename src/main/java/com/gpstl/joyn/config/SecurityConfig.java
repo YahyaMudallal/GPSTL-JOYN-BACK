@@ -52,6 +52,8 @@ public class SecurityConfig {
                                 .hasRole("RECRUITER")
                         // Profil du candidat connecté ; /candidates/register reste public.
                         .requestMatchers("/api/v1/candidates/profile", "/api/v1/candidates/profile/**").hasRole("CANDIDATE")
+                        // Dashboard du candidat connecté (CA36), avec ou sans /stats.
+                        .requestMatchers("/api/v1/candidates/dashboard", "/api/v1/candidates/dashboard/**").hasRole("CANDIDATE")
                         // Lecture seule d'un profil désigné par son id (« * » = un seul segment : ne couvre pas /profile).
                         .requestMatchers("/api/v1/candidates/*/profile").hasAnyRole("RECRUITER", "ADMIN")
                         .anyRequest().permitAll())
