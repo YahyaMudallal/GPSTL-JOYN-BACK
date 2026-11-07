@@ -49,6 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Match Lina / Data (hier, 85 %) + entretien PROPOSÉ dans 2 jours. Rita a évalué le profil de Lina (hier).
  * Lina étudie l'informatique à la Sorbonne, est disponible le 1er septembre 2027 et masque son nom de famille.
  * Chez Rival : 1 candidature et 1 like, à ne pas compter chez Acme.
+ * L'offre Data demande 2 compétences ("Java run" et "SQL run") ; Lina a Java, pas SQL.
  */
 @SpringBootTest
 class RecruiterDashboardControllerTest {
@@ -102,6 +103,12 @@ class RecruiterDashboardControllerTest {
         draftOfferId = insertOffer(acmeId, rita, "Draft " + run, "DRAFT", null);
         rivalOfferId = insertOffer(rivalId, ravi, "Rival job " + run, "PUBLISHED", now.minus(Duration.ofDays(4)));
 
+        long java = id("INSERT INTO skills (name) VALUES (?) RETURNING id", "Java " + run);
+        long sql = id("INSERT INTO skills (name) VALUES (?) RETURNING id", "SQL " + run);
+        jdbc.update("INSERT INTO job_offer_skills (job_offer_id, skill_id) VALUES (?, ?), (?, ?)",
+                dataOfferId, java, dataOfferId, sql);
+        jdbc.update("INSERT INTO candidate_skills (candidate_id, skill_id) VALUES (?, ?)", lina, java);
+
         insertApplication(lina, devJavaOfferId, "REJECTED", now.minus(Duration.ofDays(40)), now.minus(Duration.ofDays(38)));
         insertApplication(lina, dataOfferId, "PENDING", now.minus(Duration.ofDays(2)), now.minus(Duration.ofDays(1)));
         insertApplication(omar, devJavaOfferId, "PENDING", now.minus(Duration.ofDays(5)), null);
@@ -132,6 +139,8 @@ class RecruiterDashboardControllerTest {
         jdbc.update("DELETE FROM job_offers WHERE company_id IN (?, ?)", acmeId, rivalId);
         jdbc.update("DELETE FROM users WHERE email LIKE ?", "%-" + run + "@dashboard.test");
         jdbc.update("DELETE FROM companies WHERE id IN (?, ?)", acmeId, rivalId);
+        // Les liens offre/compétence et candidat/compétence sont déjà partis avec les offres et les profils.
+        jdbc.update("DELETE FROM skills WHERE name IN (?, ?)", "Java " + run, "SQL " + run);
     }
 
     // ---------------------------------------------------------------- sécurité
@@ -278,6 +287,96 @@ class RecruiterDashboardControllerTest {
                 .andExpect(jsonPath("$.summary.interested").value(1))
                 .andExpect(jsonPath("$.summary.matches").value(0))
                 .andExpect(jsonPath("$.topOffers[*].title", contains("Rival job " + run)));
+    }
+
+    // ---------------------------------------------------------------- /insights
+
+    @Test
+    void insightsReturnFunnelChannelsAndHeatmap() throws Exception {
+        mockMvc.perform(asRita(get(URL + "/insights")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.period").value("30d"))
+                .andExpect(jsonPath("$.trend", hasSize(30)))
+                // Entonnoir sur 30 jours : 2 likes, 2 candidatures, 1 lue (Lina -> Data), 0 entretien, 0 acceptée
+                .andExpect(jsonPath("$.funnel[*].label",
+                        contains("Intéressés", "Candidatures", "Lues", "Entretiens", "Acceptées")))
+                .andExpect(jsonPath("$.funnel[0].value").value(2))
+                .andExpect(jsonPath("$.funnel[1].value").value(2))
+                .andExpect(jsonPath("$.funnel[2].value").value(1))
+                .andExpect(jsonPath("$.funnel[3].value").value(0))
+                // Omar a postulé directement ; Lina a un match sur Data
+                .andExpect(jsonPath("$.channels[0].label").value("Candidature directe"))
+                .andExpect(jsonPath("$.channels[0].value").value(1))
+                .andExpect(jsonPath("$.channels[1].value").value(1))
+                // Carte de chaleur : 7 jours x 7 tranches horaires
+                .andExpect(jsonPath("$.heatmap.rows", hasSize(7)))
+                .andExpect(jsonPath("$.heatmap.columns", hasSize(7)))
+                .andExpect(jsonPath("$.heatmap.values", hasSize(7)))
+                .andExpect(jsonPath("$.heatmap.values[0]", hasSize(7)))
+                // Graphique 3D : pas de données en base, listes vides
+                .andExpect(jsonPath("$.surface.xLabels", hasSize(0)));
+    }
+
+    @Test
+    void insightsHeatmapCountsEveryApplicationOfThePeriod() throws Exception {
+        String json = mockMvc.perform(asRita(get(URL + "/insights").param("period", "all")))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        List<List<Number>> values = JsonPath.read(json, "$.heatmap.values");
+        long total = values.stream().flatMap(List::stream).mapToLong(Number::longValue).sum();
+        assertEquals(3, total); // les 3 candidatures d'Acme, pas celle de Rival
+    }
+
+    @Test
+    void insightsAreProtectedLikeTheDashboard() throws Exception {
+        mockMvc.perform(get(URL + "/insights")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get(URL + "/insights").header("Authorization", bearer(linaUserId, "CANDIDATE")))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(asRita(get(URL + "/insights").param("job_id", String.valueOf(rivalOfferId))))
+                .andExpect(status().isForbidden());
+    }
+
+    // ---------------------------------------------------------------- /offers/{jobId}
+
+    @Test
+    void offerAnalyticsDescribeOneOffer() throws Exception {
+        mockMvc.perform(asRita(get(URL + "/offers/" + dataOfferId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.offer.id").value(dataOfferId))
+                .andExpect(jsonPath("$.offer.title").value("Data " + run))
+                .andExpect(jsonPath("$.offer.status").value("Publiée"))
+                .andExpect(jsonPath("$.kpis[0].id").value("applications"))
+                .andExpect(jsonPath("$.kpis[0].value").value("1"))
+                .andExpect(jsonPath("$.kpis[2].value").value("1"))
+                .andExpect(jsonPath("$.trend", hasSize(30)))
+                .andExpect(jsonPath("$.sources[1].label").value("Après un match Joyn"))
+                .andExpect(jsonPath("$.sources[1].value").value(1))
+                .andExpect(jsonPath("$.pipeline[0].label").value("Nouvelles"))
+                .andExpect(jsonPath("$.pipeline[0].value").value(1))
+                // Lina (seule candidate) a Java mais pas SQL
+                .andExpect(jsonPath("$.skills[*].label", contains("Java " + run, "SQL " + run)))
+                .andExpect(jsonPath("$.skills[0].value").value(100))
+                .andExpect(jsonPath("$.skills[1].value").value(0))
+                .andExpect(jsonPath("$.actions[0].title").value("1 candidature en attente"));
+    }
+
+    @Test
+    void offerAnalyticsWorkForDraftOffer() throws Exception {
+        mockMvc.perform(asRita(get(URL + "/offers/" + draftOfferId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.offer.statusCode").value("DRAFT"))
+                .andExpect(jsonPath("$.kpis[0].value").value("0"))
+                .andExpect(jsonPath("$.skills", hasSize(0)));
+    }
+
+    @Test
+    void offerAnalyticsRejectOtherCompanyUnknownOrInvalidOffer() throws Exception {
+        mockMvc.perform(asRita(get(URL + "/offers/" + rivalOfferId))).andExpect(status().isForbidden());
+        mockMvc.perform(asRita(get(URL + "/offers/999999999"))).andExpect(status().isNotFound());
+        mockMvc.perform(asRita(get(URL + "/offers/abc")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("jobId"));
+        mockMvc.perform(get(URL + "/offers/" + dataOfferId)).andExpect(status().isUnauthorized());
     }
 
     // ---------------------------------------------------------------- 400

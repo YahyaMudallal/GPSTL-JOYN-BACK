@@ -12,6 +12,8 @@ import com.gpstl.joyn.recruiter.dto.RecruiterDashboardResponse.ReceivedApplicati
 import com.gpstl.joyn.recruiter.dto.RecruiterDashboardResponse.Summary;
 import com.gpstl.joyn.recruiter.dto.RecruiterDashboardResponse.TrendPoint;
 import com.gpstl.joyn.recruiter.dto.RecruiterDashboardResponse.WeeklyValue;
+import com.gpstl.joyn.recruiter.dto.RecruiterInsightsResponse;
+import com.gpstl.joyn.recruiter.dto.RecruiterOfferAnalyticsResponse;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -28,7 +30,10 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Tableau de bord du recruteur connecté (R49).
+ * Tableau de bord du recruteur connecté (R49) : trois routes, celles qu'appelle le front Flutter.
+ *   - getDashboard      -> GET /api/v1/recruiters/dashboard            (vue synthèse)
+ *   - getInsights       -> GET /api/v1/recruiters/dashboard/insights   (écran "analyse")
+ *   - getOfferAnalytics -> GET /api/v1/recruiters/dashboard/offers/{id} (performance d'une offre)
  *
  * Toutes les requêtes passent par la même liste d'offres, "scope" :
  * les offres (non supprimées) de L'ENTREPRISE du recruteur, ou une seule offre si job_id est donné.
@@ -65,8 +70,100 @@ public class RecruiterDashboardService {
         this.jdbc = jdbc;
     }
 
+    /** GET /api/v1/recruiters/dashboard : la vue synthèse. */
     @Transactional(readOnly = true)
     public RecruiterDashboardResponse getDashboard(long userId, DashboardPeriod period, Long jobId) {
+        Request request = prepare(userId, period, jobId);
+        MapSqlParameterSource params = request.params();
+        Instant now = request.now();
+
+        Counters counters = counters(params);
+        Summary summary = new Summary(counters.applications, counters.interested, counters.matches,
+                counters.profilesReviewed, counters.activeOffers, counters.pendingApplications,
+                counters.upcomingInterviews, counters.avgResponseDays, 0);
+
+        return new RecruiterDashboardResponse(
+                period.code(),
+                jobId,
+                request.companyId(),
+                utc(now),
+                summary,
+                kpis(counters, period),
+                trend(params, period),
+                weeklyInterests(params),
+                profileDistribution(params),
+                recentApplications(params, now),
+                topOffers(params, jobId != null, now),
+                activities(params, now),
+                priorityActions(counters, jobId != null));
+    }
+
+    /**
+     * GET /api/v1/recruiters/dashboard/insights : l'écran "analyse" du front.
+     * Le front charge cette route EN MÊME TEMPS que la vue synthèse : sans elle, son écran passe en erreur.
+     */
+    @Transactional(readOnly = true)
+    public RecruiterInsightsResponse getInsights(long userId, DashboardPeriod period, Long jobId) {
+        Request request = prepare(userId, period, jobId);
+        MapSqlParameterSource params = request.params();
+
+        return new RecruiterInsightsResponse(
+                period.code(),
+                jobId,
+                request.companyId(),
+                utc(request.now()),
+                trend(params, period),
+                funnel(params),
+                channels(params),
+                heatmap(params),
+                // Pas de donnée en base pour ce graphique 3D (expérience x niveau) : vide, le front l'accepte.
+                new RecruiterInsightsResponse.Surface(List.of(), List.of(), List.of()));
+    }
+
+    /**
+     * GET /api/v1/recruiters/dashboard/offers/{jobId} : la performance détaillée d'une offre.
+     * Même contrôle que ?job_id= : offre inconnue -> 404, offre d'une autre entreprise -> 403.
+     */
+    @Transactional(readOnly = true)
+    public RecruiterOfferAnalyticsResponse getOfferAnalytics(long userId, DashboardPeriod period, long jobId) {
+        Request request = prepare(userId, period, jobId);
+        MapSqlParameterSource params = request.params();
+        Instant now = request.now();
+
+        Counters counters = counters(params);
+        OfferPerformance offer = topOffers(params, true, now).get(0);
+
+        List<Kpi> kpis = List.of(
+                new Kpi("applications", "Candidatures reçues", String.valueOf(counters.applications),
+                        delta(counters.applications, counters.previousApplications, period),
+                        period.isAll() ? null : "vs période précédente"),
+                new Kpi("interested", "Intéressés", String.valueOf(counters.interested),
+                        delta(counters.interested, counters.previousInterested, period), null),
+                new Kpi("matches", "Matchs", String.valueOf(counters.matches),
+                        delta(counters.matches, counters.previousMatches, period), null),
+                new Kpi("interviews", "Entretiens planifiés", String.valueOf(counters.upcomingInterviews), null, null),
+                new Kpi("conversion", "Taux de conversion",
+                        String.format(Locale.FRANCE, "%.1f %%", offer.conversionRate()), null, null));
+
+        return new RecruiterOfferAnalyticsResponse(
+                period.code(),
+                utc(now),
+                offer,
+                kpis,
+                trend(params, period),
+                channels(params),
+                pipeline(params),
+                skills(params),
+                priorityActions(counters, true));
+    }
+
+    // ------------------------------------------------------------------ préparation commune
+
+    /** Ce dont toutes les requêtes ont besoin : l'entreprise, "maintenant" et les paramètres SQL. */
+    private record Request(long companyId, Instant now, MapSqlParameterSource params) {
+    }
+
+    private Request prepare(long userId, DashboardPeriod period, Long jobId) {
         long companyId = findActiveRecruiterCompanyId(userId);
         if (jobId != null) {
             checkOfferBelongsToCompany(jobId, companyId);
@@ -83,26 +180,7 @@ public class RecruiterDashboardService {
                 .addValue("from", utc(from))
                 .addValue("previousFrom", utc(previousFrom))
                 .addValue("now", utc(now));
-
-        Counters counters = counters(params);
-        Summary summary = new Summary(counters.applications, counters.interested, counters.matches,
-                counters.profilesReviewed, counters.activeOffers, counters.pendingApplications,
-                counters.upcomingInterviews, counters.avgResponseDays, 0);
-
-        return new RecruiterDashboardResponse(
-                period.code(),
-                jobId,
-                companyId,
-                utc(now),
-                summary,
-                kpis(counters, period),
-                trend(params, period),
-                weeklyInterests(params),
-                profileDistribution(params),
-                recentApplications(params, now),
-                topOffers(params, jobId != null, now),
-                activities(params, now),
-                priorityActions(counters, jobId != null));
+        return new Request(companyId, now, params);
     }
 
     // ------------------------------------------------------------------ identité et droits
@@ -390,6 +468,139 @@ public class RecruiterDashboardService {
                     interested + plural(interested, " intéressé", " intéressés")
                             + " · " + matches + plural(matches, " match", " matchs"));
         });
+    }
+
+    // ------------------------------------------------------------------ écran "analyse" (insights)
+
+    /**
+     * Entonnoir : combien de candidats passent chaque étape (chaque étape compte aussi ceux qui sont allés plus loin).
+     * Intéressés (likes) -> Candidatures -> Lues par l'entreprise -> Entretiens -> Acceptées.
+     */
+    private List<DistributionItem> funnel(MapSqlParameterSource params) {
+        return jdbc.queryForObject(SCOPE + """
+                SELECT
+                  (SELECT COUNT(*) FROM job_swipes s
+                    WHERE s.job_offer_id IN (SELECT id FROM scope) AND s.action = 'LIKE'
+                      AND s.created_at >= :from) AS interested,
+                  COUNT(*) AS applications,
+                  COUNT(*) FILTER (WHERE a.viewed_at IS NOT NULL OR st.code <> 'PENDING') AS viewed,
+                  COUNT(*) FILTER (WHERE st.code IN ('INTERVIEW', 'ACCEPTED')) AS interviews,
+                  COUNT(*) FILTER (WHERE st.code = 'ACCEPTED') AS accepted
+                FROM applications a
+                JOIN application_statuses st ON st.id = a.status_id
+                WHERE a.job_offer_id IN (SELECT id FROM scope) AND a.created_at >= :from
+                """, params, (rs, i) -> List.of(
+                new DistributionItem("Intéressés", rs.getLong("interested")),
+                new DistributionItem("Candidatures", rs.getLong("applications")),
+                new DistributionItem("Lues", rs.getLong("viewed")),
+                new DistributionItem("Entretiens", rs.getLong("interviews")),
+                new DistributionItem("Acceptées", rs.getLong("accepted"))));
+    }
+
+    /**
+     * D'où viennent les candidatures : directement, ou après un match (le candidat et l'offre s'étaient likés).
+     * Ce sont les seules "sources" que la base connaît aujourd'hui.
+     */
+    private List<DistributionItem> channels(MapSqlParameterSource params) {
+        return jdbc.queryForObject(SCOPE + """
+                SELECT
+                  COUNT(*) FILTER (WHERE m.id IS NULL) AS direct,
+                  COUNT(*) FILTER (WHERE m.id IS NOT NULL) AS via_match
+                FROM applications a
+                LEFT JOIN matches m ON m.candidate_id = a.candidate_id AND m.job_offer_id = a.job_offer_id
+                WHERE a.job_offer_id IN (SELECT id FROM scope) AND a.created_at >= :from
+                """, params, (rs, i) -> List.of(
+                new DistributionItem("Candidature directe", rs.getLong("direct")),
+                new DistributionItem("Après un match Joyn", rs.getLong("via_match"))));
+    }
+
+    /** Lignes de la carte de chaleur (jours) et colonnes (tranches horaires, heure de Paris). */
+    private static final List<String> HEATMAP_DAYS = List.of("Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim");
+    private static final List<String> HEATMAP_SLOTS = List.of("0h-8h", "8h-10h", "10h-12h", "12h-14h",
+            "14h-16h", "16h-18h", "18h-24h");
+
+    /** Carte de chaleur : à quel jour et à quelle heure les candidatures arrivent. */
+    private RecruiterInsightsResponse.Heatmap heatmap(MapSqlParameterSource params) {
+        long[][] values = new long[HEATMAP_DAYS.size()][HEATMAP_SLOTS.size()];
+        jdbc.query(SCOPE + """
+                SELECT CAST(EXTRACT(ISODOW FROM a.created_at AT TIME ZONE 'Europe/Paris') AS int) AS day,
+                       CAST(EXTRACT(HOUR FROM a.created_at AT TIME ZONE 'Europe/Paris') AS int) AS hour,
+                       COUNT(*) AS n
+                FROM applications a
+                WHERE a.job_offer_id IN (SELECT id FROM scope) AND a.created_at >= :from
+                GROUP BY 1, 2
+                """, params, rs -> {
+            int day = rs.getInt("day") - 1;          // ISODOW : lundi = 1 ... dimanche = 7
+            int slot = heatmapSlot(rs.getInt("hour"));
+            values[day][slot] += rs.getLong("n");
+        });
+
+        List<List<Long>> rows = new ArrayList<>();
+        for (long[] day : values) {
+            List<Long> row = new ArrayList<>();
+            for (long value : day) {
+                row.add(value);
+            }
+            rows.add(row);
+        }
+        return new RecruiterInsightsResponse.Heatmap(HEATMAP_DAYS, HEATMAP_SLOTS, rows);
+    }
+
+    private static int heatmapSlot(int hour) {
+        if (hour < 8) return 0;
+        if (hour < 10) return 1;
+        if (hour < 12) return 2;
+        if (hour < 14) return 3;
+        if (hour < 16) return 4;
+        if (hour < 18) return 5;
+        return 6;
+    }
+
+    // ------------------------------------------------------------------ écran "performance d'une offre"
+
+    /** Où en sont les candidatures de l'offre (période choisie), étape par étape. */
+    private List<DistributionItem> pipeline(MapSqlParameterSource params) {
+        return jdbc.queryForObject(SCOPE + """
+                SELECT
+                  COUNT(*) FILTER (WHERE st.code = 'PENDING') AS pending,
+                  COUNT(*) FILTER (WHERE st.code = 'VIEWED') AS viewed,
+                  COUNT(*) FILTER (WHERE st.code = 'IN_REVIEW') AS in_review,
+                  COUNT(*) FILTER (WHERE st.code = 'INTERVIEW') AS interview,
+                  COUNT(*) FILTER (WHERE st.code = 'ACCEPTED') AS accepted
+                FROM applications a
+                JOIN application_statuses st ON st.id = a.status_id
+                WHERE a.job_offer_id IN (SELECT id FROM scope) AND a.created_at >= :from
+                """, params, (rs, i) -> List.of(
+                new DistributionItem("Nouvelles", rs.getLong("pending")),
+                new DistributionItem("Lues", rs.getLong("viewed")),
+                new DistributionItem("En revue", rs.getLong("in_review")),
+                new DistributionItem("Entretien", rs.getLong("interview")),
+                new DistributionItem("Acceptées", rs.getLong("accepted"))));
+    }
+
+    /**
+     * Compétences demandées par l'offre, avec le % de candidats (de la période) qui les ont.
+     * Ex. "React : 78" = 78 % des candidats à cette offre ont React dans leur profil.
+     */
+    private List<DistributionItem> skills(MapSqlParameterSource params) {
+        return jdbc.query(SCOPE + """
+                , applicants AS (
+                    SELECT DISTINCT a.candidate_id
+                    FROM applications a
+                    WHERE a.job_offer_id IN (SELECT id FROM scope) AND a.created_at >= :from
+                )
+                SELECT sk.name,
+                       CASE WHEN (SELECT COUNT(*) FROM applicants) = 0 THEN 0
+                            ELSE ROUND(100.0 * (SELECT COUNT(*) FROM candidate_skills cs
+                                                WHERE cs.skill_id = sk.id
+                                                  AND cs.candidate_id IN (SELECT candidate_id FROM applicants))
+                                       / (SELECT COUNT(*) FROM applicants))
+                       END AS percent
+                FROM job_offer_skills jos
+                JOIN skills sk ON sk.id = jos.skill_id
+                WHERE jos.job_offer_id IN (SELECT id FROM scope)
+                ORDER BY percent DESC, sk.name
+                """, params, (rs, i) -> new DistributionItem(rs.getString("name"), rs.getLong("percent")));
     }
 
     // ------------------------------------------------------------------ dernières candidatures
