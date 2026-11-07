@@ -2,6 +2,8 @@ package com.gpstl.joyn.joboffer.service;
 
 import com.gpstl.joyn.common.model.Skill;
 import com.gpstl.joyn.common.repository.SkillRepository;
+import com.gpstl.joyn.common.geocoding.AddressGeocodingService;
+import com.gpstl.joyn.common.geocoding.Coordinates;
 import com.gpstl.joyn.joboffer.dto.JobPatch;
 import com.gpstl.joyn.joboffer.dto.JobUpdateResponse;
 import com.gpstl.joyn.joboffer.exception.JobApiException;
@@ -26,16 +28,19 @@ public class JobUpdateService {
     private final JobAccessService access;
     private final JobOfferAuditRepository audit;
     private final EntityManager entityManager;
+    private final AddressGeocodingService geocodingService;
 
     public JobUpdateService(JobOfferRepository offers, ContractTypeRepository contracts,
             SkillRepository skills, JobAccessService access, JobOfferAuditRepository audit,
-            EntityManager entityManager) {
+            EntityManager entityManager,
+            AddressGeocodingService geocodingService) {
         this.offers = offers;
         this.contracts = contracts;
         this.skills = skills;
         this.access = access;
         this.audit = audit;
         this.entityManager = entityManager;
+        this.geocodingService = geocodingService;
     }
 
     @Transactional
@@ -53,8 +58,15 @@ public class JobUpdateService {
             ? contracts.findById(((Integer) columns.get("contract_type_id")).shortValue())
                 .orElseThrow(() -> new JobApiException(400, "Invalid contract type", Map.of("contract_type_id", "Unknown contract type")))
             : job.getContractType();
+        Coordinates coordinates = columns.containsKey("location")
+                ? geocodingService.geocode((String) columns.get("location")).orElse(null)
+                : null;
         // Seuls les champs présents et validés sont appliqués à l’entité gérée par Hibernate.
         apply(job, columns, contract);
+        if (columns.containsKey("location")) {
+            job.setLatitude(coordinates == null ? null : coordinates.latitude());
+            job.setLongitude(coordinates == null ? null : coordinates.longitude());
+        }
         if (patch.skills() != null) replaceSkills(job, patch.skills());
         job.touch();
         offers.saveAndFlush(job);

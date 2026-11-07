@@ -9,6 +9,8 @@ import com.gpstl.joyn.candidate.model.CandidateEducation;
 import com.gpstl.joyn.candidate.model.CandidateExperience;
 import com.gpstl.joyn.candidate.model.CandidateSkill;
 import com.gpstl.joyn.candidate.repository.CandidateRepository;
+import com.gpstl.joyn.common.geocoding.AddressGeocodingService;
+import com.gpstl.joyn.common.geocoding.Coordinates;
 import com.gpstl.joyn.common.model.Skill;
 import com.gpstl.joyn.common.model.User;
 import com.gpstl.joyn.common.repository.SkillRepository;
@@ -47,16 +49,19 @@ public class CandidateProfileService {
     private final SkillRepository skills;
     private final EntityManager entityManager;
     private final ApplicationEventPublisher events;
+    private final AddressGeocodingService geocodingService;
 
     public CandidateProfileService(UserRepository users, CandidateRepository candidates,
             ContractTypeRepository contractTypes, SkillRepository skills,
-            EntityManager entityManager, ApplicationEventPublisher events) {
+            EntityManager entityManager, ApplicationEventPublisher events,
+            AddressGeocodingService geocodingService) {
         this.users = users;
         this.candidates = candidates;
         this.contractTypes = contractTypes;
         this.skills = skills;
         this.entityManager = entityManager;
         this.events = events;
+        this.geocodingService = geocodingService;
     }
 
     @Transactional(readOnly = true)
@@ -105,12 +110,19 @@ public class CandidateProfileService {
         Set<ContractType> desiredContracts = patch.contractTypes() == null
                 ? null : resolveContractTypes(patch.contractTypes());
         List<Skill> desiredSkills = patch.skills() == null ? null : resolveSkills(patch.skills());
+        Coordinates coordinates = patch.values().containsKey("location")
+                ? geocodingService.geocode((String) patch.values().get("location")).orElse(null)
+                : null;
 
         // 2. SELECT ... FOR UPDATE : une autre mise à jour du même profil attend notre commit.
         Candidate candidate = candidates.findByUserIdForUpdate(userId).orElseThrow(CandidateProfileService::profileNotFound);
 
         // 3. Seuls les champs présents et validés sont appliqués à l'entité gérée par Hibernate.
         patch.values().forEach((field, value) -> apply(candidate, field, value));
+        if (patch.values().containsKey("location")) {
+            candidate.setLatitude(coordinates == null ? null : coordinates.latitude());
+            candidate.setLongitude(coordinates == null ? null : coordinates.longitude());
+        }
         if (desiredContracts != null) syncContractTypes(candidate, desiredContracts);
         if (desiredSkills != null) syncSkills(candidate, desiredSkills);
         if (patch.experiences() != null) replaceExperiences(candidate, patch.experiences());

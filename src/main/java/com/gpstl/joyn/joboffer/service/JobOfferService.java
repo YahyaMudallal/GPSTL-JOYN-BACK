@@ -4,6 +4,8 @@ import com.gpstl.joyn.joboffer.dto.CreateJobOfferRequest;
 import com.gpstl.joyn.joboffer.dto.JobOfferResponse;
 import com.gpstl.joyn.common.model.Skill;
 import com.gpstl.joyn.common.repository.SkillRepository;
+import com.gpstl.joyn.common.geocoding.AddressGeocodingService;
+import com.gpstl.joyn.common.geocoding.Coordinates;
 import com.gpstl.joyn.recruiter.model.Recruiter;
 import com.gpstl.joyn.recruiter.repository.RecruiterRepository;
 import com.gpstl.joyn.joboffer.exception.InvalidFieldException;
@@ -38,15 +40,18 @@ public class JobOfferService {
     private final ContractTypeRepository contractTypeRepository;
     private final SkillRepository skillRepository;
     private final JobOfferRepository jobOfferRepository;
+    private final AddressGeocodingService geocodingService;
 
     public JobOfferService(RecruiterRepository recruiterProfileRepository,
                            ContractTypeRepository contractTypeRepository,
                            SkillRepository skillRepository,
-                           JobOfferRepository jobOfferRepository) {
+                           JobOfferRepository jobOfferRepository,
+                           AddressGeocodingService geocodingService) {
         this.recruiterProfileRepository = recruiterProfileRepository;
         this.contractTypeRepository = contractTypeRepository;
         this.skillRepository = skillRepository;
         this.jobOfferRepository = jobOfferRepository;
+        this.geocodingService = geocodingService;
     }
 
     /**
@@ -68,6 +73,7 @@ public class JobOfferService {
         ContractType contractType = contractTypeRepository.findByCodeIgnoreCase(request.contractType().trim())
                 .orElseThrow(() -> new InvalidFieldException("contract_type",
                         "Type de contrat inconnu. Valeurs acceptées : " + availableContractCodes()));
+        Coordinates coordinates = geocodingService.geocode(request.location()).orElse(null);
 
         JobOffer offer = new JobOffer();
         offer.setCompany(recruiter.getCompany());
@@ -76,6 +82,7 @@ public class JobOfferService {
         offer.setTitle(request.title().trim());
         offer.setDescription(request.description().trim());
         offer.setLocation(request.location().trim());
+        setCoordinates(offer, coordinates);
         offer.setRemoteMode(RemoteMode.valueOf(request.remotePolicy()));
         offer.setExperienceLevelRequired(toExperienceLevel(request.experienceLevel()));
         offer.setSalaryMin(request.salaryMin());
@@ -133,6 +140,11 @@ public class JobOfferService {
 
     private static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private static void setCoordinates(JobOffer offer, Coordinates coordinates) {
+        offer.setLatitude(coordinates == null ? null : coordinates.latitude());
+        offer.setLongitude(coordinates == null ? null : coordinates.longitude());
     }
 
     private String availableContractCodes() {

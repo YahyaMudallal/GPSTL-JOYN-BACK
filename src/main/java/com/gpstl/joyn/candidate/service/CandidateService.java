@@ -5,6 +5,8 @@ import com.gpstl.joyn.candidate.dto.CandidateRegisterResponse;
 import com.gpstl.joyn.candidate.exception.CandidateResumeNotFoundException;
 import com.gpstl.joyn.candidate.model.Candidate;
 import com.gpstl.joyn.candidate.repository.CandidateRepository;
+import com.gpstl.joyn.common.geocoding.AddressGeocodingService;
+import com.gpstl.joyn.common.geocoding.Coordinates;
 import com.gpstl.joyn.common.model.User;
 import com.gpstl.joyn.common.service.UserAccountService;
 import org.springframework.stereotype.Service;
@@ -19,14 +21,17 @@ public class CandidateService {
     private final CandidateRepository candidateRepository;
     private final UserAccountService userAccountService;
     private final CandidateResumeStorage resumeStorage;
+    private final AddressGeocodingService geocodingService;
 
     public CandidateService(
             CandidateRepository candidateRepository,
             UserAccountService userAccountService,
-            CandidateResumeStorage resumeStorage) {
+            CandidateResumeStorage resumeStorage,
+            AddressGeocodingService geocodingService) {
         this.candidateRepository = candidateRepository;
         this.userAccountService = userAccountService;
         this.resumeStorage = resumeStorage;
+        this.geocodingService = geocodingService;
     }
 
     @Transactional
@@ -34,6 +39,7 @@ public class CandidateService {
             CandidateRegisterRequest request,
             MultipartFile resume) {
         validateCandidateInfo(request, resume);
+        Coordinates coordinates = geocodingService.geocode(request.location()).orElse(null);
 
         User user = userAccountService.createUserAccount(
                 request.email(),
@@ -45,12 +51,14 @@ public class CandidateService {
                 ? null
                 : "/api/v1/candidates/resumes/" + resumeStorage.store(resume);
 
-        Candidate candidate = candidateRepository.saveAndFlush(new Candidate(
+        Candidate candidate = new Candidate(
                 user,
                 request.firstName().trim(),
                 request.lastName().trim(),
-                resumeUrl
-        ));
+                resumeUrl);
+        candidate.setLocation(blankToNull(request.location()));
+        setCoordinates(candidate, coordinates);
+        candidate = candidateRepository.saveAndFlush(candidate);
 
         return new CandidateRegisterResponse(
                 candidate.getId(),
@@ -83,5 +91,14 @@ public class CandidateService {
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private static void setCoordinates(Candidate candidate, Coordinates coordinates) {
+        candidate.setLatitude(coordinates == null ? null : coordinates.latitude());
+        candidate.setLongitude(coordinates == null ? null : coordinates.longitude());
     }
 }

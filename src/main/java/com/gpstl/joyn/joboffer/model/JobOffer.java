@@ -60,6 +60,12 @@ public class JobOffer {
     @Column(name = "location")
     private String location;
 
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
     @Column(name = "salary_min", precision = 12, scale = 2)
     private BigDecimal salaryMin;
 
@@ -151,6 +157,10 @@ public class JobOffer {
 
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
 
     public BigDecimal getSalaryMin() { return salaryMin; }
     public void setSalaryMin(BigDecimal salaryMin) { this.salaryMin = salaryMin; }
