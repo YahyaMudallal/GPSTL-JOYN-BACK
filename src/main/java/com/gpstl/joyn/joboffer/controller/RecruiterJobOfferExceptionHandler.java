@@ -3,6 +3,7 @@ package com.gpstl.joyn.joboffer.controller;
 import com.gpstl.joyn.joboffer.dto.ApiError;
 import com.gpstl.joyn.joboffer.exception.InvalidFieldException;
 import com.gpstl.joyn.joboffer.exception.RecruiterProfileNotFoundException;
+import com.gpstl.joyn.common.geocoding.GeocodingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -47,6 +48,13 @@ public class RecruiterJobOfferExceptionHandler {
     @ExceptionHandler(RecruiterProfileNotFoundException.class)
     public ResponseEntity<ApiError> handleNoRecruiterProfile(RecruiterProfileNotFoundException ex) {
         HttpStatus status = HttpStatus.FORBIDDEN;
+        return ResponseEntity.status(status)
+                .body(new ApiError(status.value(), status.getReasonPhrase(), ex.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(GeocodingException.class)
+    public ResponseEntity<ApiError> handleGeocodingUnavailable(GeocodingException ex) {
+        HttpStatus status = HttpStatus.SERVICE_UNAVAILABLE;
         return ResponseEntity.status(status)
                 .body(new ApiError(status.value(), status.getReasonPhrase(), ex.getMessage(), List.of()));
     }

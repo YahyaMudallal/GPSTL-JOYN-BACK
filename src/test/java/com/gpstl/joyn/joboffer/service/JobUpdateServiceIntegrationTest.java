@@ -15,9 +15,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import com.gpstl.joyn.candidate.service.CandidateProfileService;
+import com.gpstl.joyn.common.geocoding.Coordinates;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -48,6 +50,18 @@ class JobUpdateServiceIntegrationTest extends JobDatabaseTestSupport {
         Map<String, Object> patch = new HashMap<>(); patch.put("salary_max", null); patch.put("location", null);
         assertThat(service.patch(recruiter, job, patch)).containsEntry("salary_max", null).containsEntry("location", null);
         assertError(400, () -> service.patch(admin, job, Map.of("contract_type_id", 32767)));
+    }
+
+    @Test void locationPatchGeocodesAndStoresCoordinates() {
+        when(geocodingService.geocode("Lyon"))
+            .thenReturn(java.util.Optional.of(new Coordinates(4.8357, 45.764)));
+
+        service.patch(recruiter, job, Map.of("location", "Lyon"));
+
+        assertThat(jdbc.queryForObject(
+            "SELECT latitude FROM job_offers WHERE id = ?", Double.class, job)).isEqualTo(45.764);
+        assertThat(jdbc.queryForObject(
+            "SELECT longitude FROM job_offers WHERE id = ?", Double.class, job)).isEqualTo(4.8357);
     }
 
     @Test void synchronizesSkillsWithoutDeletingSharedCatalogOrRequiredLevels() {

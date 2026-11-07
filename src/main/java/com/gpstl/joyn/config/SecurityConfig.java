@@ -25,7 +25,8 @@ import java.nio.charset.StandardCharsets;
  *  - claim "sub"  = id de l'utilisateur dans la table users (ex. "42") ;
  *  - claim "role" = CANDIDATE, RECRUITER ou ADMIN (comme la colonne users.role).
  *
- * Seules les routes /api/v1/recruiters/**, /api/v1/candidates/profile et /api/v1/candidates/{id}/profile
+ * Seules les routes /api/v1/recruiters/**, /api/v1/candidates/profile,
+ * /api/v1/candidates/recommendations et /api/v1/candidates/{id}/profile
  * sont protégées pour l'instant, afin de ne pas
  * bloquer les autres routes de l'équipe (inscription, connexion...). L'équipe pourra
  * resserrer les règles quand toutes les routes existeront.
@@ -42,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/recruiters/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/candidates/applications").hasRole("CANDIDATE")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/candidates/recommendations").hasRole("CANDIDATE")
                         .requestMatchers(HttpMethod.POST, "/api/v1/applications").hasRole("CANDIDATE")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/applications/*/status")
                                 .hasAnyRole("RECRUITER", "ADMIN")

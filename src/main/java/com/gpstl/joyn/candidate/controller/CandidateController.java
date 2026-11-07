@@ -40,6 +40,7 @@ public class CandidateController {
             @RequestParam String lastName,
             @RequestParam String email,
             @RequestParam String password,
+            @RequestParam(value = "location", required = false) String location,
             @RequestParam(value = "resume", required = false) MultipartFile resume,
             @RequestParam(value = "cv", required = false) MultipartFile legacyCv) {
         if (resume != null && !resume.isEmpty()
@@ -56,7 +57,8 @@ public class CandidateController {
                     email,
                     password,
                     firstName,
-                    lastName);
+                    lastName,
+                    location);
         CandidateRegisterResponse response =
                 registrationService.register(
                     request,
