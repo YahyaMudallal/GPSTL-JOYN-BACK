@@ -2,6 +2,7 @@ package com.gpstl.joyn.candidate.controller;
 
 import com.gpstl.joyn.JoynApplication;
 import com.gpstl.joyn.candidate.repository.CandidateRepository;
+import com.gpstl.joyn.common.geocoding.Coordinates;
 import com.gpstl.joyn.common.repository.UserRepository;
 import com.gpstl.joyn.joboffer.JobDatabaseTestSupport;
 import org.junit.jupiter.api.AfterAll;
@@ -35,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(
         classes = JoynApplication.class,
@@ -116,6 +118,24 @@ class CandidateRegistrationIntegrationTests extends JobDatabaseTestSupport {
         assertNotNull(response.getBody());
         assertNull(response.getBody().get("resumeUrl"));
         assertTrue(userRepository.existsByEmailIgnoreCase(email));
+    }
+
+    @Test
+    void shouldGeocodeCandidateLocationOnRegistration() {
+        String email = "candidate-" + UUID.randomUUID() + "@example.com";
+        when(geocodingService.geocode("Paris"))
+                .thenReturn(java.util.Optional.of(new Coordinates(2.347, 48.859)));
+        MultiValueMap<String, Object> body = registrationForm(email);
+        body.add("location", "Paris");
+
+        ResponseEntity<Map> response = register(body);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        long userId = ((Number) response.getBody().get("userId")).longValue();
+        var candidate = candidateRepository.findByUserId(userId).orElseThrow();
+        assertEquals("Paris", candidate.getLocation());
+        assertEquals(48.859, candidate.getLatitude());
+        assertEquals(2.347, candidate.getLongitude());
     }
 
     @AfterAll

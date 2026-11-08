@@ -1,6 +1,8 @@
 package com.gpstl.joyn.joboffer.controller;
 
 import com.gpstl.joyn.joboffer.exception.JobApiException;
+import com.gpstl.joyn.common.geocoding.GeocodingException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.ErrorResponse;
@@ -18,6 +20,12 @@ public class JobExceptionHandler {
     @ExceptionHandler(JobApiException.class)
     public ResponseEntity<?> jobError(JobApiException ex) {
         return ResponseEntity.status(ex.getStatus()).body(Map.of("message", ex.getMessage(), "errors", ex.getErrors()));
+    }
+
+    @ExceptionHandler(GeocodingException.class)
+    public ResponseEntity<?> geocodingUnavailable(GeocodingException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("message", ex.getMessage(), "errors", Map.of()));
     }
 
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})

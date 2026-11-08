@@ -4,6 +4,7 @@ import com.gpstl.joyn.candidate.dto.CandidateProfileResponse;
 import com.gpstl.joyn.candidate.event.CandidateMatchingCriteriaChanged;
 import com.gpstl.joyn.candidate.exception.CandidateProfileException;
 import com.gpstl.joyn.candidate.repository.CandidateRepository;
+import com.gpstl.joyn.common.geocoding.Coordinates;
 import com.gpstl.joyn.joboffer.JobDatabaseTestSupport;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.mockito.Mockito.when;
 
 /**
  * Service du profil candidat sur une vraie base PostgreSQL (schéma temporaire).
@@ -112,6 +114,21 @@ class CandidateProfileServiceIntegrationTest extends JobDatabaseTestSupport {
         assertThat(jdbc.queryForObject("SELECT phone FROM candidate_profiles WHERE id = ?", String.class, profile)).isEqualTo("+33612345678");
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM candidate_preferred_contract_types WHERE candidate_id = ?", Integer.class, profile)).isEqualTo(2);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM candidate_experiences WHERE candidate_id = ?", Integer.class, profile)).isEqualTo(1);
+    }
+
+    @Test
+    void locationPatchGeocodesAndStoresCoordinates() {
+        when(geocodingService.geocode("Lyon"))
+                .thenReturn(java.util.Optional.of(new Coordinates(4.8357, 45.764)));
+
+        service.updateProfile(candidate, body("{\"location\":\"Lyon\"}"));
+
+        assertThat(jdbc.queryForObject(
+                "SELECT latitude FROM candidate_profiles WHERE id = ?", Double.class, profile))
+                .isEqualTo(45.764);
+        assertThat(jdbc.queryForObject(
+                "SELECT longitude FROM candidate_profiles WHERE id = ?", Double.class, profile))
+                .isEqualTo(4.8357);
     }
 
     @Test

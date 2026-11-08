@@ -18,12 +18,16 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.WebApplicationContext;
+import com.gpstl.joyn.common.geocoding.AddressGeocodingService;
+import com.gpstl.joyn.common.geocoding.Coordinates;
 
 import java.time.Instant;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.nullValue;
@@ -48,6 +52,9 @@ class RecruiterJobOfferControllerTest {
 
     @Autowired
     private JdbcTemplate jdbc;
+
+    @MockitoBean
+    private AddressGeocodingService geocodingService;
 
     @Value("${joyn.security.jwt.secret}")
     private String jwtSecret;
@@ -91,6 +98,8 @@ class RecruiterJobOfferControllerTest {
     void createsOfferForRecruiterCompany() throws Exception {
         String react = "React-" + run;
         String docker = "Docker-" + run;
+        when(geocodingService.geocode("Paris 9e"))
+                .thenReturn(java.util.Optional.of(new Coordinates(2.347, 48.859)));
 
         MvcResult result = mockMvc.perform(post(URL)
                         .header("Authorization", bearer(recruiterUserId, "RECRUITER"))
@@ -121,6 +130,10 @@ class RecruiterJobOfferControllerTest {
         Integer published = jdbc.queryForObject(
                 "SELECT count(*) FROM job_offers WHERE id = ? AND published_at IS NOT NULL", Integer.class, offerId);
         assertThat(published).isEqualTo(1);
+        assertThat(jdbc.queryForObject(
+                "SELECT latitude FROM job_offers WHERE id = ?", Double.class, offerId)).isEqualTo(48.859);
+        assertThat(jdbc.queryForObject(
+                "SELECT longitude FROM job_offers WHERE id = ?", Double.class, offerId)).isEqualTo(2.347);
     }
 
     @Test

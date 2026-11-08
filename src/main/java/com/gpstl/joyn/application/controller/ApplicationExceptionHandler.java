@@ -4,6 +4,8 @@ import com.gpstl.joyn.application.dto.ApplicationErrorResponse;
 import com.gpstl.joyn.application.dto.ApplicationErrorResponse.FieldError;
 import com.gpstl.joyn.application.exception.ApplicationException;
 import com.gpstl.joyn.candidate.controller.CandidateApplicationsController;
+import com.gpstl.joyn.candidate.controller.CandidateRecommendationController;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -17,7 +19,10 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.util.List;
 
-@RestControllerAdvice(assignableTypes = {ApplicationController.class, CandidateApplicationsController.class})
+@RestControllerAdvice(assignableTypes = {
+        ApplicationController.class,
+        CandidateApplicationsController.class,
+        CandidateRecommendationController.class})
 public class ApplicationExceptionHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationExceptionHandler.class);

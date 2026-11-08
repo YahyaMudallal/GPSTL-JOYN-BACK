@@ -1,6 +1,7 @@
 package com.gpstl.joyn.candidate.controller;
 
 import com.gpstl.joyn.candidate.exception.CandidateProfileException;
+import com.gpstl.joyn.common.geocoding.GeocodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -27,6 +28,11 @@ public class CandidateProfileExceptionHandler {
     @ExceptionHandler(CandidateProfileException.class)
     public ResponseEntity<Map<String, Object>> profileError(CandidateProfileException ex) {
         return ResponseEntity.status(ex.getStatus()).body(body(ex.getMessage(), ex.getErrors()));
+    }
+
+    @ExceptionHandler(GeocodingException.class)
+    public ResponseEntity<Map<String, Object>> geocodingUnavailable(GeocodingException ex) {
+        return ResponseEntity.status(503).body(body(ex.getMessage(), Map.of()));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

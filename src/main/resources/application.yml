@@ -42,3 +42,6 @@ joyn:
       secret: ${JWT_SECRET:joyn-dev-secret-a-changer-en-production-32+}
       # Durée de validité d'un token de connexion, en secondes (3600 = 1 heure).
       expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
+
+  geocoding:
+    base-url: https://api-adresse.data.gouv.fr
