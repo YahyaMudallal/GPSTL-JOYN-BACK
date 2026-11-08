@@ -88,6 +88,12 @@ public class JobOffer {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private OfferStatus status = OfferStatus.DRAFT;
+    @Column(name = "recruitment_outcome")
+    private String recruitmentOutcome;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hired_application_id")
+    private com.gpstl.joyn.application.model.Application hiredApplication;
 
     // --- Champs spécifiques à l'alternance (facultatifs) ---
 
@@ -179,6 +185,11 @@ public class JobOffer {
 
     public OfferStatus getStatus() { return status; }
     public void setStatus(OfferStatus status) { this.status = status; }
+    public String getRecruitmentOutcome() { return recruitmentOutcome; }
+    public void setRecruitmentOutcome(String outcome) { this.recruitmentOutcome = outcome; }
+    public com.gpstl.joyn.application.model.Application getHiredApplication() { return hiredApplication; }
+    public void setHiredApplication(com.gpstl.joyn.application.model.Application application) { this.hiredApplication = application; }
+
 
     public String getRhythmType() { return rhythmType; }
     public void setRhythmType(String rhythmType) { this.rhythmType = rhythmType; }
