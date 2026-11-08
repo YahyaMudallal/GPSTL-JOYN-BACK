@@ -26,7 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @RestController
 @RequestMapping("/api/v1/companies")
-@Tag(name = "Companies", description = "Consultation publique des entreprises et la mise à jour de leurs données par les admins ou par les recruteurs habilités")
+@Tag(name = "Companies")
 @CrossOrigin(origins = "*")
 public class SiretLookupController {
     private final SiretLookupService service;
