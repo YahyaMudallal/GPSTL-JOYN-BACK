@@ -21,7 +21,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/recruiters/jobs")
-@Tag(name = "Offres (recruteur)")
+@Tag(name = "Jobs")
 @SecurityRequirement(name = "bearerAuth")
 public class RecruiterJobApplicantController implements JobManagementEndpoint {
 
