@@ -50,11 +50,13 @@ public class CandidateProfileService {
     private final EntityManager entityManager;
     private final ApplicationEventPublisher events;
     private final AddressGeocodingService geocodingService;
+    private final CandidateResumeStorage resumeStorage;
 
     public CandidateProfileService(UserRepository users, CandidateRepository candidates,
             ContractTypeRepository contractTypes, SkillRepository skills,
             EntityManager entityManager, ApplicationEventPublisher events,
-            AddressGeocodingService geocodingService) {
+            AddressGeocodingService geocodingService,
+            CandidateResumeStorage resumeStorage) {
         this.users = users;
         this.candidates = candidates;
         this.contractTypes = contractTypes;
@@ -62,6 +64,7 @@ public class CandidateProfileService {
         this.entityManager = entityManager;
         this.events = events;
         this.geocodingService = geocodingService;
+        this.resumeStorage = resumeStorage;
     }
 
     @Transactional(readOnly = true)
@@ -70,7 +73,7 @@ public class CandidateProfileService {
         Candidate candidate = candidates.findProfileByUserId(userId)
                 .orElseThrow(CandidateProfileService::profileNotFound);
         // Conversion dans la transaction : les sections sont chargées à la demande.
-        return CandidateProfileResponse.from(candidate);
+        return CandidateProfileResponse.from(candidate, signedResumeUrl(candidate));
     }
 
     @Transactional
@@ -78,7 +81,8 @@ public class CandidateProfileService {
         // Le compte d'abord : un recruteur reçoit 403 même si son JSON est invalide.
         checkCandidateAccount(userId);
         CandidateProfilePatch patch = CandidateProfilePatch.parse(body);
-        return CandidateProfileResponse.from(applyPatch(patch, userId));
+        Candidate candidate = applyPatch(patch, userId);
+        return CandidateProfileResponse.from(candidate, signedResumeUrl(candidate));
     }
 
     /**
@@ -94,12 +98,16 @@ public class CandidateProfileService {
         Candidate candidate = candidates.findProfileById(candidateId)
                 .orElseThrow(CandidateProfileService::profileNotFound);
         if ("ADMIN".equals(viewer.getRole())) {
-            return CandidateProfileResponse.from(candidate);
+            return CandidateProfileResponse.from(candidate, signedResumeUrl(candidate));
         }
         if (!candidate.isVisibleToRecruiters() || !"ACTIVE".equals(candidate.getUser().getStatus())) {
             throw profileNotFound();
         }
-        return CandidateProfileResponse.forRecruiter(candidate);
+        return CandidateProfileResponse.forRecruiter(candidate, signedResumeUrl(candidate));
+    }
+
+    private String signedResumeUrl(Candidate candidate) {
+        return resumeStorage.createPresignedUrlIfValid(candidate.getResumeUrl());
     }
 
     /** Étapes de la mise à jour ; le corps a déjà été validé (sans accès à la base) par l'appelant. */

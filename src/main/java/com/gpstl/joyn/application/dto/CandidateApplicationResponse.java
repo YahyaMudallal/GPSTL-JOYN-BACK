@@ -25,7 +25,7 @@ public record CandidateApplicationResponse(
         OffsetDateTime viewedAt,
         @Schema(description = "Message submitted with the application")
         String coverMessage,
-        @Schema(description = "Resume URL submitted with the application")
+        @Schema(description = "Temporary presigned URL to the resume submitted with the application")
         String resumeUrl,
         @Schema(description = "Application creation date")
         OffsetDateTime createdAt,

@@ -48,3 +48,12 @@ joyn:
 
   geocoding:
     base-url: https://api-adresse.data.gouv.fr
+
+  storage:
+    provider: ${JOYN_STORAGE_PROVIDER:supabase}
+    supabase:
+      endpoint: ${SUPABASE_S3_ENDPOINT:}
+      region: ${SUPABASE_S3_REGION:}
+      access-key: ${SUPABASE_S3_ACCESS_KEY:}
+      secret-key: ${SUPABASE_S3_SECRET_KEY:}
+      bucket: joyn_file_bucket

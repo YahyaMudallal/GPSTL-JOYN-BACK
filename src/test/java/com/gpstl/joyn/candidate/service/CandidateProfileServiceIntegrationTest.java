@@ -96,6 +96,18 @@ class CandidateProfileServiceIntegrationTest extends JobDatabaseTestSupport {
     }
 
     @Test
+    void returnsStorageUrlInsteadOfPersistedObjectKey() {
+        String key = "resumes/" + this.profile + "/123e4567-e89b-12d3-a456-426614174000.pdf";
+        jdbc.update("UPDATE candidate_profiles SET resume_url = ? WHERE id = ?", key, this.profile);
+
+        CandidateProfileResponse response = service.getProfile(candidate);
+
+        assertThat(response.cvUrl()).isEqualTo(
+                "/api/v1/candidates/resumes/" + this.profile + "/123e4567-e89b-12d3-a456-426614174000.pdf");
+        assertThat(response.cvUrl()).isNotEqualTo(key);
+    }
+
+    @Test
     void patchUpdatesOnlySuppliedFieldsAndSynchronizesSections() {
         var response = service.updateProfile(candidate, body("""
             {"first_name":"Yahya","headline":"Ingénieur","phone":"+33612345678","years_of_experience":2,

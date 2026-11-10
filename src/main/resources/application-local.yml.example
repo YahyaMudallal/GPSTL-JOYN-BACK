@@ -21,3 +21,9 @@ spring:
     properties:
       hibernate:
         formal_sql: true
+
+joyn:
+  storage:
+    provider: local
+  media:
+    local-directory: ./media/candidate-resumes

@@ -86,6 +86,8 @@ class CandidateProfileControllerTest extends JobDatabaseTestSupport {
     @Test
     void missingOrForgedTokenGets401() throws Exception {
         mvc.perform(get(ROUTE)).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/v1/candidates/resumes/" + profile + "/resume.pdf"))
+                .andExpect(status().isUnauthorized());
         mvc.perform(get(ROUTE).header("Authorization",
                 token(candidate, "CANDIDATE", "une-autre-cle-secrete-de-plus-de-32-caracteres!")))
                 .andExpect(status().isUnauthorized());

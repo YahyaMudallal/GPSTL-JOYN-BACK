@@ -2,6 +2,7 @@ package com.gpstl.joyn.joboffer.service;
 
 import com.gpstl.joyn.candidate.dto.CandidateProfileResponse;
 import com.gpstl.joyn.candidate.repository.CandidateRepository;
+import com.gpstl.joyn.candidate.service.CandidateResumeStorage;
 import com.gpstl.joyn.joboffer.dto.RecruiterJobApplicantItem;
 import com.gpstl.joyn.joboffer.dto.RecruiterJobApplicantsPageResponse;
 import com.gpstl.joyn.joboffer.exception.JobApiException;
@@ -25,16 +26,19 @@ public class RecruiterJobApplicantService {
     private final JobAccessService jobAccess;
     private final RecruiterJobApplicantRepository applicants;
     private final CandidateRepository candidates;
+    private final CandidateResumeStorage resumeStorage;
 
     public RecruiterJobApplicantService(
             JobOfferRepository jobOffers,
             JobAccessService jobAccess,
             RecruiterJobApplicantRepository applicants,
-            CandidateRepository candidates) {
+            CandidateRepository candidates,
+            CandidateResumeStorage resumeStorage) {
         this.jobOffers = jobOffers;
         this.jobAccess = jobAccess;
         this.applicants = applicants;
         this.candidates = candidates;
+        this.resumeStorage = resumeStorage;
     }
 
     @Transactional(readOnly = true)
@@ -76,7 +80,9 @@ public class RecruiterJobApplicantService {
 
     private RecruiterJobApplicantItem toItem(RecruiterJobApplicantProjection result) {
         CandidateProfileResponse profile = candidates.findProfileById(result.getCandidateId())
-                .map(CandidateProfileResponse::forRecruiter)
+                .map(candidate -> CandidateProfileResponse.forRecruiter(
+                        candidate,
+                        resumeStorage.createPresignedUrlIfValid(candidate.getResumeUrl())))
                 .orElseThrow(() -> new JobApiException(404, "Candidate profile not found"));
 
         Integer score = result.getMatchScore() == null ? null : result.getMatchScore().intValue();

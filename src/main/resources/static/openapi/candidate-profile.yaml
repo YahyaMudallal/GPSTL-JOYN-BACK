@@ -131,6 +131,39 @@ paths:
           description: Content-Type différent de application/json
         '500':
           $ref: '#/components/responses/Internal'
+  /api/v1/candidates/profile/resume:
+    put:
+      operationId: uploadCandidateResume
+      summary: Déposer ou remplacer le CV du candidat connecté
+      description: Le PDF (5 Mo maximum) est stocké dans le bucket privé joyn_file_bucket. La réponse contient une URL présignée valable 15 minutes.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - resume
+              properties:
+                resume:
+                  type: string
+                  format: binary
+                  description: Fichier PDF, taille maximale 5 Mo
+      responses:
+        '200':
+          description: CV enregistré et URL temporaire générée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateResume'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/Internal'
   /api/v1/candidates/{candidateId}/profile:
     parameters:
     - name: candidateId
@@ -189,6 +222,13 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    CandidateResume:
+      type: object
+      properties:
+        cv_url:
+          type: string
+          format: uri
+          description: URL présignée temporaire (15 minutes)
     CandidateProfilePatch:
       type: object
       additionalProperties: false
@@ -497,7 +537,8 @@ components:
         cv_url:
           type: string
           nullable: true
-          description: Modifiable uniquement par le dépôt de CV, pas par PATCH.
+          format: uri
+          description: URL présignée temporaire valable 15 minutes ; modifiable uniquement par la route de dépôt de CV.
         links:
           type: object
           description: Liens à null dans la vue recruteur si show_contact_links = false
@@ -633,7 +674,7 @@ components:
         address: null
         years_of_experience: 2
         photo_url: null
-        cv_url: /api/v1/candidates/resumes/3f2c9a1e-0b7d-4e8a-9c1f-2d6e5a4b3c21.pdf
+        cv_url: 'https://project.supabase.co/storage/v1/s3/joyn_file_bucket/resumes/42/3f2c9a1e-0b7d-4e8a-9c1f-2d6e5a4b3c21.pdf?X-Amz-Expires=900&X-Amz-Signature=temporary'
         links:
           github: https://github.com/yahya
           linkedin: null

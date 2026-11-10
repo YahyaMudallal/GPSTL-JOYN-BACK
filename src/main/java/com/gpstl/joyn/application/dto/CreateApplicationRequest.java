@@ -22,8 +22,7 @@ public record CreateApplicationRequest(
     String coverMessage,
 
     @Schema(
-        description = "Optional URL of the resume attached to the application",
-        example = "https://example.com/resumes/candidate-12.pdf")
+        description = "Deprecated and ignored. The application automatically uses the candidate's stored resume.")
     @Size(max = 2048)
     String resumeUrl
 ) {

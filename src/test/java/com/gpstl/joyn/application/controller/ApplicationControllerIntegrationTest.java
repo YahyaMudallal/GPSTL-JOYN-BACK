@@ -17,6 +17,8 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.Instant;
@@ -35,6 +37,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ApplicationControllerIntegrationTest {
 
     private static final String URL = "/api/v1/applications";
+
+    @DynamicPropertySource
+    static void storageProvider(DynamicPropertyRegistry registry) {
+        registry.add("joyn.storage.provider", () -> "local");
+    }
 
     @Autowired
     private WebApplicationContext context;
@@ -114,7 +121,7 @@ class ApplicationControllerIntegrationTest {
                 .andExpect(jsonPath("$.jobOfferId").value(publishedJobId))
                 .andExpect(jsonPath("$.status").value("PENDING"))
                 .andExpect(jsonPath("$.coverMessage").value("Please consider my application."))
-                .andExpect(jsonPath("$.resumeUrl").value("https://example.com/resume.pdf"))
+                .andExpect(jsonPath("$.resumeUrl").value(nullValue()))
                 .andExpect(jsonPath("$.createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.updatedAt").isNotEmpty());
 
@@ -242,7 +249,7 @@ class ApplicationControllerIntegrationTest {
                 .andExpect(jsonPath("$.content[0].companyName").value("Company " + run))
                 .andExpect(jsonPath("$.content[0].viewedAt").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].coverMessage").value("Please consider my application."))
-                .andExpect(jsonPath("$.content[0].resumeUrl").value("https://example.com/resume.pdf"))
+                .andExpect(jsonPath("$.content[0].resumeUrl").value(nullValue()))
                 .andExpect(jsonPath("$.content[0].createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].updatedAt").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].conversationId").value(nullValue()))

@@ -13,6 +13,7 @@ import com.gpstl.joyn.application.repository.ApplicationStatusRepository;
 import com.gpstl.joyn.application.repository.CandidateApplicationHistoryProjection;
 import com.gpstl.joyn.candidate.model.Candidate;
 import com.gpstl.joyn.candidate.repository.CandidateRepository;
+import com.gpstl.joyn.candidate.service.CandidateResumeStorage;
 import com.gpstl.joyn.common.model.User;
 import com.gpstl.joyn.common.repository.UserRepository;
 import com.gpstl.joyn.joboffer.exception.JobApiException;
@@ -52,6 +53,7 @@ public class ApplicationService {
     private final UserRepository userRepository;
     private final JobOfferRepository jobOfferRepository;
     private final JobAccessService jobAccessService;
+    private final CandidateResumeStorage resumeStorage;
 
     public ApplicationService(
             ApplicationRepository applicationRepository,
@@ -59,13 +61,15 @@ public class ApplicationService {
             CandidateRepository candidateRepository,
             UserRepository userRepository,
             JobOfferRepository jobOfferRepository,
-            JobAccessService jobAccessService) {
+            JobAccessService jobAccessService,
+            CandidateResumeStorage resumeStorage) {
         this.applicationRepository = applicationRepository;
         this.statusRepository = statusRepository;
         this.candidateRepository = candidateRepository;
         this.userRepository = userRepository;
         this.jobOfferRepository = jobOfferRepository;
         this.jobAccessService = jobAccessService;
+        this.resumeStorage = resumeStorage;
     }
 
     @Transactional
@@ -98,8 +102,8 @@ public class ApplicationService {
             candidate, 
             jobOffer, 
             pendingStatus,
-            request.coverMessage(), 
-            request.resumeUrl());
+            request.coverMessage(),
+            candidate.getResumeUrl());
         return toResponse(applicationRepository.saveAndFlush(application));
     }
 
@@ -176,7 +180,7 @@ public class ApplicationService {
                 ascending, 
                 PageRequest.of(page - 1, limit));
         List<CandidateApplicationResponse> content = results.getContent().stream()
-                .map(ApplicationService::toCandidateApplicationResponse)
+                .map(this::toCandidateApplicationResponse)
                 .toList();
         return new CandidateApplicationsPageResponse(
                 content,
@@ -187,7 +191,7 @@ public class ApplicationService {
                 results.hasNext());
     }
 
-    private static CandidateApplicationResponse toCandidateApplicationResponse(
+    private CandidateApplicationResponse toCandidateApplicationResponse(
             CandidateApplicationHistoryProjection application) {
         return new CandidateApplicationResponse(
                 application.getId(),
@@ -198,7 +202,7 @@ public class ApplicationService {
                 application.getStatus(),
                 toOffsetDateTime(application.getViewedAt()),
                 application.getCoverMessage(),
-                application.getResumeUrl(),
+                signedResumeUrl(application.getResumeUrl()),
                 toOffsetDateTime(application.getCreatedAt()),
                 toOffsetDateTime(application.getUpdatedAt()),
                 application.getConversationId());
@@ -208,7 +212,7 @@ public class ApplicationService {
         return value == null ? null : value.atOffset(ZoneOffset.UTC);
     }
 
-    private static ApplicationResponse toResponse(Application application) {
+    private ApplicationResponse toResponse(Application application) {
         return new ApplicationResponse(
                 application.getId(),
                 application.getCandidate().getId(),
@@ -216,9 +220,13 @@ public class ApplicationService {
                 application.getStatus().getCode(),
                 application.getViewedAt(),
                 application.getCoverMessage(),
-                application.getResumeUrl(),
+                signedResumeUrl(application.getResumeUrl()),
                 application.getCreatedAt(),
                 application.getUpdatedAt());
+    }
+
+    private String signedResumeUrl(String storageKey) {
+        return resumeStorage.createPresignedUrlIfValid(storageKey);
     }
 
     private User activeUser(Long userId) {

@@ -33,6 +33,7 @@ public abstract class JobDatabaseTestSupport {
     protected int contract;
 
     protected static void configureDatabase(DynamicPropertyRegistry registry, String schema) {
+        registry.add("joyn.storage.provider", () -> "local");
         registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
         registry.add("spring.datasource.url", () -> {
             String baseUrl = System.getProperty("spring.datasource.url");
