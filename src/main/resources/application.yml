@@ -31,6 +31,9 @@ spring:
     api-key: ${GOOGLE_API_KEY:}
 
 joyn:
+  cors:
+    # Valeurs séparées par des virgules ; les motifs locaux acceptent les ports de dev variables.
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:[*],http://127.0.0.1:[*],https://gpstl-joyn-front.joynpstl.workers.dev}
   siret:
     base-url: ${SIRET_API_BASE_URL:https://recherche-entreprises.api.gouv.fr}
     connect-timeout: ${SIRET_API_CONNECT_TIMEOUT:2s}
