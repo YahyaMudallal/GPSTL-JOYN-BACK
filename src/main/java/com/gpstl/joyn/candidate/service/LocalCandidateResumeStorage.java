@@ -1,6 +1,7 @@
 package com.gpstl.joyn.candidate.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
@@ -10,19 +11,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 /**
  * Local development adapter until the deployment's media server is selected.
  */
 @Component
+@ConditionalOnProperty(name = "joyn.storage.provider", havingValue = "local")
 public class LocalCandidateResumeStorage implements CandidateResumeStorage {
-
-    private static final Pattern SAFE_STORAGE_KEY =
-            Pattern.compile("[0-9a-fA-F-]{36}(?:\\.[a-z0-9]{1,10})?");
 
     private final Path storageDirectory;
 
@@ -33,12 +30,12 @@ public class LocalCandidateResumeStorage implements CandidateResumeStorage {
     }
 
     @Override
-    public String store(MultipartFile resume) {
-        String key = UUID.randomUUID() + extensionFrom(resume.getOriginalFilename());
+    public String store(Long candidateId, MultipartFile resume) {
+        String key = "resumes/" + candidateId + "/" + UUID.randomUUID() + ".pdf";
         Path target = resolveKey(key);
 
         try {
-            Files.createDirectories(storageDirectory);
+            Files.createDirectories(target.getParent());
             try (var input = resume.getInputStream()) {
                 Files.copy(input, target);
             }
@@ -49,8 +46,17 @@ public class LocalCandidateResumeStorage implements CandidateResumeStorage {
     }
 
     @Override
+    public String createPresignedUrl(String storageKey) {
+        if (storageKey == null || !CandidateResumeStorage.STORAGE_KEY_PATTERN.matcher(storageKey).matches()) {
+            throw new IllegalArgumentException("Invalid resume storage key");
+        }
+        String[] parts = storageKey.split("/");
+        return "/api/v1/candidates/resumes/" + parts[1] + "/" + parts[2];
+    }
+
+    @Override
     public Optional<StoredCandidateResume> load(String storageKey) {
-        if (storageKey == null || !SAFE_STORAGE_KEY.matcher(storageKey).matches()) {
+        if (storageKey == null || !CandidateResumeStorage.STORAGE_KEY_PATTERN.matcher(storageKey).matches()) {
             return Optional.empty();
         }
 
@@ -75,20 +81,5 @@ public class LocalCandidateResumeStorage implements CandidateResumeStorage {
             throw new IllegalArgumentException("Invalid resume storage key");
         }
         return file;
-    }
-
-    private String extensionFrom(String originalFilename) {
-        if (originalFilename == null) {
-            return "";
-        }
-
-        int extensionIndex = originalFilename.lastIndexOf('.');
-        if (extensionIndex < 0 || extensionIndex == originalFilename.length() - 1) {
-            return "";
-        }
-
-        String extension = originalFilename.substring(extensionIndex + 1)
-                .toLowerCase(Locale.ROOT);
-        return extension.matches("[a-z0-9]{1,10}") ? "." + extension : "";
     }
 }

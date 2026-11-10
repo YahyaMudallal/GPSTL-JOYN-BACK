@@ -10,6 +10,7 @@ import com.gpstl.joyn.application.repository.ApplicationStatusRepository;
 import com.gpstl.joyn.application.repository.CandidateApplicationHistoryProjection;
 import com.gpstl.joyn.candidate.model.Candidate;
 import com.gpstl.joyn.candidate.repository.CandidateRepository;
+import com.gpstl.joyn.candidate.service.CandidateResumeStorage;
 import com.gpstl.joyn.common.model.User;
 import com.gpstl.joyn.common.repository.UserRepository;
 import com.gpstl.joyn.joboffer.exception.JobApiException;
@@ -34,6 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -47,6 +49,7 @@ class ApplicationServiceTest {
     private UserRepository userRepository;
     private JobOfferRepository jobOfferRepository;
     private JobAccessService jobAccessService;
+    private CandidateResumeStorage resumeStorage;
     private ApplicationService service;
 
     @BeforeEach
@@ -57,8 +60,9 @@ class ApplicationServiceTest {
         userRepository = mock(UserRepository.class);
         jobOfferRepository = mock(JobOfferRepository.class);
         jobAccessService = mock(JobAccessService.class);
+        resumeStorage = mock(CandidateResumeStorage.class);
         service = new ApplicationService(applicationRepository, statusRepository,
-                candidateRepository, userRepository, jobOfferRepository, jobAccessService);
+                candidateRepository, userRepository, jobOfferRepository, jobAccessService, resumeStorage);
     }
 
     @Test
@@ -68,6 +72,11 @@ class ApplicationServiceTest {
         JobOffer jobOffer = mock(JobOffer.class);
         ApplicationStatus pending = mock(ApplicationStatus.class);
         when(candidate.getId()).thenReturn(12L);
+        String resumeKey = "resumes/12/123e4567-e89b-12d3-a456-426614174000.pdf";
+        when(candidate.getResumeUrl()).thenReturn(resumeKey);
+        when(resumeStorage.createPresignedUrl(resumeKey))
+                .thenReturn("https://storage.example.test/signed?X-Amz-Expires=900");
+        doCallRealMethod().when(resumeStorage).createPresignedUrlIfValid(resumeKey);
         when(jobOffer.getId()).thenReturn(34L);
         when(user.getRole()).thenReturn("CANDIDATE");
         when(user.getStatus()).thenReturn("ACTIVE");
@@ -87,6 +96,7 @@ class ApplicationServiceTest {
         assertThat(response.jobOfferId()).isEqualTo(34L);
         assertThat(response.status()).isEqualTo("PENDING");
         assertThat(response.coverMessage()).isEqualTo("Hello");
+        assertThat(response.resumeUrl()).isEqualTo("https://storage.example.test/signed?X-Amz-Expires=900");
     }
 
     @Test
@@ -210,7 +220,11 @@ class ApplicationServiceTest {
         when(application.getStatus()).thenReturn("PENDING");
         when(application.getViewedAt()).thenReturn(timestamp);
         when(application.getCoverMessage()).thenReturn("Please consider my application.");
-        when(application.getResumeUrl()).thenReturn("https://example.com/resume.pdf");
+        String resumeKey = "resumes/12/123e4567-e89b-12d3-a456-426614174000.pdf";
+        when(application.getResumeUrl()).thenReturn(resumeKey);
+        when(resumeStorage.createPresignedUrl(resumeKey))
+                .thenReturn("https://storage.example.test/signed?X-Amz-Expires=900");
+        doCallRealMethod().when(resumeStorage).createPresignedUrlIfValid(resumeKey);
         when(application.getCreatedAt()).thenReturn(timestamp);
         when(application.getUpdatedAt()).thenReturn(timestamp);
         when(application.getConversationId()).thenReturn(81L);
@@ -235,7 +249,8 @@ class ApplicationServiceTest {
                     assertThat(item.status()).isEqualTo("PENDING");
                     assertThat(item.viewedAt()).isEqualTo(OffsetDateTime.ofInstant(timestamp, ZoneOffset.UTC));
                     assertThat(item.coverMessage()).isEqualTo("Please consider my application.");
-                    assertThat(item.resumeUrl()).isEqualTo("https://example.com/resume.pdf");
+                    assertThat(item.resumeUrl())
+                            .isEqualTo("https://storage.example.test/signed?X-Amz-Expires=900");
                     assertThat(item.createdAt()).isEqualTo(OffsetDateTime.ofInstant(timestamp, ZoneOffset.UTC));
                     assertThat(item.updatedAt()).isEqualTo(OffsetDateTime.ofInstant(timestamp, ZoneOffset.UTC));
                     assertThat(item.conversationId()).isEqualTo(81L);

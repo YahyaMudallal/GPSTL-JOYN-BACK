@@ -18,7 +18,7 @@ public record ApplicationResponse(
     OffsetDateTime viewedAt,
     @Schema(example = "I am excited to apply for this position.")
     String coverMessage,
-    @Schema(example = "https://example.com/resumes/candidate-12.pdf")
+    @Schema(description = "Temporary presigned URL to the submitted resume")
     String resumeUrl,
     @Schema(example = "2026-10-24T14:03:10Z")
     OffsetDateTime createdAt,

@@ -51,6 +51,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/candidates/applications").hasRole("CANDIDATE")
                         .requestMatchers(HttpMethod.GET, "/api/v1/candidates/recommendations").hasRole("CANDIDATE")
                         .requestMatchers(HttpMethod.POST, "/api/v1/applications").hasRole("CANDIDATE")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/candidates/resumes/**")
+                                .hasAnyRole("CANDIDATE", "RECRUITER", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/applications/*/status")
                                 .hasAnyRole("RECRUITER", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/recruiters/jobs/*/recommendations")

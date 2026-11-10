@@ -86,7 +86,7 @@ public record CandidateProfileResponse(
      * À appeler dans la transaction du service : l'email et les sections liées
      * sont chargés à la demande depuis la base.
      */
-    public static CandidateProfileResponse from(Candidate c) {
+    public static CandidateProfileResponse from(Candidate c, String cvUrl) {
         return new CandidateProfileResponse(
                 c.getId(),
                 c.getUser().getEmail(),
@@ -99,7 +99,7 @@ public record CandidateProfileResponse(
                 c.getAddress(),
                 toInteger(c.getYearsOfExperience()),
                 c.getPhotoUrl(),
-                c.getResumeUrl(),
+                cvUrl,
                 new Links(c.getGithubUrl(), c.getLinkedinUrl(), c.getPortfolioUrl()),
                 new Alternance(c.getRhythmType(), c.getAvailableFrom(), toInteger(c.getContractDurationMonths())),
                 new Preferences(
@@ -127,8 +127,8 @@ public record CandidateProfileResponse(
      *  - les réglages eux-mêmes (visibility) ne sont pas exposés au recruteur.
      * L'administrateur, lui, reçoit la vue complète (from).
      */
-    public static CandidateProfileResponse forRecruiter(Candidate c) {
-        CandidateProfileResponse full = from(c);
+    public static CandidateProfileResponse forRecruiter(Candidate c, String cvUrl) {
+        CandidateProfileResponse full = from(c, cvUrl);
         boolean contact = c.isShowContactLinks();
         return new CandidateProfileResponse(
                 full.id(),

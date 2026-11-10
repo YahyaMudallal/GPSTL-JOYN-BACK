@@ -20,18 +20,18 @@ class LocalCandidateResumeStorageTest {
 
     @Test
     void storesAndLoadsResumeUsingGeneratedStorageKey() throws IOException {
-        byte[] content = "resume data".getBytes();
+        byte[] content = "%PDF-1.7\nresume data".getBytes();
         LocalCandidateResumeStorage storage =
                 new LocalCandidateResumeStorage(storageDirectory.toString());
         MockMultipartFile upload = new MockMultipartFile(
                 "resume", "candidate.pdf", "application/pdf", content);
 
-        String key = storage.store(upload);
+        String key = storage.store(42L, upload);
         CandidateResumeStorage.StoredCandidateResume stored =
                 storage.load(key).orElseThrow();
 
-        assertTrue(key.endsWith(".pdf"));
-                try (var input = stored.resource().getInputStream()) {
+        assertTrue(key.matches("resumes/42/[0-9a-f-]{36}\\.pdf"));
+        try (var input = stored.resource().getInputStream()) {
             assertArrayEquals(content, input.readAllBytes());
         }
         assertEquals("application/pdf", stored.mediaType().toString());

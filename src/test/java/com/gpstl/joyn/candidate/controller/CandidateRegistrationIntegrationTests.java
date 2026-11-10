@@ -2,6 +2,7 @@ package com.gpstl.joyn.candidate.controller;
 
 import com.gpstl.joyn.JoynApplication;
 import com.gpstl.joyn.candidate.repository.CandidateRepository;
+import com.gpstl.joyn.candidate.service.CandidateService;
 import com.gpstl.joyn.common.geocoding.Coordinates;
 import com.gpstl.joyn.common.repository.UserRepository;
 import com.gpstl.joyn.joboffer.JobDatabaseTestSupport;
@@ -20,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -31,8 +33,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -69,18 +71,21 @@ class CandidateRegistrationIntegrationTests extends JobDatabaseTestSupport {
     private UserRepository userRepository;
 
     @Autowired
+    private CandidateService candidateService;
+
+    @Autowired
     private TestRestTemplate rest;
 
     @Test
-    void shouldRegisterCandidateAndServeUploadedResume() {
+    void shouldRegisterCandidateAndStoreResumeUnderCandidateDirectory() {
         String email = "candidate-" + UUID.randomUUID() + "@example.com";
-        byte[] resume = "Candidate resume contents".getBytes();
+        byte[] resume = "%PDF-1.7\nCandidate resume contents".getBytes();
 
         MultiValueMap<String, Object> body = registrationForm(email);
         body.add("cv", new ByteArrayResource(resume) {
             @Override
             public String getFilename() {
-                return "resume.txt";
+                return "resume.pdf";
             }
         });
 
@@ -97,15 +102,13 @@ class CandidateRegistrationIntegrationTests extends JobDatabaseTestSupport {
                 .orElseThrow().getPasswordHash().startsWith("$2"));
         assertEquals("CANDIDATE", userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow().getRole());
-        assertEquals(result.get("resumeUrl"),
-                candidateRepository.findByUserId(((Number) result.get("userId")).longValue())
-                        .orElseThrow().getResumeUrl());
-
-        ResponseEntity<byte[]> download = rest.getForEntity(
-                "http://localhost:" + port + result.get("resumeUrl"),
-                byte[].class);
-        assertEquals(HttpStatus.OK, download.getStatusCode());
-        assertArrayEquals(resume, download.getBody());
+        var candidate = candidateRepository.findByUserId(((Number) result.get("userId")).longValue())
+                .orElseThrow();
+        assertTrue(candidate.getResumeUrl().matches(
+                "resumes/" + candidate.getId() + "/[0-9a-f-]{36}\\.pdf"));
+        assertEquals("/api/v1/candidates/resumes/" + candidate.getId() + "/"
+                        + candidate.getResumeUrl().substring(candidate.getResumeUrl().lastIndexOf('/') + 1),
+                result.get("resumeUrl"));
     }
 
     @Test
@@ -118,6 +121,40 @@ class CandidateRegistrationIntegrationTests extends JobDatabaseTestSupport {
         assertNotNull(response.getBody());
         assertNull(response.getBody().get("resumeUrl"));
         assertTrue(userRepository.existsByEmailIgnoreCase(email));
+    }
+
+    @Test
+    void candidateCanReplaceResumeOnProfileAndOnlyTheObjectKeyIsPersisted() {
+        String email = "candidate-" + UUID.randomUUID() + "@example.com";
+        ResponseEntity<Map> registration = register(registrationForm(email));
+        long userId = ((Number) registration.getBody().get("userId")).longValue();
+        var candidate = candidateRepository.findByUserId(userId).orElseThrow();
+
+        var response = candidateService.updateResume(userId, new MockMultipartFile(
+                "resume", "new-name.pdf", "application/pdf", "%PDF-1.7\nupdated".getBytes()));
+
+        String persistedKey = candidateRepository.findByUserId(userId).orElseThrow().getResumeUrl();
+        assertTrue(persistedKey.matches("resumes/" + candidate.getId() + "/[0-9a-f-]{36}\\.pdf"));
+        assertEquals("/api/v1/candidates/resumes/" + candidate.getId() + "/"
+                        + persistedKey.substring(persistedKey.lastIndexOf('/') + 1),
+                response.resumeUrl());
+    }
+
+    @Test
+    void rejectsNonPdfResumeBeforeCreatingCandidateAccount() {
+        String email = "candidate-" + UUID.randomUUID() + "@example.com";
+        MultiValueMap<String, Object> body = registrationForm(email);
+        body.add("resume", new ByteArrayResource("not a PDF".getBytes()) {
+            @Override
+            public String getFilename() {
+                return "resume.pdf";
+            }
+        });
+
+        ResponseEntity<Map> response = register(body);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertFalse(userRepository.existsByEmailIgnoreCase(email));
     }
 
     @Test

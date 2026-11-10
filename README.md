@@ -48,6 +48,32 @@ psql postgres -c "GRANT ALL PRIVILEGES ON DATABASE joyn_db TO joyn_user;"
 
 ## Installation et Configuration du projet
 
+### Stockage des CV (production)
+
+Les CV sont stockés dans le bucket privé Supabase Storage `joyn_file_bucket`, sous
+`resumes/<candidateId>/<uuid>.pdf`. Le backend utilise l'API S3 de Supabase ; configurez
+les identifiants depuis les paramètres S3 de votre projet, sans les commiter :
+
+```bash
+JOYN_STORAGE_PROVIDER=supabase
+SUPABASE_S3_ENDPOINT=https://<project-ref>.supabase.co/storage/v1/s3
+SUPABASE_S3_REGION=<region-du-projet>
+SUPABASE_S3_ACCESS_KEY=<access-key>
+SUPABASE_S3_SECRET_KEY=<secret-key>
+```
+
+Le bucket doit exister et rester privé. Les réponses d'inscription, de profil et de
+candidature renvoient une URL présignée en lecture, valable 15 minutes ; elles ne
+stockent jamais cette URL expirante en base. Le candidat peut déposer ou remplacer son
+CV avec `PUT /api/v1/candidates/profile/resume` (multipart, champ `resume`, PDF de 5 Mo
+maximum). Les nouvelles inscriptions acceptent aussi `resume` (et l'ancien alias `cv`).
+
+En local, le profil Spring `local` utilise le stockage disque configuré dans
+`application-local.yml` et ne requiert pas de clés Supabase.
+Si le provider `supabase` est sélectionné sans que toutes les variables S3 soient présentes,
+l'application démarre quand même, mais les opérations de CV répondent `503 Service Unavailable`
+jusqu'à ce que le stockage soit configuré.
+
 1. **Cloner le dépôt :**
 ```bash
 git clone https://github.com/votre-orga/joyn-backend.git
@@ -115,18 +141,19 @@ Ouvre Run Configurations... > sélectionne ta configuration Java ou Spring Boot 
 ## Lancé le serveur en local
 **Linux / MacOS**
 ```bash
-./mvnw spring-boot:run
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 **Window**
 ```shell
-.\mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 **Via l'IDE**
 Exécutez la méthode principale (main) de la classe :
 `src/main/java/com/gpstl/joyn/JoynApplication.java`
 
-L'application démarre par défaut sur le port 8080 : http://localhost:8080.
+L'application démarre sur le port 8080 : http://localhost:8080. Sans profil `local`,
+la configuration utilise Supabase Storage et exige les variables d'environnement décrites ci-dessus.
 
 ### Accès depuis un frontend (CORS)
 
