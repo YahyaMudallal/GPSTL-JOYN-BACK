@@ -128,6 +128,19 @@ Exécutez la méthode principale (main) de la classe :
 
 L'application démarre par défaut sur le port 8080 : http://localhost:8080.
 
+### Accès depuis un frontend (CORS)
+
+L'API autorise les frontends servis depuis `localhost` ou `127.0.0.1` (quel que soit leur port), ainsi que le frontend Joyn déployé à l'adresse `https://gpstl-joyn-front.joynpstl.workers.dev`.
+Cette politique est appliquée globalement, y compris aux pré-requêtes `OPTIONS`, et autorise les méthodes HTTP de l'API ainsi que l'en-tête `Authorization` utilisé pour les tokens Bearer.
+
+Pour ajouter ou remplacer les origines autorisées dans un environnement, configurez `CORS_ALLOWED_ORIGIN_PATTERNS` avec une liste séparée par des virgules, par exemple :
+
+```bash
+CORS_ALLOWED_ORIGIN_PATTERNS=https://gpstl-joyn-front.joynpstl.workers.dev,http://localhost:[*]
+```
+
+Les origines non listées restent refusées. N'utilisez pas `*` comme origine autorisée.
+
 ## Méthode de travail
 
 Le respect strict de ces conventions est indispensable pour éviter les conflits et les régressions :
