@@ -27,7 +27,7 @@ public class GeminiResumeParser {
 
     private static final Logger logger =
         LoggerFactory.getLogger(GeminiResumeParser.class);
-    private static final String MODEL = "gemini-3.8-flash";
+    private static final String MODEL = "gemini-3.5-flash-lite";
 
     private final ObjectProvider<Client> clientProvider;
     private final ObjectMapper objectMapper;
