@@ -8,7 +8,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
@@ -77,6 +77,18 @@ public class SupabaseCandidateResumeStorage implements CandidateResumeStorage {
     public Optional<StoredCandidateResume> load(String storageKey) {
         validateStorageKey(storageKey);
         return Optional.empty();
+    }
+
+    @Override
+    public void delete(String storageKey) {
+        validateStorageKey(storageKey);
+
+        s3Client.deleteObject(
+                DeleteObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(storageKey)
+                        .build()
+        );
     }
 
     private static void validateStorageKey(String storageKey) {

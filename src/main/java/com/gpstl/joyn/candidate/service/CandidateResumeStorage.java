@@ -1,3 +1,4 @@
+
 package com.gpstl.joyn.candidate.service;
 
 import org.slf4j.LoggerFactory;
@@ -9,7 +10,8 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * Storage boundary for candidate resumes, shared by local and Supabase S3 adapters.
+ * Storage boundary for candidate resumes,
+ * shared by local and Supabase S3 adapters.
  */
 public interface CandidateResumeStorage {
 
@@ -22,15 +24,20 @@ public interface CandidateResumeStorage {
 
     Optional<StoredCandidateResume> load(String storageKey);
 
+    // Delete a stored CV.
+    void delete(String storageKey);
+
     default String createPresignedUrlIfValid(String storageKey) {
         if (storageKey == null) {
             return null;
         }
+
         if (!STORAGE_KEY_PATTERN.matcher(storageKey).matches()) {
             LoggerFactory.getLogger(CandidateResumeStorage.class)
                     .warn("Skipping presigned URL for an unsupported legacy resume storage key");
             return null;
         }
+
         return createPresignedUrl(storageKey);
     }
 

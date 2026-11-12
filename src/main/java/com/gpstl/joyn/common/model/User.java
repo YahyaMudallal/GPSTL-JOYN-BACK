@@ -23,6 +23,9 @@ public class User {
     @Column(nullable = false)
     private String status = "ACTIVE";
 
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     @Column(name = "email_verified_at")
     private Instant emailVerifiedAt;
 
@@ -66,4 +69,17 @@ public class User {
 
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+
+    public Instant getDeletedAt() {
+    return deletedAt;
+    }
+
+    public void anonymize() {
+        this.email = "deleted-" + id + "@anonymized.local";
+        this.passwordHash = "DELETED";
+        this.status = "DELETED";
+        this.deletedAt = Instant.now();
+        this.emailVerifiedAt = null;
+        this.lastLoginAt = null;
+    }
 }

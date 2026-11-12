@@ -65,6 +65,7 @@ class CandidateDashboardControllerTest {
     private long candidateUserId;
     private long otherCandidateUserId;
     private long recruiterUserId;
+    private long adminUserId;
     private long conversationId;
 
     @BeforeEach
@@ -75,6 +76,7 @@ class CandidateDashboardControllerTest {
         companyId = id("INSERT INTO companies (name) VALUES (?) RETURNING id", "Acme " + run);
 
         recruiterUserId = insertUser("rec", "RECRUITER");
+        adminUserId = insertUser("admin", "ADMIN");
         long recruiterId = id("""
                 INSERT INTO recruiter_profiles (user_id, company_id, first_name, last_name)
                 VALUES (?, ?, 'Rita', 'Recruteuse') RETURNING id""", recruiterUserId, companyId);
@@ -137,7 +139,7 @@ class CandidateDashboardControllerTest {
     void rejectsRecruiterAndAdmin() throws Exception {
         mockMvc.perform(get(URL).header("Authorization", bearer(recruiterUserId, "RECRUITER")))
                 .andExpect(status().isForbidden());
-        mockMvc.perform(get(URL).header("Authorization", bearer(1, "ADMIN")))
+        mockMvc.perform(get(URL).header("Authorization", bearer(adminUserId, "ADMIN")))
                 .andExpect(status().isForbidden());
     }
 

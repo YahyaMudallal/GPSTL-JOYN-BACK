@@ -27,6 +27,11 @@ public class UnavailableCandidateResumeStorage implements CandidateResumeStorage
         throw unavailable();
     }
 
+    @Override
+    public void delete(String storageKey) {
+        throw unavailable();
+    }
+
     private static ResponseStatusException unavailable() {
         return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, MESSAGE);
     }

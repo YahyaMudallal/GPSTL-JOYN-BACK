@@ -56,4 +56,8 @@ public class Recruiter {
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
     public Instant getCreatedAt() { return createdAt; } 
+    public void anonymize() {
+    this.firstName = "Compte";
+    this.lastName = "Supprimé";
+    }
 }

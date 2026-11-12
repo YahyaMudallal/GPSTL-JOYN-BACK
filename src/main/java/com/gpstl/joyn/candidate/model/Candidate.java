@@ -259,4 +259,28 @@ public class Candidate {
 
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public void anonymize() {
+    this.firstName = "Compte";
+    this.lastName = "Supprimé";
+    this.phone = null;
+    this.address = null;
+    this.location = null;
+    this.latitude = null;
+    this.longitude = null;
+    this.headline = null;
+    this.bio = null;
+    this.githubUrl = null;
+    this.linkedinUrl = null;
+    this.portfolioUrl = null;
+    this.resumeUrl = null;
+    this.photoUrl = null;
+    this.visibleToRecruiters = false;
+    this.visibleToOthers = false;
+    this.showLastName = false;
+    this.showContactLinks = false;
+    this.experiences.clear();
+    this.educations.clear();
+    this.skills.clear();
+    this.preferredContractTypes.clear();
+    }
 }

@@ -75,6 +75,23 @@ public class LocalCandidateResumeStorage implements CandidateResumeStorage {
         }
     }
 
+    @Override
+    public void delete(String storageKey) {
+        if (storageKey == null ||
+                !CandidateResumeStorage.STORAGE_KEY_PATTERN.matcher(storageKey).matches()) {
+            throw new IllegalArgumentException("Invalid resume storage key");
+        }
+
+        Path file = resolveKey(storageKey);
+
+        try {
+            Files.deleteIfExists(file);
+        } catch (IOException exception) {
+            throw new IllegalStateException(
+                    "Unable to delete candidate resume", exception);
+        }
+    }
+
     private Path resolveKey(String storageKey) {
         Path file = storageDirectory.resolve(storageKey).normalize();
         if (!file.startsWith(storageDirectory)) {

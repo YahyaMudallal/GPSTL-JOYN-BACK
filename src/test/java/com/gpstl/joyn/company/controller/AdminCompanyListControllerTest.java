@@ -56,10 +56,19 @@ class AdminCompanyListControllerTest {
 
     private final String run = UUID.randomUUID().toString().substring(0, 8);
     private String alphaSiret;
-
+    private long adminUserId;
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+        adminUserId = jdbc.queryForObject(
+        """
+        INSERT INTO users (email, password_hash, role, status)
+        VALUES (?, 'test-hash', 'ADMIN', 'ACTIVE')
+        RETURNING id
+        """,
+        Long.class,
+        "admin-" + run + "@example.test"
+        );
 
         Instant now = Instant.now();
         alphaSiret = randomSiret();
@@ -74,7 +83,7 @@ class AdminCompanyListControllerTest {
 
     @AfterEach
     void tearDown() {
-        jdbc.update("DELETE FROM companies WHERE name LIKE ?", "%" + run);
+        jdbc.update("DELETE FROM users WHERE id = ?", adminUserId);
     }
 
     // ---------------------------------------------------------------- sécurité
@@ -215,7 +224,7 @@ class AdminCompanyListControllerTest {
         NimbusJwtEncoder encoder = new NimbusJwtEncoder(new ImmutableSecret<>(SecurityConfig.secretKey(jwtSecret)));
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .subject("1")
+                .subject(String.valueOf(adminUserId))
                 .claim("role", role)
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(3600))
