@@ -26,6 +26,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import com.gpstl.joyn.application.event.ApplicationStatusChanged;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -54,6 +57,8 @@ public class ApplicationService {
     private final JobOfferRepository jobOfferRepository;
     private final JobAccessService jobAccessService;
     private final CandidateResumeStorage resumeStorage;
+    /** Optionnel : prévient la messagerie (CO26) d'un changement de statut. Null dans les tests unitaires. */
+    private ApplicationEventPublisher events;
 
     public ApplicationService(
             ApplicationRepository applicationRepository,
@@ -107,6 +112,12 @@ public class ApplicationService {
         return toResponse(applicationRepository.saveAndFlush(application));
     }
 
+    /** Injecté par Spring ; un setter garde le constructeur inchangé pour les tests existants. */
+    @Autowired(required = false)
+    public void setEvents(ApplicationEventPublisher events) {
+        this.events = events;
+    }
+
     @Transactional
     public ApplicationResponse updateStatus(
             Long userId, 
@@ -137,7 +148,12 @@ public class ApplicationService {
         if ("VIEWED".equals(status.getCode()) && application.getViewedAt() == null) {
             application.setViewedAt(OffsetDateTime.now());
         }
-        return toResponse(applicationRepository.saveAndFlush(application));
+        Application saved = applicationRepository.saveAndFlush(application);
+        // CO26 : la messagerie ouvre une conversation quand la candidature passe en INTERVIEW ou ACCEPTED.
+        if (events != null) {
+            events.publishEvent(new ApplicationStatusChanged(saved.getId(), status.getCode()));
+        }
+        return toResponse(saved);
     }
 
     /**
