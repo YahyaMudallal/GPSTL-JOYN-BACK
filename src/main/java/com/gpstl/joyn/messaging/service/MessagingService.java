@@ -7,6 +7,10 @@ import com.gpstl.joyn.messaging.dto.MessagePage;
 import com.gpstl.joyn.messaging.dto.ReadReceipt;
 import com.gpstl.joyn.messaging.event.MessagingEvent;
 import com.gpstl.joyn.messaging.exception.MessagingException;
+import com.gpstl.joyn.messaging.model.Conversation;
+import com.gpstl.joyn.messaging.model.Message;
+import com.gpstl.joyn.messaging.repository.ConversationRepository;
+import com.gpstl.joyn.messaging.repository.MessageRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -32,8 +36,13 @@ import java.util.Set;
  * Toute autre personne reçoit 403, même si elle connaît l'id de la conversation.
  *
  * Les tables conversations et messages existent depuis V1 : aucune migration n'est nécessaire.
- * Comme pour les dashboards, on utilise du SQL (NamedParameterJdbcTemplate) : ces tables n'ont pas
- * d'entité JPA, et les valeurs passent toujours en paramètres (:id), jamais collées dans le SQL.
+ *
+ * Deux outils, chacun pour ce qu'il fait le mieux :
+ *   - JPA (entités Conversation et Message, repositories) pour ÉCRIRE : ouvrir une conversation,
+ *     envoyer un message, marquer comme lu ;
+ *   - SQL (NamedParameterJdbcTemplate) pour LIRE avec des jointures et des comptages : la liste des
+ *     conversations avec le dernier message et les non-lus, les pages de messages, les droits d'accès.
+ * Dans le SQL, les valeurs passent toujours en paramètres (:id), jamais collées dans le texte.
  */
 @Service
 public class MessagingService {
@@ -47,10 +56,17 @@ public class MessagingService {
     private static final Set<String> CANDIDATE_CAN_START = Set.of("INTERVIEW", "ACCEPTED");
 
     private final NamedParameterJdbcTemplate jdbc;
+    private final ConversationRepository conversationRepository;
+    private final MessageRepository messageRepository;
     private final ApplicationEventPublisher events;
 
-    public MessagingService(NamedParameterJdbcTemplate jdbc, ApplicationEventPublisher events) {
+    public MessagingService(NamedParameterJdbcTemplate jdbc,
+                            ConversationRepository conversationRepository,
+                            MessageRepository messageRepository,
+                            ApplicationEventPublisher events) {
         this.jdbc = jdbc;
+        this.conversationRepository = conversationRepository;
+        this.messageRepository = messageRepository;
         this.events = events;
     }
 
@@ -226,15 +242,9 @@ public class MessagingService {
             }
         }
 
-        long before = countConversation(appId);
+        boolean alreadyExists = conversationRepository.existsByApplicationId(appId);
         long conversationId = ensureConversationForApplication(appId);
-        return new OpenResult(findItem(viewer, conversationId), before == 0);
-    }
-
-    private long countConversation(long applicationId) {
-        Long n = jdbc.queryForObject("SELECT COUNT(*) FROM conversations WHERE application_id = :id",
-                Map.of("id", applicationId), Long.class);
-        return n == null ? 0 : n;
+        return new OpenResult(findItem(viewer, conversationId), !alreadyExists);
     }
 
     /** Recruteur qui envoie seulement candidateId (format actuel du front recruteur). */
@@ -268,17 +278,19 @@ public class MessagingService {
 
     /**
      * Crée la conversation d'une candidature si elle n'existe pas encore, et renvoie son id.
-     * Utilisée par POST /conversations ET par l'ouverture automatique (ApplicationConversationListener).
-     * ON CONFLICT : si deux appels arrivent en même temps, la contrainte UNIQUE en garde une seule.
+     * Utilisée par POST /conversations ET par l'ouverture automatique (AutomaticConversationListener).
+     * Jamais de doublon, même si deux appels arrivent en même temps (voir ConversationRepository).
      */
     public long ensureConversationForApplication(long applicationId) {
-        jdbc.update("""
-                INSERT INTO conversations (application_id, is_unlocked)
-                VALUES (:id, TRUE)
-                ON CONFLICT (application_id) DO NOTHING""", Map.of("id", applicationId));
-        Long id = jdbc.queryForObject("SELECT id FROM conversations WHERE application_id = :id",
-                Map.of("id", applicationId), Long.class);
-        return id == null ? 0 : id;
+        return conversationRepository.findOrCreateForApplication(applicationId).getId();
+    }
+
+    /**
+     * Crée la conversation d'un match si elle n'existe pas encore, et renvoie son id.
+     * Prête pour le futur module de matching : il lui suffira de publier MatchCreated.
+     */
+    public long ensureConversationForMatch(long matchId) {
+        return conversationRepository.findOrCreateForMatch(matchId).getId();
     }
 
     // ================================================================== GET /conversations/{id}/messages
@@ -347,19 +359,16 @@ public class MessagingService {
             throw MessagingException.badRequest("clientId", "clientId cannot exceed 100 characters");
         }
 
-        Long messageId = jdbc.queryForObject("""
-                INSERT INTO messages (conversation_id, sender_user_id, content)
-                VALUES (:conversationId, :uid, :content)
-                RETURNING id""",
-                new MapSqlParameterSource()
-                        .addValue("conversationId", conversationId)
-                        .addValue("uid", userId)
-                        .addValue("content", content),
-                Long.class);
-        jdbc.update("UPDATE conversations SET updated_at = NOW() WHERE id = :id", Map.of("id", conversationId));
+        // Écriture avec JPA : le message est enregistré, la conversation remonte en tête de liste.
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> MessagingException.notFound("conversationId", "Conversation not found"));
+        Message saved = messageRepository.saveAndFlush(new Message(conversation, userId, content));
+        conversation.touch();
+        conversationRepository.saveAndFlush(conversation);
 
+        // Relecture en SQL pour renvoyer le message avec le rôle et le prénom de l'expéditeur.
         MessageItem message = jdbc.queryForObject(MESSAGE_SELECT + " WHERE msg.id = :id",
-                Map.of("id", messageId), messageMapper(userId, clientId));
+                Map.of("id", saved.getId()), messageMapper(userId, clientId));
 
         // Temps réel : envoyé aux participants APRÈS le commit (voir MessagingStreamService).
         events.publishEvent(MessagingEvent.newMessage(message, participants(ref)));
@@ -377,18 +386,10 @@ public class MessagingService {
         Viewer viewer = viewer(userId);
         ConversationRef ref = checkAccess(conversationId, viewer);
 
-        int marked = jdbc.update("""
-                UPDATE messages
-                SET read_at = NOW()
-                WHERE conversation_id = :conversationId
-                  AND read_at IS NULL
-                  AND CASE WHEN :recruiter THEN sender_user_id = :candidateUserId
-                           ELSE sender_user_id IS DISTINCT FROM :uid END""",
-                new MapSqlParameterSource()
-                        .addValue("conversationId", conversationId)
-                        .addValue("uid", userId)
-                        .addValue("recruiter", viewer.isRecruiter())
-                        .addValue("candidateUserId", ref.candidateUserId()));
+        OffsetDateTime now = OffsetDateTime.now();
+        int marked = viewer.isRecruiter()
+                ? messageRepository.markAsReadFromSender(conversationId, ref.candidateUserId(), now)
+                : messageRepository.markAsReadNotSentBy(conversationId, userId, now);
 
         if (marked > 0) {
             events.publishEvent(MessagingEvent.read(conversationId, userId, participants(ref)));

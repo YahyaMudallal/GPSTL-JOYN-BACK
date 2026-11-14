@@ -1,6 +1,7 @@
 package com.gpstl.joyn.messaging.controller;
 
 import com.gpstl.joyn.config.SecurityConfig;
+import com.gpstl.joyn.messaging.event.MatchCreated;
 import com.gpstl.joyn.messaging.service.MessagingStreamService;
 import com.jayway.jsonpath.JsonPath;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -64,6 +66,9 @@ class ConversationControllerTest {
     @Autowired
     private MessagingStreamService streamService;
 
+    @Autowired
+    private ApplicationEventPublisher events;
+
     @Value("${joyn.security.jwt.secret}")
     private String jwtSecret;
 
@@ -80,6 +85,7 @@ class ConversationControllerTest {
     private long omarCandidateId;
     private long linaApplicationId;
     private long omarApplicationId;
+    private long devJavaOfferId;
 
     @BeforeEach
     void setUp() {
@@ -105,6 +111,7 @@ class ConversationControllerTest {
                 VALUES (?, 'Omar', 'Test') RETURNING id""", omarUserId);
 
         long devJava = insertOffer(acmeId, rita, "Dev Java " + run);
+        devJavaOfferId = devJava;
         long rivalJob = insertOffer(rivalId, ravi, "Rival job " + run);
 
         linaApplicationId = insertApplication(lina, devJava, "INTERVIEW");
@@ -372,6 +379,33 @@ class ConversationControllerTest {
         Long count = jdbc.queryForObject("SELECT COUNT(*) FROM conversations WHERE application_id = ?",
                 Long.class, omarApplicationId);
         assertEquals(0L, count);
+    }
+
+    @Test
+    void conversationOpensAutomaticallyWhenAMatchIsCreated() throws Exception {
+        // Ce que fera le futur module de matching : créer le match, puis publier MatchCreated.
+        long matchId = id("""
+                INSERT INTO matches (candidate_id, job_offer_id, compatibility_score, status)
+                VALUES (?, ?, 87, 'ACTIVE') RETURNING id""", omarCandidateId, devJavaOfferId);
+        events.publishEvent(new MatchCreated(matchId));
+        events.publishEvent(new MatchCreated(matchId)); // une deuxième fois : pas de doublon
+
+        Long count = jdbc.queryForObject("SELECT COUNT(*) FROM conversations WHERE match_id = ?", Long.class, matchId);
+        assertEquals(1L, count);
+
+        String json = mockMvc.perform(as(omarUserId, "CANDIDATE", get(URL)))
+                .andExpect(jsonPath("$.data", hasSize(1)))
+                .andExpect(jsonPath("$.data[0].matchId").value(matchId))
+                .andExpect(jsonPath("$.data[0].applicationId").value(nullValue()))
+                .andExpect(jsonPath("$.data[0].name").value("Acme " + run))
+                .andReturn().getResponse().getContentAsString();
+        Number conversationId = JsonPath.read(json, "$.data[0].id");
+
+        // Les deux côtés peuvent écrire dans une conversation née d'un match.
+        send(ritaUserId, conversationId.longValue(), "{\"text\": \"Ravie de ce match !\"}")
+                .andExpect(status().isCreated());
+        mockMvc.perform(as(omarUserId, "CANDIDATE", get(URL)))
+                .andExpect(jsonPath("$.data[0].unread").value(1));
     }
 
     // ================================================================ temps réel (SSE)
