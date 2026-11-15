@@ -66,6 +66,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/candidates/profile", "/api/v1/candidates/profile/**").hasRole("CANDIDATE")
                         // Dashboard du candidat connecté (CA36), avec ou sans /stats.
                         .requestMatchers("/api/v1/candidates/dashboard", "/api/v1/candidates/dashboard/**").hasRole("CANDIDATE")
+                        // Messagerie (CO26) : candidats et recruteurs ; le service vérifie qu'on participe à la conversation.
+                        .requestMatchers("/api/v1/conversations", "/api/v1/conversations/**").hasAnyRole("CANDIDATE", "RECRUITER")
                         // Lecture seule d'un profil désigné par son id (« * » = un seul segment : ne couvre pas /profile).
                         .requestMatchers("/api/v1/candidates/*/profile").hasAnyRole("RECRUITER", "ADMIN")
                         .anyRequest().permitAll())
