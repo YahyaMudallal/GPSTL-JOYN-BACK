@@ -6,6 +6,7 @@ target/
 .env
 application-local.properties
 application-local.yml
+media/
 
 ### STS ###
 .apt_generated

@@ -57,3 +57,11 @@ joyn:
       access-key: ${SUPABASE_S3_ACCESS_KEY:}
       secret-key: ${SUPABASE_S3_SECRET_KEY:}
       bucket: joyn_file_bucket
+
+  notifications:
+    cleanup-enabled: ${NOTIFICATIONS_CLEANUP_ENABLED:true}
+    cleanup-cron: ${NOTIFICATIONS_CLEANUP_CRON:0 0 3 * * *}
+    read-retention-days: ${NOTIFICATIONS_READ_RETENTION_DAYS:7}
+    max-retention-days: ${NOTIFICATIONS_MAX_RETENTION_DAYS:30}
+    max-per-user: ${NOTIFICATIONS_MAX_PER_USER:100}
+
