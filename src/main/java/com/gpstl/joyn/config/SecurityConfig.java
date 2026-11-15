@@ -70,6 +70,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/conversations", "/api/v1/conversations/**").hasAnyRole("CANDIDATE", "RECRUITER")
                         // Lecture seule d'un profil désigné par son id (« * » = un seul segment : ne couvre pas /profile).
                         .requestMatchers("/api/v1/candidates/*/profile").hasAnyRole("RECRUITER", "ADMIN")
+                        // Notifications : candidats, recruteurs et administrateurs
+                        .requestMatchers("/api/v1/notifications", "/api/v1/notifications/**").hasAnyRole("CANDIDATE", "RECRUITER", "ADMIN")
                         .anyRequest().permitAll())
                 // Sans token -> 401 ; token valide sans le rôle -> 403
                 .oauth2ResourceServer(oauth2 -> oauth2

@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import com.gpstl.joyn.application.event.ApplicationCreated;
 import com.gpstl.joyn.application.event.ApplicationStatusChanged;
 
 import java.time.Instant;
@@ -109,7 +110,23 @@ public class ApplicationService {
             pendingStatus,
             request.coverMessage(),
             candidate.getResumeUrl());
-        return toResponse(applicationRepository.saveAndFlush(application));
+        Application saved = applicationRepository.saveAndFlush(application);
+        if (events != null) {
+            Long recruiterUserId = null;
+            try {
+                if (jobOffer.getRecruiter() != null && jobOffer.getRecruiter().getUser() != null) {
+                    recruiterUserId = jobOffer.getRecruiter().getUser().getId();
+                }
+            } catch (Exception ignored) {
+                // Ignore si proxy ou mock incomplet
+            }
+            events.publishEvent(new ApplicationCreated(
+                    saved.getId(),
+                    jobOffer.getId(),
+                    candidate.getUser().getId(),
+                    recruiterUserId));
+        }
+        return toResponse(saved);
     }
 
     /** Injecté par Spring ; un setter garde le constructeur inchangé pour les tests existants. */
