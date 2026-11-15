@@ -28,6 +28,10 @@ public record AdminCandidateItem(
 ) {
 
     public static AdminCandidateItem from(Candidate candidate) {
+        return from(candidate, candidate.getPhotoUrl());
+    }
+
+    public static AdminCandidateItem from(Candidate candidate, String avatarUrl) {
         User user = candidate.getUser();
         return new AdminCandidateItem(
                 user.getId(),
@@ -37,7 +41,7 @@ public record AdminCandidateItem(
                 candidate.getLastName(),
                 user.getRole(),
                 user.getStatus(),
-                candidate.getPhotoUrl(),
+                avatarUrl,
                 user.getEmailVerifiedAt() != null,
                 user.getCreatedAt(),
                 user.getLastLoginAt());

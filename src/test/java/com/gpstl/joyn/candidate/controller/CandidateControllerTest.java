@@ -5,6 +5,8 @@ import com.gpstl.joyn.candidate.dto.CandidateRegisterResponse;
 import com.gpstl.joyn.candidate.dto.CandidateResumeResponse;
 import com.gpstl.joyn.candidate.exception.CandidateEmailAlreadyRegisteredException;
 import com.gpstl.joyn.candidate.service.CandidateService;
+import com.gpstl.joyn.user.dto.ProfilePictureResponse;
+import com.gpstl.joyn.user.service.UserProfilePictureService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -27,13 +29,15 @@ import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 class CandidateControllerTest {
 
     private CandidateService registrationService;
+    private UserProfilePictureService profilePictureService;
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         registrationService = mock(CandidateService.class);
+        profilePictureService = mock(UserProfilePictureService.class);
         mockMvc = MockMvcBuilders.standaloneSetup(
-                        new CandidateController(registrationService))
+                        new CandidateController(registrationService, profilePictureService))
                 .setControllerAdvice(new RegistrationExceptionHandler())
                 .build();
     }
@@ -118,5 +122,37 @@ class CandidateControllerTest {
                             return request;
                         }))
                 .andExpect(status().isServiceUnavailable());
+    }
+
+    @Test
+    void acceptsPhotoUploadForOwnProfile() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "avatar.png", "image/png", new byte[]{1, 2, 3});
+        when(profilePictureService.updateProfilePicture(21L, file))
+                .thenReturn(new ProfilePictureResponse("https://storage.example/avatar.webp", "https://storage.example/avatar.webp"));
+
+        mockMvc.perform(multipart("/api/v1/candidates/profile/photo")
+                        .file(file)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            request.setUserPrincipal(() -> "21");
+                            return request;
+                        }))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.photo_url").value("https://storage.example/avatar.webp"));
+
+        verify(profilePictureService).updateProfilePicture(21L, file);
+    }
+
+    @Test
+    void deletesPhotoForOwnProfile() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/api/v1/candidates/profile/photo")
+                        .with(request -> {
+                            request.setUserPrincipal(() -> "21");
+                            return request;
+                        }))
+                .andExpect(status().isNoContent());
+
+        verify(profilePictureService).deleteProfilePicture(21L);
     }
 }

@@ -14,6 +14,7 @@ import com.gpstl.joyn.recruiter.dto.RecruiterDashboardResponse.TrendPoint;
 import com.gpstl.joyn.recruiter.dto.RecruiterDashboardResponse.WeeklyValue;
 import com.gpstl.joyn.recruiter.dto.RecruiterInsightsResponse;
 import com.gpstl.joyn.recruiter.dto.RecruiterOfferAnalyticsResponse;
+import com.gpstl.joyn.user.service.UserProfilePictureStorage;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -65,9 +66,11 @@ public class RecruiterDashboardService {
             """;
 
     private final NamedParameterJdbcTemplate jdbc;
+    private final UserProfilePictureStorage profilePictureStorage;
 
-    public RecruiterDashboardService(NamedParameterJdbcTemplate jdbc) {
+    public RecruiterDashboardService(NamedParameterJdbcTemplate jdbc, UserProfilePictureStorage profilePictureStorage) {
         this.jdbc = jdbc;
+        this.profilePictureStorage = profilePictureStorage;
     }
 
     /** GET /api/v1/recruiters/dashboard : la vue synthèse. */
@@ -645,7 +648,7 @@ public class RecruiterDashboardService {
                     rs.getLong("candidate_id"),
                     rs.getString("first_name"),
                     lastName,
-                    rs.getString("photo_url"),
+                    profilePictureStorage.createPresignedUrlIfValid(rs.getString("photo_url")),
                     rs.getString("education"),
                     availableFrom == null ? null : availableFrom.toLocalDate().toString(),
                     rs.getLong("job_offer_id"),

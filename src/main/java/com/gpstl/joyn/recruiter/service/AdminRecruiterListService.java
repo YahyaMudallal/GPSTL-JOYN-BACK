@@ -4,6 +4,7 @@ import com.gpstl.joyn.common.dto.PageResponse;
 import com.gpstl.joyn.recruiter.dto.AdminRecruiterItem;
 import com.gpstl.joyn.recruiter.model.Recruiter;
 import com.gpstl.joyn.recruiter.repository.RecruiterRepository;
+import com.gpstl.joyn.user.service.UserProfilePictureStorage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -20,9 +21,13 @@ public class AdminRecruiterListService {
     private static final Set<String> ALLOWED_USER_STATUSES = Set.of("ACTIVE", "SUSPENDED");
 
     private final RecruiterRepository recruiterRepository;
+    private final UserProfilePictureStorage profilePictureStorage;
 
-    public AdminRecruiterListService(RecruiterRepository recruiterRepository) {
+    public AdminRecruiterListService(
+            RecruiterRepository recruiterRepository,
+            UserProfilePictureStorage profilePictureStorage) {
         this.recruiterRepository = recruiterRepository;
+        this.profilePictureStorage = profilePictureStorage;
     }
 
     @Transactional(readOnly = true)
@@ -79,7 +84,8 @@ public class AdminRecruiterListService {
                         r.getCompany() != null ? r.getCompany().getId() : null,
                         r.getCompany() != null ? r.getCompany().getName() : null,
                         r.getUser().getStatus(),
-                        r.getCreatedAt()
+                        r.getCreatedAt(),
+                        profilePictureStorage.createPresignedUrlIfValid(r.getUser().getProfilePictureUrl())
                 ))
                 .toList();
 

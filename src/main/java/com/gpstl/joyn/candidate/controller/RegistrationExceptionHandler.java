@@ -3,6 +3,7 @@ package com.gpstl.joyn.candidate.controller;
 import com.gpstl.joyn.candidate.exception.CandidateEmailAlreadyRegisteredException;
 import com.gpstl.joyn.candidate.exception.CandidateResumeNotFoundException;
 import com.gpstl.joyn.common.geocoding.GeocodingException;
+import com.gpstl.joyn.user.exception.UserProfilePictureException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,13 @@ public class RegistrationExceptionHandler {
     public ResponseEntity<Map<String, String>> resumeNotFound(
             CandidateResumeNotFoundException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", exception.getMessage()));
+    }
+
+    @ExceptionHandler(UserProfilePictureException.class)
+    public ResponseEntity<Map<String, String>> profilePictureException(
+            UserProfilePictureException exception) {
+        return ResponseEntity.status(exception.getStatus())
                 .body(Map.of("message", exception.getMessage()));
     }
 

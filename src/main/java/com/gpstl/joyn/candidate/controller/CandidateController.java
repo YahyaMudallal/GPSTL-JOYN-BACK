@@ -5,14 +5,18 @@ import com.gpstl.joyn.candidate.dto.CandidateRegisterResponse;
 import com.gpstl.joyn.candidate.dto.CandidateResumeResponse;
 import com.gpstl.joyn.candidate.exception.CandidateProfileException;
 import com.gpstl.joyn.candidate.service.CandidateService;
+import com.gpstl.joyn.user.dto.ProfilePictureResponse;
+import com.gpstl.joyn.user.service.UserProfilePictureService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,9 +33,18 @@ import java.security.Principal;
 public class CandidateController {
 
     private final CandidateService registrationService;
+    private final UserProfilePictureService profilePictureService;
 
     public CandidateController(CandidateService registrationService) {
+        this(registrationService, null);
+    }
+
+    @Autowired
+    public CandidateController(
+            CandidateService registrationService,
+            UserProfilePictureService profilePictureService) {
         this.registrationService = registrationService;
+        this.profilePictureService = profilePictureService;
     }
 
     /**
@@ -88,6 +101,33 @@ public class CandidateController {
         }
         MultipartFile uploadedResume = resume == null || resume.isEmpty() ? legacyCv : resume;
         return ResponseEntity.ok(registrationService.updateResume(userId(principal), uploadedResume));
+    }
+
+    @PutMapping(value = {"/profile/photo", "/profile/picture"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            summary = "Upload or replace the authenticated candidate's profile picture",
+            description = "Accepts an image, center-crops to 1:1, resizes to 512x512, converts to WebP 80% and returns the URL")
+    public ResponseEntity<ProfilePictureResponse> updateProfilePicture(
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "photo", required = false) MultipartFile photo,
+            @RequestParam(value = "picture", required = false) MultipartFile picture,
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            Principal principal) {
+        MultipartFile upload = file != null && !file.isEmpty() ? file
+                : photo != null && !photo.isEmpty() ? photo
+                : picture != null && !picture.isEmpty() ? picture
+                : image;
+        if (upload == null || upload.isEmpty()) {
+            throw new IllegalArgumentException("Provide an image file (file, photo, picture, or image)");
+        }
+        return ResponseEntity.ok(profilePictureService.updateProfilePicture(userId(principal), upload));
+    }
+
+    @DeleteMapping(value = {"/profile/photo", "/profile/picture"})
+    @Operation(summary = "Remove the authenticated candidate's profile picture")
+    public ResponseEntity<Void> deleteProfilePicture(Principal principal) {
+        profilePictureService.deleteProfilePicture(userId(principal));
+        return ResponseEntity.noContent().build();
     }
 
     private static long userId(Principal principal) {

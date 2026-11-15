@@ -4,6 +4,8 @@ import com.gpstl.joyn.recruiter.dto.RecruiterProfilePatch;
 import com.gpstl.joyn.recruiter.dto.RecruiterProfileResponse;
 import com.gpstl.joyn.recruiter.exception.RecruiterProfileException;
 import com.gpstl.joyn.recruiter.service.RecruiterProfileService;
+import com.gpstl.joyn.user.dto.ProfilePictureResponse;
+import com.gpstl.joyn.user.service.UserProfilePictureService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,11 +13,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.Map;
@@ -31,9 +38,13 @@ import java.util.Map;
 @SecurityRequirement(name = "bearerAuth")
 public class RecruiterProfileController {
     private final RecruiterProfileService profiles;
+    private final UserProfilePictureService profilePictureService;
 
-    public RecruiterProfileController(RecruiterProfileService profiles) {
+    public RecruiterProfileController(
+            RecruiterProfileService profiles,
+            UserProfilePictureService profilePictureService) {
         this.profiles = profiles;
+        this.profilePictureService = profilePictureService;
     }
 
     @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -61,6 +72,32 @@ public class RecruiterProfileController {
     @ApiResponse(responseCode = "415", description = "Content-Type is not application/json", content = @Content)
     public RecruiterProfileResponse patch(@RequestBody(required = false) Map<String, Object> body, Principal principal) {
         return profiles.updateProfile(userId(principal), body);
+    }
+
+    @PutMapping(value = {"/profile/photo", "/profile/picture"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Upload or replace the authenticated recruiter's profile picture",
+            description = "Accepts an image, center-crops to 1:1, resizes to 512x512, converts to WebP 80% and returns the URL")
+    public ResponseEntity<ProfilePictureResponse> updatePhoto(
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "photo", required = false) MultipartFile photo,
+            @RequestParam(value = "picture", required = false) MultipartFile picture,
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            Principal principal) {
+        MultipartFile upload = file != null && !file.isEmpty() ? file
+                : photo != null && !photo.isEmpty() ? photo
+                : picture != null && !picture.isEmpty() ? picture
+                : image;
+        if (upload == null || upload.isEmpty()) {
+            throw new IllegalArgumentException("Provide an image file (file, photo, picture, or image)");
+        }
+        return ResponseEntity.ok(profilePictureService.updateProfilePicture(userId(principal), upload));
+    }
+
+    @DeleteMapping(value = {"/profile/photo", "/profile/picture"})
+    @Operation(summary = "Remove the authenticated recruiter's profile picture")
+    public ResponseEntity<Void> deletePhoto(Principal principal) {
+        profilePictureService.deleteProfilePicture(userId(principal));
+        return ResponseEntity.noContent().build();
     }
 
     /** users.id vient du claim « sub » du token vérifié, jamais du corps JSON. */

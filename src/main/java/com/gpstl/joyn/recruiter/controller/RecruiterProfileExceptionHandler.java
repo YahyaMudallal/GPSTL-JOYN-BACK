@@ -1,6 +1,7 @@
 package com.gpstl.joyn.recruiter.controller;
 
 import com.gpstl.joyn.recruiter.exception.RecruiterProfileException;
+import com.gpstl.joyn.user.exception.UserProfilePictureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -26,6 +27,11 @@ public class RecruiterProfileExceptionHandler {
     @ExceptionHandler(RecruiterProfileException.class)
     public ResponseEntity<Map<String, Object>> profileError(RecruiterProfileException ex) {
         return ResponseEntity.status(ex.getStatus()).body(body(ex.getMessage(), ex.getErrors()));
+    }
+
+    @ExceptionHandler(UserProfilePictureException.class)
+    public ResponseEntity<Map<String, Object>> profilePictureError(UserProfilePictureException ex) {
+        return ResponseEntity.status(ex.getStatus()).body(body(ex.getMessage(), Map.of()));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

@@ -11,6 +11,7 @@ import com.gpstl.joyn.messaging.model.Conversation;
 import com.gpstl.joyn.messaging.model.Message;
 import com.gpstl.joyn.messaging.repository.ConversationRepository;
 import com.gpstl.joyn.messaging.repository.MessageRepository;
+import com.gpstl.joyn.user.service.UserProfilePictureStorage;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -59,15 +60,18 @@ public class MessagingService {
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
     private final ApplicationEventPublisher events;
+    private final UserProfilePictureStorage profilePictureStorage;
 
     public MessagingService(NamedParameterJdbcTemplate jdbc,
                             ConversationRepository conversationRepository,
                             MessageRepository messageRepository,
-                            ApplicationEventPublisher events) {
+                            ApplicationEventPublisher events,
+                            UserProfilePictureStorage profilePictureStorage) {
         this.jdbc = jdbc;
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
         this.events = events;
+        this.profilePictureStorage = profilePictureStorage;
     }
 
     // ================================================================== qui est connecté ?
@@ -451,11 +455,12 @@ public class MessagingService {
                 .addValue("companyId", viewer.isRecruiter() ? viewer.companyId() : 0L);
     }
 
-    private static RowMapper<ConversationItem> conversationMapper(Viewer viewer) {
+    private RowMapper<ConversationItem> conversationMapper(Viewer viewer) {
         return (rs, i) -> {
             String candidateName = displayName(rs.getString("first_name"), rs.getString("last_name"),
                     rs.getBoolean("show_last_name"));
             String companyName = rs.getString("company_name");
+            String photoUrl = profilePictureStorage.createPresignedUrlIfValid(rs.getString("photo_url"));
             return new ConversationItem(
                     rs.getLong("id"),
                     viewer.isRecruiter() ? candidateName : companyName,
@@ -468,7 +473,7 @@ public class MessagingService {
                     rs.getString("logo_url"),
                     rs.getLong("candidate_id"),
                     candidateName,
-                    rs.getString("photo_url"),
+                    photoUrl,
                     rs.getString("last_message"),
                     rs.getObject("last_message_at", OffsetDateTime.class),
                     rs.getLong("unread"),
