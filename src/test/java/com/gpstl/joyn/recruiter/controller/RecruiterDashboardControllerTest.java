@@ -163,6 +163,12 @@ class RecruiterDashboardControllerTest {
     }
 
     @Test
+    void rejectsRecruiterOfDeletedCompany() throws Exception {
+        jdbc.update("UPDATE companies SET status = 'DELETED', deleted_at = NOW() WHERE id = ?", acmeId);
+        mockMvc.perform(asRita(get(URL))).andExpect(status().isForbidden());
+    }
+
+    @Test
     void rejectsOfferOfAnotherCompany() throws Exception {
         mockMvc.perform(asRita(get(URL).param("job_id", String.valueOf(rivalOfferId))))
                 .andExpect(status().isForbidden());

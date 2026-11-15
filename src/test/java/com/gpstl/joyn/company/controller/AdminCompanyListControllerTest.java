@@ -184,6 +184,21 @@ class AdminCompanyListControllerTest {
         expectBadRequest("order", "up", "order");
     }
 
+    @Test
+    void hidesDeletedCompaniesUnlessIncludeDeleted() throws Exception {
+        jdbc.update("UPDATE companies SET status = 'DELETED', deleted_at = NOW() WHERE name = ?", "Beta " + run);
+
+        mockMvc.perform(asAdmin(get(URL).param("search", run)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].name", contains("Gamma " + run, "Alpha " + run)))
+                .andExpect(jsonPath("$.data[0].deleted_at").value(org.hamcrest.Matchers.nullValue()));
+
+        mockMvc.perform(asAdmin(get(URL).param("search", run).param("include_deleted", "true")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].name", contains("Gamma " + run, "Beta " + run, "Alpha " + run)))
+                .andExpect(jsonPath("$.data[1].deleted_at").isNotEmpty());
+    }
+
     // ---------------------------------------------------------------- outils
 
     private void expectBadRequest(String parameter, String value, String expectedField) throws Exception {

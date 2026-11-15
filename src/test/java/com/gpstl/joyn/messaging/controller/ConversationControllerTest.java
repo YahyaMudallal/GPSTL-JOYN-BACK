@@ -265,6 +265,39 @@ class ConversationControllerTest {
     }
 
     @Test
+    void deletedCompanyMakesConversationsReadOnly() throws Exception {
+        long conversationId = openAs(ritaUserId, linaApplicationId);
+        send(ritaUserId, conversationId, "{\"text\": \"Bonjour Lina\"}").andExpect(status().isCreated());
+
+        jdbc.update("UPDATE companies SET status = 'DELETED', deleted_at = NOW() WHERE id = ?", acmeId);
+
+        // Recruteurs de l'entreprise supprimée : plus aucun accès à la messagerie.
+        mockMvc.perform(as(ritaUserId, "RECRUITER", get(URL))).andExpect(status().isForbidden());
+        mockMvc.perform(as(robUserId, "RECRUITER", get(URL + "/" + conversationId + "/messages")))
+                .andExpect(status().isForbidden());
+        send(ritaUserId, conversationId, "{\"text\": \"Encore là\"}").andExpect(status().isForbidden());
+        open(ritaUserId, "{\"application_id\": " + omarApplicationId + "}").andExpect(status().isForbidden());
+
+        // Candidate : l'historique reste lisible, mais elle ne peut plus écrire.
+        mockMvc.perform(as(linaUserId, "CANDIDATE", get(URL + "/" + conversationId + "/messages")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(1)));
+        send(linaUserId, conversationId, "{\"text\": \"Bonjour ?\"}").andExpect(status().isForbidden());
+        // La conversation existante est renvoyée telle quelle
+        open(linaUserId, "{\"application_id\": " + linaApplicationId + "}").andExpect(status().isOk());
+
+        // Les autres entreprises ne sont pas touchées.
+        mockMvc.perform(as(raviUserId, "RECRUITER", get(URL))).andExpect(status().isOk());
+    }
+
+    @Test
+    void candidateCannotOpenConversationWithDeletedCompany() throws Exception {
+        jdbc.update("UPDATE companies SET status = 'DELETED', deleted_at = NOW() WHERE id = ?", acmeId);
+
+        open(linaUserId, "{\"application_id\": " + linaApplicationId + "}").andExpect(status().isForbidden());
+    }
+
+    @Test
     void rejectsEmptyOrTooLongMessages() throws Exception {
         long conversationId = openAs(ritaUserId, linaApplicationId);
 

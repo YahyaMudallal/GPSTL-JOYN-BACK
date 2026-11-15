@@ -66,6 +66,9 @@ public class JobAccessService {
         if ("ADMIN".equals(role)) return;
         Recruiter recruiter = recruiters.findByUserId(userId)
             .orElseThrow(() -> new JobApiException(403, "Recruiter profile is required"));
+        // Entreprise supprimée : le recruteur perd tous ses droits sur les offres
+        if (recruiter.getCompany().isDeleted())
+            throw new JobApiException(403, "Recruiter company has been deleted");
         if (!Objects.equals(job.getCompany().getId(), recruiter.getCompany().getId()))
             throw new JobApiException(403, "Job belongs to another company");
     }

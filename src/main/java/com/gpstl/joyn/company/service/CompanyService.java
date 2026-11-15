@@ -6,7 +6,10 @@ import com.gpstl.joyn.company.dto.CompanyResponse;
 import com.gpstl.joyn.company.dto.CompanyStatusUpdateRequest;
 import com.gpstl.joyn.company.model.Company;
 import com.gpstl.joyn.company.repository.CompanyRepository;
+import com.gpstl.joyn.joboffer.model.JobOffer;
+import com.gpstl.joyn.joboffer.model.JobOfferAudit;
 import com.gpstl.joyn.joboffer.model.OfferStatus;
+import com.gpstl.joyn.joboffer.repository.JobOfferAuditRepository;
 import com.gpstl.joyn.joboffer.repository.JobOfferRepository;
 
 import org.springframework.http.HttpStatus;
@@ -16,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
@@ -24,21 +29,23 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final JobOfferRepository jobOfferRepository;
     private final RecruiterRepository recruiterProfileRepository;
+    private final JobOfferAuditRepository jobOfferAuditRepository;
 
     public CompanyService(
             CompanyRepository companyRepository,
             JobOfferRepository jobOfferRepository,
-            RecruiterRepository recruiterProfileRepository) {
+            RecruiterRepository recruiterProfileRepository,
+            JobOfferAuditRepository jobOfferAuditRepository) {
         this.companyRepository = companyRepository;
         this.jobOfferRepository = jobOfferRepository;
         this.recruiterProfileRepository = recruiterProfileRepository;
+        this.jobOfferAuditRepository = jobOfferAuditRepository;
     }
 
     public CompanyResponse getProfile(
             Long companyId, boolean includeJobs, Authentication authentication) {
 
-        Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Company company = findActiveCompany(companyId);
 
         boolean allowed = "VERIFIED".equals(company.getVerificationStatus());
 
@@ -125,8 +132,7 @@ public class CompanyService {
             );
         }
 
-        Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entreprise introuvable."));
+        Company company = findActiveCompany(companyId);
 
         company.setVerificationStatus(normalizedStatus);
         Company updated = companyRepository.save(company);
@@ -181,8 +187,7 @@ public class CompanyService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès interdit pour ce rôle.");
         }
         // Vérification de l'existence de l'entreprise
-        Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entreprise introuvable."));
+        Company company = findActiveCompany(companyId);
 
         // Validation des changements
         if (changes == null || changes.isEmpty()) {
@@ -231,6 +236,70 @@ public class CompanyService {
 
         return getProfile(companyId, true, authentication);
     }
+
+    /**
+     * Suppression logique d'une entreprise.
+     * Dans une seule transaction : l'entreprise passe en DELETED, ses offres non clôturées passent
+     * en CLOSED (retirées du deck et des recommandations) et ses recruteurs perdent leurs droits,
+     * car tous les contrôles d'accès recruteur refusent une entreprise supprimée.
+     * Aucune candidature ni aucun message n'est supprimé.
+     */
+    @Transactional
+    public void deleteCompany(Long companyId, String reason, Authentication authentication) {
+
+        // Vérification du JWT
+        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt jwt)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentification requise.");
+        }
+
+        Long userId;
+        try {
+            userId = Long.valueOf(jwt.getSubject());
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Identifiant utilisateur invalide.");
+        }
+
+        // ADMIN : toutes les entreprises ; RECRUITER : uniquement la sienne
+        String role = jwt.getClaimAsString("role");
+        if ("RECRUITER".equals(role)) {
+            boolean belongsToCompany = recruiterProfileRepository.findByUserId(userId)
+                    .map(recruiter -> recruiter.getCompany().getId().equals(companyId))
+                    .orElse(false);
+
+            if (!belongsToCompany) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vous n'appartenez pas à cette entreprise.");
+            }
+        } else if (!"ADMIN".equals(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès interdit pour ce rôle.");
+        }
+
+        // Inexistante ou déjà supprimée : 404
+        Company company = findActiveCompany(companyId);
+
+        Instant now = Instant.now();
+        company.markDeleted(now);
+        companyRepository.save(company);
+
+        // Clôture des offres encore actives, comme une clôture manuelle (JobClosureService)
+        String auditReason = (reason == null || reason.isBlank())
+                ? "Entreprise supprimée"
+                : "Entreprise supprimée : " + reason;
+
+        List<JobOffer> offers = jobOfferRepository.findByCompanyIdAndDeletedAtIsNull(companyId);
+        for (JobOffer offer : offers) {
+            offer.setStatus(OfferStatus.CLOSED);
+            offer.setDeletedAt(now.atOffset(ZoneOffset.UTC));
+        }
+        jobOfferRepository.saveAll(offers);
+        jobOfferAuditRepository.saveAll(offers.stream()
+                .map(offer -> new JobOfferAudit(userId, offer, "CLOSE", auditReason))
+                .toList());
+    }
+
+    /** Retrouve une entreprise non supprimée, sinon 404. */
+    private Company findActiveCompany(Long companyId) {
+        return companyRepository.findById(companyId)
+                .filter(company -> !company.isDeleted())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entreprise introuvable."));
+    }
 }
-
-

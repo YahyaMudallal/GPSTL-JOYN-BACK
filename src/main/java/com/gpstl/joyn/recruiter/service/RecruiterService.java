@@ -38,7 +38,8 @@ public class RecruiterService {
         );
 
         String companyName = request.companyName().trim();
-        Company company = companyRepository.findByNameIgnoreCase(companyName)
+        // Une entreprise supprimée n'est jamais réutilisée : on en crée une nouvelle.
+        Company company = companyRepository.findFirstByNameIgnoreCaseAndDeletedAtIsNull(companyName)
                 .orElseGet(() -> companyRepository.save(new Company(companyName)));
 
         Recruiter profile = new Recruiter(

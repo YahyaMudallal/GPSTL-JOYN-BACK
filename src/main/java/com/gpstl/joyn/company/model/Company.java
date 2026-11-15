@@ -39,6 +39,13 @@ public class Company {
     @Column(name = "verification_status", nullable = false)
     private String verificationStatus = "NOT_VERIFIED";
 
+    // Suppression logique : ACTIVE ou DELETED (V12)
+    @Column(name = "status", nullable = false)
+    private String status = "ACTIVE";
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -84,5 +91,17 @@ public class Company {
     public void setSector(String sector) { this.sector = sector; }
     public void setCompanySize(String companySize) { this.companySize = companySize; }
     public void setAddress(String address) { this.address = address; }
+
+    public String getStatus() { return status; }
+    public Instant getDeletedAt() { return deletedAt; }
+
+    /** Une entreprise supprimée n'est plus visible et ses recruteurs perdent leurs droits. */
+    public boolean isDeleted() { return deletedAt != null; }
+
+    /** Suppression logique : la ligne reste en base pour préserver l'historique. */
+    public void markDeleted(Instant when) {
+        this.status = "DELETED";
+        this.deletedAt = when;
+    }
 }
 

@@ -21,6 +21,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -106,5 +109,47 @@ class CompanyControllerTest {
                 eq(Map.of("description", "Nouvelle description")),
                 any()
         );
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/companies/{id} - 204 sans corps de requête")
+    void deleteCompany_NoBody_NoContent() throws Exception {
+        mockMvc.perform(delete("/api/v1/companies/5"))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(companyService).deleteCompany(eq(5L), isNull(), any());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/companies/{id} - 204 avec un motif transmis au service")
+    void deleteCompany_WithReason_NoContent() throws Exception {
+        mockMvc.perform(delete("/api/v1/companies/5")
+                        .contentType("application/json")
+                        .content("{\"reason\":\"Cessation d'activité\"}"))
+                .andExpect(status().isNoContent());
+
+        verify(companyService).deleteCompany(eq(5L), eq("Cessation d'activité"), any());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/companies/{id} - 400 pour un champ inconnu")
+    void deleteCompany_UnknownField_BadRequest() throws Exception {
+        mockMvc.perform(delete("/api/v1/companies/5")
+                        .contentType("application/json")
+                        .content("{\"foo\":\"bar\"}"))
+                .andExpect(status().isBadRequest());
+
+        verify(companyService, never()).deleteCompany(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/companies/{id} - 404 relayé depuis le service")
+    void deleteCompany_NotFound() throws Exception {
+        org.mockito.Mockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Entreprise introuvable."))
+                .when(companyService).deleteCompany(eq(5L), any(), any());
+
+        mockMvc.perform(delete("/api/v1/companies/5"))
+                .andExpect(status().isNotFound());
     }
 }

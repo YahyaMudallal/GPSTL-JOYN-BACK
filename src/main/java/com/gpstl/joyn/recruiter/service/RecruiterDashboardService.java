@@ -191,9 +191,10 @@ public class RecruiterDashboardService {
     /** users.id (claim "sub") -> entreprise du recruteur. Le compte est relu en base. */
     private long findActiveRecruiterCompanyId(long userId) {
         List<Map<String, Object>> rows = jdbc.queryForList("""
-                SELECT u.role, u.status, rp.company_id
+                SELECT u.role, u.status, rp.company_id, co.deleted_at AS company_deleted_at
                 FROM users u
                 LEFT JOIN recruiter_profiles rp ON rp.user_id = u.id
+                LEFT JOIN companies co ON co.id = rp.company_id
                 WHERE u.id = :uid""", Map.of("uid", userId));
 
         if (rows.isEmpty()) {
@@ -209,6 +210,10 @@ public class RecruiterDashboardService {
         Object companyId = row.get("company_id");
         if (companyId == null) {
             throw DashboardException.notFound(null, "Recruiter profile not found");
+        }
+        // Entreprise supprimée : le recruteur perd l'accès au tableau de bord
+        if (row.get("company_deleted_at") != null) {
+            throw DashboardException.forbidden("Recruiter company has been deleted");
         }
         return ((Number) companyId).longValue();
     }

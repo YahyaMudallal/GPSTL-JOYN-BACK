@@ -30,4 +30,7 @@ List<JobOffer> findPublicOffersByCompanyId(
         @Param("companyId") Long companyId,
         @Param("status") OfferStatus status
 );
+
+    // Offres encore actives (non clôturées) d'une entreprise, clôturées lors de sa suppression
+    List<JobOffer> findByCompanyIdAndDeletedAtIsNull(Long companyId);
 }
