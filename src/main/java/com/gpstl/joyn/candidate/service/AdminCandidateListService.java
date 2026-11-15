@@ -7,6 +7,7 @@ import com.gpstl.joyn.candidate.repository.CandidateRepository;
 import com.gpstl.joyn.common.dto.PageResponse;
 import com.gpstl.joyn.common.model.User;
 import com.gpstl.joyn.common.repository.UserRepository;
+import com.gpstl.joyn.user.service.UserProfilePictureStorage;
 import com.gpstl.joyn.company.exception.InvalidQueryParameterException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -52,10 +53,15 @@ public class AdminCandidateListService {
 
     private final CandidateRepository candidates;
     private final UserRepository users;
+    private final UserProfilePictureStorage profilePictureStorage;
 
-    public AdminCandidateListService(CandidateRepository candidates, UserRepository users) {
+    public AdminCandidateListService(
+            CandidateRepository candidates,
+            UserRepository users,
+            UserProfilePictureStorage profilePictureStorage) {
         this.candidates = candidates;
         this.users = users;
+        this.profilePictureStorage = profilePictureStorage;
     }
 
     @Transactional(readOnly = true)
@@ -99,7 +105,7 @@ public class AdminCandidateListService {
 
         // 3. Requête avec les filtres demandés, puis transformation en DTO.
         return PageResponse.from(candidates.findAll(buildFilters(filters, normalizedStatus), pageRequest)
-                .map(AdminCandidateItem::from));
+                .map(c -> AdminCandidateItem.from(c, profilePictureStorage.createPresignedUrlIfValid(c.getPhotoUrl()))));
     }
 
     /** Utilisateur absent : 401 ; compte suspendu ou rôle non autorisé : 403. */

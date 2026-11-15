@@ -2,6 +2,8 @@ package com.gpstl.joyn.config;
 
 import com.gpstl.joyn.candidate.service.CandidateResumeStorage;
 import com.gpstl.joyn.candidate.service.SupabaseCandidateResumeStorage;
+import com.gpstl.joyn.user.service.SupabaseUserProfilePictureStorage;
+import com.gpstl.joyn.user.service.UserProfilePictureStorage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -70,6 +72,20 @@ public class SupabaseStorageConfig {
                 s3Presigner,
                 bucket,
                 Duration.ofMinutes(15)
+        );
+    }
+
+    @Bean
+    public UserProfilePictureStorage supabaseUserProfilePictureStorage(
+            S3Client s3Client,
+            S3Presigner s3Presigner,
+            @Value("${joyn.storage.supabase.bucket}") String bucket
+    ) {
+        return new SupabaseUserProfilePictureStorage(
+                s3Client,
+                s3Presigner,
+                bucket,
+                Duration.ofHours(24)
         );
     }
 

@@ -7,6 +7,7 @@ import com.gpstl.joyn.recruiter.dto.RecruiterProfileResponse;
 import com.gpstl.joyn.recruiter.exception.RecruiterProfileException;
 import com.gpstl.joyn.recruiter.model.Recruiter;
 import com.gpstl.joyn.recruiter.repository.RecruiterRepository;
+import com.gpstl.joyn.user.service.UserProfilePictureStorage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +22,15 @@ import java.util.Map;
 public class RecruiterProfileService {
     private final UserRepository users;
     private final RecruiterRepository recruiters;
+    private final UserProfilePictureStorage profilePictureStorage;
 
-    public RecruiterProfileService(UserRepository users, RecruiterRepository recruiters) {
+    public RecruiterProfileService(
+            UserRepository users,
+            RecruiterRepository recruiters,
+            UserProfilePictureStorage profilePictureStorage) {
         this.users = users;
         this.recruiters = recruiters;
+        this.profilePictureStorage = profilePictureStorage;
     }
 
     @Transactional(readOnly = true)
@@ -51,9 +57,11 @@ public class RecruiterProfileService {
     }
 
     // À appeler dans la transaction : l'entreprise est chargée à la demande.
-    private static RecruiterProfileResponse toResponse(Recruiter recruiter, User user) {
+    private RecruiterProfileResponse toResponse(Recruiter recruiter, User user) {
+        String photoUrl = profilePictureStorage.createPresignedUrlIfValid(user.getProfilePictureUrl());
         return new RecruiterProfileResponse(recruiter.getId(), user.getId(), user.getEmail(),
-                recruiter.getFirstName(), recruiter.getLastName(), recruiter.getCompany().getName());
+                recruiter.getFirstName(), recruiter.getLastName(), recruiter.getCompany().getName(),
+                photoUrl, photoUrl);
     }
 
     private static RecruiterProfileException profileNotFound() {

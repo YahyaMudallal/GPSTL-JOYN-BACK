@@ -2,6 +2,8 @@ package com.gpstl.joyn.config;
 
 import com.gpstl.joyn.candidate.service.CandidateResumeStorage;
 import com.gpstl.joyn.candidate.service.UnavailableCandidateResumeStorage;
+import com.gpstl.joyn.user.service.UnavailableUserProfilePictureStorage;
+import com.gpstl.joyn.user.service.UserProfilePictureStorage;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.web.server.ResponseStatusException;
@@ -35,6 +37,15 @@ class UnavailableSupabaseStorageConfigTest {
                             .isInstanceOf(ResponseStatusException.class)
                             .extracting(exception -> ((ResponseStatusException) exception).getStatusCode())
                             .isEqualTo(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE);
+
+                    assertThat(context).hasSingleBean(UserProfilePictureStorage.class);
+                    assertThat(context.getBean(UserProfilePictureStorage.class))
+                            .isInstanceOf(UnavailableUserProfilePictureStorage.class);
+                    assertThatThrownBy(() -> context.getBean(UserProfilePictureStorage.class)
+                            .createPresignedUrl("profile_pictures/42/123e4567-e89b-12d3-a456-426614174000.webp"))
+                            .isInstanceOf(ResponseStatusException.class)
+                            .extracting(exception -> ((ResponseStatusException) exception).getStatusCode())
+                            .isEqualTo(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE);
                 });
     }
 
@@ -45,6 +56,7 @@ class UnavailableSupabaseStorageConfigTest {
                 .run(context -> {
                     assertThat(context).hasNotFailed();
                     assertThat(context).doesNotHaveBean(CandidateResumeStorage.class);
+                    assertThat(context).doesNotHaveBean(UserProfilePictureStorage.class);
                     assertThat(context).doesNotHaveBean("s3Client");
                 });
     }

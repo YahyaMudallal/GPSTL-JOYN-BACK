@@ -53,6 +53,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/applications").hasRole("CANDIDATE")
                         .requestMatchers(HttpMethod.GET, "/api/v1/candidates/resumes/**")
                                 .hasAnyRole("CANDIDATE", "RECRUITER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/profile-pictures/**").permitAll()
+                        .requestMatchers("/api/v1/users/profile-picture", "/api/v1/users/profile-picture/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/applications/*/status")
                                 .hasAnyRole("RECRUITER", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/recruiters/jobs/*/recommendations")

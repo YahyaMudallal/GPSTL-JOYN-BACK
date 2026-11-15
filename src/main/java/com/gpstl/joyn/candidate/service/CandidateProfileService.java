@@ -18,6 +18,7 @@ import com.gpstl.joyn.common.repository.UserRepository;
 import com.gpstl.joyn.joboffer.model.ContractType;
 import com.gpstl.joyn.joboffer.model.RemoteMode;
 import com.gpstl.joyn.joboffer.repository.ContractTypeRepository;
+import com.gpstl.joyn.user.service.UserProfilePictureStorage;
 import jakarta.persistence.EntityManager;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -51,12 +52,14 @@ public class CandidateProfileService {
     private final ApplicationEventPublisher events;
     private final AddressGeocodingService geocodingService;
     private final CandidateResumeStorage resumeStorage;
+    private final UserProfilePictureStorage profilePictureStorage;
 
     public CandidateProfileService(UserRepository users, CandidateRepository candidates,
             ContractTypeRepository contractTypes, SkillRepository skills,
             EntityManager entityManager, ApplicationEventPublisher events,
             AddressGeocodingService geocodingService,
-            CandidateResumeStorage resumeStorage) {
+            CandidateResumeStorage resumeStorage,
+            UserProfilePictureStorage profilePictureStorage) {
         this.users = users;
         this.candidates = candidates;
         this.contractTypes = contractTypes;
@@ -65,6 +68,7 @@ public class CandidateProfileService {
         this.events = events;
         this.geocodingService = geocodingService;
         this.resumeStorage = resumeStorage;
+        this.profilePictureStorage = profilePictureStorage;
     }
 
     @Transactional(readOnly = true)
@@ -73,7 +77,7 @@ public class CandidateProfileService {
         Candidate candidate = candidates.findProfileByUserId(userId)
                 .orElseThrow(CandidateProfileService::profileNotFound);
         // Conversion dans la transaction : les sections sont chargées à la demande.
-        return CandidateProfileResponse.from(candidate, signedResumeUrl(candidate));
+        return CandidateProfileResponse.from(candidate, signedResumeUrl(candidate), signedPhotoUrl(candidate));
     }
 
     @Transactional
@@ -82,7 +86,7 @@ public class CandidateProfileService {
         checkCandidateAccount(userId);
         CandidateProfilePatch patch = CandidateProfilePatch.parse(body);
         Candidate candidate = applyPatch(patch, userId);
-        return CandidateProfileResponse.from(candidate, signedResumeUrl(candidate));
+        return CandidateProfileResponse.from(candidate, signedResumeUrl(candidate), signedPhotoUrl(candidate));
     }
 
     /**
@@ -98,16 +102,20 @@ public class CandidateProfileService {
         Candidate candidate = candidates.findProfileById(candidateId)
                 .orElseThrow(CandidateProfileService::profileNotFound);
         if ("ADMIN".equals(viewer.getRole())) {
-            return CandidateProfileResponse.from(candidate, signedResumeUrl(candidate));
+            return CandidateProfileResponse.from(candidate, signedResumeUrl(candidate), signedPhotoUrl(candidate));
         }
         if (!candidate.isVisibleToRecruiters() || !"ACTIVE".equals(candidate.getUser().getStatus())) {
             throw profileNotFound();
         }
-        return CandidateProfileResponse.forRecruiter(candidate, signedResumeUrl(candidate));
+        return CandidateProfileResponse.forRecruiter(candidate, signedResumeUrl(candidate), signedPhotoUrl(candidate));
     }
 
     private String signedResumeUrl(Candidate candidate) {
         return resumeStorage.createPresignedUrlIfValid(candidate.getResumeUrl());
+    }
+
+    private String signedPhotoUrl(Candidate candidate) {
+        return profilePictureStorage.createPresignedUrlIfValid(candidate.getPhotoUrl());
     }
 
     /** Étapes de la mise à jour ; le corps a déjà été validé (sans accès à la base) par l'appelant. */

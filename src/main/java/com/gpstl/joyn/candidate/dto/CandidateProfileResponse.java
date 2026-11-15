@@ -87,6 +87,10 @@ public record CandidateProfileResponse(
      * sont chargés à la demande depuis la base.
      */
     public static CandidateProfileResponse from(Candidate c, String cvUrl) {
+        return from(c, cvUrl, c.getPhotoUrl());
+    }
+
+    public static CandidateProfileResponse from(Candidate c, String cvUrl, String photoUrl) {
         return new CandidateProfileResponse(
                 c.getId(),
                 c.getUser().getEmail(),
@@ -98,7 +102,7 @@ public record CandidateProfileResponse(
                 c.getLocation(),
                 c.getAddress(),
                 toInteger(c.getYearsOfExperience()),
-                c.getPhotoUrl(),
+                photoUrl,
                 cvUrl,
                 new Links(c.getGithubUrl(), c.getLinkedinUrl(), c.getPortfolioUrl()),
                 new Alternance(c.getRhythmType(), c.getAvailableFrom(), toInteger(c.getContractDurationMonths())),
@@ -128,7 +132,11 @@ public record CandidateProfileResponse(
      * L'administrateur, lui, reçoit la vue complète (from).
      */
     public static CandidateProfileResponse forRecruiter(Candidate c, String cvUrl) {
-        CandidateProfileResponse full = from(c, cvUrl);
+        return forRecruiter(c, cvUrl, c.getPhotoUrl());
+    }
+
+    public static CandidateProfileResponse forRecruiter(Candidate c, String cvUrl, String photoUrl) {
+        CandidateProfileResponse full = from(c, cvUrl, photoUrl);
         boolean contact = c.isShowContactLinks();
         return new CandidateProfileResponse(
                 full.id(),

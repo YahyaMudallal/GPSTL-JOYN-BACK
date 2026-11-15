@@ -10,6 +10,7 @@ import com.gpstl.joyn.joboffer.model.JobOffer;
 import com.gpstl.joyn.joboffer.repository.JobOfferRepository;
 import com.gpstl.joyn.joboffer.repository.RecruiterJobApplicantProjection;
 import com.gpstl.joyn.joboffer.repository.RecruiterJobApplicantRepository;
+import com.gpstl.joyn.user.service.UserProfilePictureStorage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -27,18 +28,21 @@ public class RecruiterJobApplicantService {
     private final RecruiterJobApplicantRepository applicants;
     private final CandidateRepository candidates;
     private final CandidateResumeStorage resumeStorage;
+    private final UserProfilePictureStorage profilePictureStorage;
 
     public RecruiterJobApplicantService(
             JobOfferRepository jobOffers,
             JobAccessService jobAccess,
             RecruiterJobApplicantRepository applicants,
             CandidateRepository candidates,
-            CandidateResumeStorage resumeStorage) {
+            CandidateResumeStorage resumeStorage,
+            UserProfilePictureStorage profilePictureStorage) {
         this.jobOffers = jobOffers;
         this.jobAccess = jobAccess;
         this.applicants = applicants;
         this.candidates = candidates;
         this.resumeStorage = resumeStorage;
+        this.profilePictureStorage = profilePictureStorage;
     }
 
     @Transactional(readOnly = true)
@@ -82,7 +86,8 @@ public class RecruiterJobApplicantService {
         CandidateProfileResponse profile = candidates.findProfileById(result.getCandidateId())
                 .map(candidate -> CandidateProfileResponse.forRecruiter(
                         candidate,
-                        resumeStorage.createPresignedUrlIfValid(candidate.getResumeUrl())))
+                        resumeStorage.createPresignedUrlIfValid(candidate.getResumeUrl()),
+                        profilePictureStorage.createPresignedUrlIfValid(candidate.getPhotoUrl())))
                 .orElseThrow(() -> new JobApiException(404, "Candidate profile not found"));
 
         Integer score = result.getMatchScore() == null ? null : result.getMatchScore().intValue();
