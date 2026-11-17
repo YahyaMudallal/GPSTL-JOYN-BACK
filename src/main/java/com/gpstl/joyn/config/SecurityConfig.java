@@ -47,6 +47,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/companies/lookup").permitAll()
+                        // Logos des entreprises (R84) : tout le monde peut les voir ;
+                        // envoi / suppression par un recruteur (de l'entreprise, vérifié dans le service) ou un admin.
+                        .requestMatchers(HttpMethod.GET, "/api/v1/companies/logos/**", "/api/v1/companies/*/logo").permitAll()
+                        .requestMatchers("/api/v1/companies/*/logo").hasAnyRole("RECRUITER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/recruiters/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/candidates/applications").hasRole("CANDIDATE")
                         .requestMatchers(HttpMethod.GET, "/api/v1/candidates/recommendations").hasRole("CANDIDATE")

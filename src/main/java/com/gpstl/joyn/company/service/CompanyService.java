@@ -30,16 +30,20 @@ public class CompanyService {
     private final JobOfferRepository jobOfferRepository;
     private final RecruiterRepository recruiterProfileRepository;
     private final JobOfferAuditRepository jobOfferAuditRepository;
+    private final CompanyLogoStorage logoStorage;
 
     public CompanyService(
             CompanyRepository companyRepository,
             JobOfferRepository jobOfferRepository,
             RecruiterRepository recruiterProfileRepository,
-            JobOfferAuditRepository jobOfferAuditRepository) {
+            JobOfferAuditRepository jobOfferAuditRepository,
+            CompanyLogoStorage logoStorage) {
         this.companyRepository = companyRepository;
         this.jobOfferRepository = jobOfferRepository;
         this.recruiterProfileRepository = recruiterProfileRepository;
         this.jobOfferAuditRepository = jobOfferAuditRepository;
+        this.logoStorage = logoStorage;
+  
     }
 
     public CompanyResponse getProfile(
@@ -92,7 +96,7 @@ public class CompanyService {
         return new CompanyResponse(
                 company.getId(),
                 company.getName(),
-                company.getLogoUrl(),
+                logoStorage.createPresignedUrlIfValid(company.getLogoUrl()), // R84 : clé -> URL
                 company.getSector(),
                 company.getCompanySize(),
                 company.getWebsite(),
@@ -140,7 +144,7 @@ public class CompanyService {
         return new CompanyResponse(
                 updated.getId(),
                 updated.getName(),
-                updated.getLogoUrl(),
+                logoStorage.createPresignedUrlIfValid(updated.getLogoUrl()), // R84 : clé -> URL
                 updated.getSector(),
                 updated.getCompanySize(),
                 updated.getWebsite(),

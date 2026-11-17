@@ -12,6 +12,7 @@ import com.gpstl.joyn.candidate.dto.CandidateDashboardResponse.RecentMatch;
 import com.gpstl.joyn.candidate.dto.CandidateDashboardResponse.Swipes;
 import com.gpstl.joyn.common.dto.DashboardPeriod;
 import com.gpstl.joyn.common.exception.DashboardException;
+import com.gpstl.joyn.company.service.CompanyLogoStorage;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -48,9 +49,11 @@ public class CandidateDashboardService {
     private static final int NEW_OFFERS_DAYS = 7;
 
     private final NamedParameterJdbcTemplate jdbc;
+    private final CompanyLogoStorage logoStorage;
 
-    public CandidateDashboardService(NamedParameterJdbcTemplate jdbc) {
+    public CandidateDashboardService(NamedParameterJdbcTemplate jdbc, CompanyLogoStorage logoStorage) {
         this.jdbc = jdbc;
+        this.logoStorage = logoStorage;
     }
 
     @Transactional(readOnly = true)
@@ -214,7 +217,7 @@ public class CandidateDashboardService {
                         rs.getLong("job_offer_id"),
                         rs.getString("title"),
                         rs.getString("company_name"),
-                        rs.getString("logo_url"),
+                        logoStorage.createPresignedUrlIfValid(rs.getString("logo_url")), // R84 : clé -> URL
                         rs.getObject("compatibility_score", Integer.class),
                         rs.getString("status"),
                         rs.getObject("conversation_id", Long.class),

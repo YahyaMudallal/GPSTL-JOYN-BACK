@@ -41,9 +41,11 @@ public class AdminCompanyListService {
             "name", "name");
 
     private final CompanyRepository companyRepository;
+    private final CompanyLogoStorage logoStorage;
 
-    public AdminCompanyListService(CompanyRepository companyRepository) {
+    public AdminCompanyListService(CompanyRepository companyRepository, CompanyLogoStorage logoStorage) {
         this.companyRepository = companyRepository;
+        this.logoStorage = logoStorage;
     }
 
     @Transactional(readOnly = true)
@@ -77,7 +79,8 @@ public class AdminCompanyListService {
 
         // 3. Requête avec les filtres demandés, puis transformation en DTO.
         Specification<Company> filters = buildFilters(search, normalizedStatus, sector, normalizedSize, includeDeleted);
-        Page<AdminCompanyItem> result = companyRepository.findAll(filters, pageRequest).map(AdminCompanyItem::from);
+        Page<AdminCompanyItem> result = companyRepository.findAll(filters, pageRequest).map(company -> AdminCompanyItem.from(company,
+                        logoStorage.createPresignedUrlIfValid(company.getLogoUrl())));
         return PageResponse.from(result);
     }
 
