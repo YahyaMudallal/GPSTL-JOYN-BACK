@@ -4,7 +4,9 @@ import com.gpstl.joyn.company.dto.CompanyResponse;
 import com.gpstl.joyn.company.dto.CompanyStatusUpdateRequest;
 import com.gpstl.joyn.company.model.Company;
 import com.gpstl.joyn.company.repository.CompanyRepository;
+import com.gpstl.joyn.joboffer.model.JobOffer;
 import com.gpstl.joyn.joboffer.model.OfferStatus;
+import com.gpstl.joyn.joboffer.repository.JobOfferAuditRepository;
 import com.gpstl.joyn.joboffer.repository.JobOfferRepository;
 import com.gpstl.joyn.recruiter.model.Recruiter;
 import com.gpstl.joyn.recruiter.repository.RecruiterRepository;
@@ -14,10 +16,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,6 +42,9 @@ class CompanyServiceTest {
 
     @Mock
     private RecruiterRepository recruiterProfileRepository;
+
+    @Mock
+    private JobOfferAuditRepository jobOfferAuditRepository;
 
     // R84 : convertit la clé du logo en URL (non utilisé dans ces tests)
     @Mock
@@ -255,5 +262,133 @@ when(auth.getPrincipal()).thenReturn(jwt);
           .hasMessageContaining("400 BAD_REQUEST");
 
         verify(companyRepository, never()).save(any());
+    }
+
+    // ---------------------------------------------------------------------
+    // deleteCompany() : suppression logique
+    // ---------------------------------------------------------------------
+
+    private static Authentication jwtAuth(String role, String subject) {
+        Jwt jwt = mock(Jwt.class);
+        lenient().when(jwt.getClaimAsString("role")).thenReturn(role);
+        lenient().when(jwt.getSubject()).thenReturn(subject);
+        Authentication auth = mock(Authentication.class);
+        lenient().when(auth.getPrincipal()).thenReturn(jwt);
+        return auth;
+    }
+
+    private static Recruiter recruiterOf(Long companyId) {
+        Company company = mock(Company.class);
+        when(company.getId()).thenReturn(companyId);
+        Recruiter recruiter = mock(Recruiter.class);
+        when(recruiter.getCompany()).thenReturn(company);
+        return recruiter;
+    }
+
+    @Test
+    @DisplayName("deleteCompany() - ADMIN : entreprise DELETED et offres actives clôturées")
+    void deleteCompany_Admin_SoftDeletesCompanyAndClosesOffers() {
+        Company company = new Company("JoynCorp");
+        JobOffer published = new JobOffer();
+        published.setStatus(OfferStatus.PUBLISHED);
+        JobOffer draft = new JobOffer();
+        draft.setStatus(OfferStatus.DRAFT);
+
+        when(companyRepository.findById(5L)).thenReturn(Optional.of(company));
+        when(jobOfferRepository.findByCompanyIdAndDeletedAtIsNull(5L)).thenReturn(List.of(published, draft));
+
+        companyService.deleteCompany(5L, "Cessation d'activité", jwtAuth("ADMIN", "1"));
+
+        assertThat(company.isDeleted()).isTrue();
+        assertThat(company.getStatus()).isEqualTo("DELETED");
+        assertThat(company.getDeletedAt()).isNotNull();
+        assertThat(published.getStatus()).isEqualTo(OfferStatus.CLOSED);
+        assertThat(draft.getStatus()).isEqualTo(OfferStatus.CLOSED);
+        assertThat(published.getDeletedAt()).isNotNull();
+        assertThat(draft.getDeletedAt()).isNotNull();
+        verify(companyRepository).save(company);
+        verify(jobOfferRepository).saveAll(List.of(published, draft));
+        verify(jobOfferAuditRepository).saveAll(argThat(audits -> audits.spliterator().getExactSizeIfKnown() == 2));
+    }
+
+    @Test
+    @DisplayName("deleteCompany() - RECRUITER de l'entreprise : suppression autorisée")
+    void deleteCompany_RecruiterOfCompany_Allowed() {
+        Company company = new Company("JoynCorp");
+        Recruiter recruiter = recruiterOf(5L);
+
+        when(recruiterProfileRepository.findByUserId(42L)).thenReturn(Optional.of(recruiter));
+        when(companyRepository.findById(5L)).thenReturn(Optional.of(company));
+        when(jobOfferRepository.findByCompanyIdAndDeletedAtIsNull(5L)).thenReturn(List.of());
+
+        companyService.deleteCompany(5L, null, jwtAuth("RECRUITER", "42"));
+
+        assertThat(company.isDeleted()).isTrue();
+    }
+
+    @Test
+    @DisplayName("deleteCompany() - 403 pour un recruteur d'une autre entreprise")
+    void deleteCompany_RecruiterOfOtherCompany_Forbidden() {
+        Recruiter recruiter = recruiterOf(99L);
+        when(recruiterProfileRepository.findByUserId(42L)).thenReturn(Optional.of(recruiter));
+
+        assertThatThrownBy(() -> companyService.deleteCompany(5L, null, jwtAuth("RECRUITER", "42")))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN));
+
+        verify(companyRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("deleteCompany() - 403 pour un candidat")
+    void deleteCompany_Candidate_Forbidden() {
+        assertThatThrownBy(() -> companyService.deleteCompany(5L, null, jwtAuth("CANDIDATE", "7")))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN));
+    }
+
+    @Test
+    @DisplayName("deleteCompany() - 401 sans authentification")
+    void deleteCompany_Unauthenticated_Unauthorized() {
+        assertThatThrownBy(() -> companyService.deleteCompany(5L, null, null))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED));
+    }
+
+    @Test
+    @DisplayName("deleteCompany() - 404 si l'entreprise n'existe pas")
+    void deleteCompany_Unknown_NotFound() {
+        when(companyRepository.findById(5L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> companyService.deleteCompany(5L, null, jwtAuth("ADMIN", "1")))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
+    }
+
+    @Test
+    @DisplayName("deleteCompany() - 404 si l'entreprise est déjà supprimée")
+    void deleteCompany_AlreadyDeleted_NotFound() {
+        Company company = new Company("JoynCorp");
+        company.markDeleted(Instant.now());
+        when(companyRepository.findById(5L)).thenReturn(Optional.of(company));
+
+        assertThatThrownBy(() -> companyService.deleteCompany(5L, null, jwtAuth("ADMIN", "1")))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
+
+        verify(jobOfferRepository, never()).findByCompanyIdAndDeletedAtIsNull(any());
+    }
+
+    @Test
+    @DisplayName("getProfile() - 404 pour une entreprise supprimée, même vérifiée")
+    void getProfile_DeletedCompany_NotFound() {
+        Company company = new Company("JoynCorp");
+        company.setVerificationStatus("VERIFIED");
+        company.markDeleted(Instant.now());
+        when(companyRepository.findById(5L)).thenReturn(Optional.of(company));
+
+        assertThatThrownBy(() -> companyService.getProfile(5L, false, null))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
     }
 }

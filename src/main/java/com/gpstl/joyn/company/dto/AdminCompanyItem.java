@@ -21,7 +21,9 @@ public record AdminCompanyItem(
         @JsonProperty("logo_url") String logoUrl,
         String website,
         @JsonProperty("created_at") Instant createdAt,
-        @JsonProperty("updated_at") Instant updatedAt
+        @JsonProperty("updated_at") Instant updatedAt,
+        // null tant que l'entreprise n'est pas supprimée (suppression logique)
+        @JsonProperty("deleted_at") Instant deletedAt
 ) {
 
     public static AdminCompanyItem from(Company company) {
@@ -42,6 +44,7 @@ public record AdminCompanyItem(
                 logoUrl,
                 company.getWebsite(),
                 company.getCreatedAt(),
-                company.getUpdatedAt());
+                company.getUpdatedAt(),
+                company.getDeletedAt());
     }
 }

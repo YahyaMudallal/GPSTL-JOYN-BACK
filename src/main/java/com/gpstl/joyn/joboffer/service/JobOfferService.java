@@ -68,6 +68,10 @@ public class JobOfferService {
         //    impossible de créer une offre pour le compte d'une autre entreprise.
         Recruiter recruiter = recruiterProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RecruiterProfileNotFoundException(String.valueOf(userId)));
+        //    Entreprise supprimée : plus de publication possible sans réenregistrement.
+        if (recruiter.getCompany().isDeleted()) {
+            throw new RecruiterProfileNotFoundException(String.valueOf(userId));
+        }
 
         // 2. Le type de contrat doit exister dans la table de référence contract_types.
         ContractType contractType = contractTypeRepository.findByCodeIgnoreCase(request.contractType().trim())

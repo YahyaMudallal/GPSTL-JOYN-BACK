@@ -21,7 +21,7 @@ import java.util.Set;
 
 /**
  * Liste paginée des entreprises pour le back-office admin (A66) :
- * GET /api/v1/admin/companies?page=1&limit=20&search=...&status=...&sector=...&company_size=...&sort_by=...&order=...
+ * GET /api/v1/admin/companies?page=1&limit=20&search=...&status=...&sector=...&company_size=...&include_deleted=...&sort_by=...&order=...
  *
  * Le contrôle "rôle ADMIN" est fait avant d'arriver ici, par SecurityConfig.
  */
@@ -50,7 +50,7 @@ public class AdminCompanyListService {
 
     @Transactional(readOnly = true)
     public PageResponse<AdminCompanyItem> listCompanies(int page, int limit, String search, String status,
-                                                         String sector, String companySize,
+                                                         String sector, String companySize, boolean includeDeleted,
                                                          String sortBy, String order) {
         // 1. Vérifier les paramètres : une valeur invalide donne un 400 qui dit quel paramètre corriger.
         if (page < 1) {
@@ -78,7 +78,7 @@ public class AdminCompanyListService {
         PageRequest pageRequest = PageRequest.of(page - 1, limit, sort);
 
         // 3. Requête avec les filtres demandés, puis transformation en DTO.
-        Specification<Company> filters = buildFilters(search, normalizedStatus, sector, normalizedSize);
+        Specification<Company> filters = buildFilters(search, normalizedStatus, sector, normalizedSize, includeDeleted);
         Page<AdminCompanyItem> result = companyRepository.findAll(filters, pageRequest).map(company -> AdminCompanyItem.from(company,
                         logoStorage.createPresignedUrlIfValid(company.getLogoUrl())));
         return PageResponse.from(result);
@@ -88,7 +88,8 @@ public class AdminCompanyListService {
      * Construit la clause WHERE dynamique : chaque filtre n'est ajouté que s'il est renseigné.
      * search : recherche insensible à la casse dans le nom, le SIRET et le domaine email.
      */
-    private Specification<Company> buildFilters(String search, String status, String sector, String companySize) {
+    private Specification<Company> buildFilters(String search, String status, String sector, String companySize,
+                                                boolean includeDeleted) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -107,6 +108,10 @@ public class AdminCompanyListService {
             }
             if (companySize != null) {
                 predicates.add(cb.equal(root.get("companySize"), companySize));
+            }
+            // Par défaut, les entreprises supprimées (suppression logique) sont masquées
+            if (!includeDeleted) {
+                predicates.add(cb.isNull(root.get("deletedAt")));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };

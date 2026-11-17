@@ -64,6 +64,15 @@ class JobAccessServiceTest {
         assertForbidden();
     }
 
+    @Test void rejectsRecruiterOfDeletedCompany() {
+        when(company.isDeleted()).thenReturn(true);
+        Recruiter recruiter = mock(Recruiter.class);
+        when(recruiter.getCompany()).thenReturn(company);
+        when(recruiters.findByUserId(1L)).thenReturn(Optional.of(recruiter));
+        when(user.getRole()).thenReturn("RECRUITER");
+        assertForbidden();
+    }
+
     @Test void missingUserIsUnauthorizedAndMissingJobIsNotFound() {
         when(users.findById(1L)).thenReturn(Optional.empty());
         assertThat(catchThrowableOfType(() -> service.authorizedJob(1,10), JobApiException.class).getStatus()).isEqualTo(401);

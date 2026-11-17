@@ -15,6 +15,9 @@ public interface CompanyRepository extends JpaRepository<Company, Long>, JpaSpec
     // Recherche par nom insensible à la casse
     Optional<Company> findByNameIgnoreCase(String name);
 
+    // Même recherche, limitée aux entreprises non supprimées (inscription recruteur)
+    Optional<Company> findFirstByNameIgnoreCaseAndDeletedAtIsNull(String name);
+
     // Optionnel : recherche par SIRET si fourni plus tard
     Optional<Company> findBySiret(String siret);
     boolean existsBySiret(String siret);

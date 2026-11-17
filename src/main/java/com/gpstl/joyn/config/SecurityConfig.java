@@ -68,6 +68,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/companies/*")
                                 .hasRole("RECRUITER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/companies/*")
+                                .hasAnyRole("RECRUITER", "ADMIN")
                         // Profil du candidat connecté ; /candidates/register reste public.
                         .requestMatchers("/api/v1/candidates/profile", "/api/v1/candidates/profile/**").hasRole("CANDIDATE")
                         // Dashboard du candidat connecté (CA36), avec ou sans /stats.

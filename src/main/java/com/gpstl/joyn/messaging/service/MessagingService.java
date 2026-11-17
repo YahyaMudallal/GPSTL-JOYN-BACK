@@ -94,10 +94,11 @@ public class MessagingService {
     /** users.id (claim "sub") -> candidat ou recruteur. Le compte est relu en base à chaque appel. */
     Viewer viewer(long userId) {
         List<Map<String, Object>> rows = jdbc.queryForList("""
-                SELECT u.role, u.status, cp.id AS candidate_id, rp.company_id
+                SELECT u.role, u.status, cp.id AS candidate_id, rp.company_id, co.deleted_at AS company_deleted_at
                 FROM users u
                 LEFT JOIN candidate_profiles cp ON cp.user_id = u.id
                 LEFT JOIN recruiter_profiles rp ON rp.user_id = u.id
+                LEFT JOIN companies co ON co.id = rp.company_id
                 WHERE u.id = :uid""", Map.of("uid", userId));
         if (rows.isEmpty()) {
             throw MessagingException.unauthorized("Authenticated user does not exist");
@@ -116,6 +117,10 @@ public class MessagingService {
         if ("RECRUITER".equals(role) && companyId == 0) {
             throw MessagingException.notFound(null, "Recruiter profile not found");
         }
+        // Entreprise supprimée : le recruteur perd l'accès à la messagerie (les messages restent en base)
+        if ("RECRUITER".equals(role) && row.get("company_deleted_at") != null) {
+            throw MessagingException.forbidden("Recruiter company has been deleted");
+        }
         if (!"CANDIDATE".equals(role) && !"RECRUITER".equals(role)) {
             throw MessagingException.forbidden("Only candidates and recruiters can use the messaging");
         }
@@ -131,21 +136,23 @@ public class MessagingService {
     // ================================================================== droits sur une conversation
 
     /** Ce qu'il faut savoir d'une conversation pour vérifier les droits. */
-    record ConversationRef(long id, long candidateId, long candidateUserId, long companyId) {
+    record ConversationRef(long id, long candidateId, long candidateUserId, long companyId, boolean companyDeleted) {
     }
 
     /** Charge la conversation et vérifie que l'utilisateur en fait partie : sinon 404 ou 403. */
     ConversationRef checkAccess(long conversationId, Viewer viewer) {
         List<ConversationRef> refs = jdbc.query("""
-                SELECT c.id, cp.id AS candidate_id, cp.user_id AS candidate_user_id, jo.company_id
+                SELECT c.id, cp.id AS candidate_id, cp.user_id AS candidate_user_id, jo.company_id,
+                       co.deleted_at IS NOT NULL AS company_deleted
                 FROM conversations c
                 LEFT JOIN applications a ON a.id = c.application_id
                 LEFT JOIN matches m ON m.id = c.match_id
                 JOIN candidate_profiles cp ON cp.id = COALESCE(a.candidate_id, m.candidate_id)
                 JOIN job_offers jo ON jo.id = COALESCE(a.job_offer_id, m.job_offer_id)
+                JOIN companies co ON co.id = jo.company_id
                 WHERE c.id = :id""", Map.of("id", conversationId), (rs, i) -> new ConversationRef(
                 rs.getLong("id"), rs.getLong("candidate_id"), rs.getLong("candidate_user_id"),
-                rs.getLong("company_id")));
+                rs.getLong("company_id"), rs.getBoolean("company_deleted")));
         if (refs.isEmpty()) {
             throw MessagingException.notFound("conversationId", "Conversation not found");
         }
@@ -220,9 +227,10 @@ public class MessagingService {
         long appId = applicationId != null ? applicationId : findApplicationOfCandidate(viewer, candidateId, jobId);
 
         List<Map<String, Object>> rows = jdbc.queryForList("""
-                SELECT a.id, a.candidate_id, jo.company_id, st.code
+                SELECT a.id, a.candidate_id, jo.company_id, st.code, co.deleted_at AS company_deleted_at
                 FROM applications a
                 JOIN job_offers jo ON jo.id = a.job_offer_id
+                JOIN companies co ON co.id = jo.company_id
                 JOIN application_statuses st ON st.id = a.status_id
                 WHERE a.id = :id""", Map.of("id", appId));
         if (rows.isEmpty()) {
@@ -251,6 +259,10 @@ public class MessagingService {
         }
 
         boolean alreadyExists = conversationRepository.existsByApplicationId(appId);
+        // Entreprise supprimée : la conversation existante reste lisible, mais on n'en crée plus
+        if (!alreadyExists && app.get("company_deleted_at") != null) {
+            throw MessagingException.forbidden("The company has been deleted");
+        }
         long conversationId = ensureConversationForApplication(appId);
         return new OpenResult(findItem(viewer, conversationId), !alreadyExists);
     }
@@ -355,6 +367,9 @@ public class MessagingService {
     public MessageItem sendMessage(long userId, long conversationId, String text, String clientId) {
         Viewer viewer = viewer(userId);
         ConversationRef ref = checkAccess(conversationId, viewer);
+        if (ref.companyDeleted()) {
+            throw MessagingException.forbidden("The company has been deleted; this conversation is read-only");
+        }
 
         String content = text == null ? "" : text.strip();
         if (content.isEmpty()) {

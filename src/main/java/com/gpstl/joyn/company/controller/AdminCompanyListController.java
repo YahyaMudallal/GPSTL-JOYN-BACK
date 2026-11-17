@@ -36,7 +36,8 @@ public class AdminCompanyListController {
 
     @GetMapping
     @Operation(summary = "List companies with pagination and filters",
-            description = "Returns a paginated list of companies supporting text search, verification status filters, and sorting")
+            description = "Returns a paginated list of companies supporting text search, verification status filters, and sorting. "
+                    + "Soft-deleted companies are hidden unless include_deleted=true")
     @ApiResponse(responseCode = "200", description = "Page d'entreprises (data + pagination)")
     @ApiResponse(responseCode = "400", description = "Paramètre invalide (page, limit, status, company_size, sort_by, order)",
             content = @Content(schema = @Schema(implementation = ApiError.class)))
@@ -55,12 +56,14 @@ public class AdminCompanyListController {
             @RequestParam(required = false) String sector,
             @Parameter(description = "MICRO, SMALL, MEDIUM ou LARGE")
             @RequestParam(name = "company_size", required = false) String companySize,
+            @Parameter(description = "true pour inclure les entreprises supprimées (deleted_at renseigné)")
+            @RequestParam(name = "include_deleted", defaultValue = "false") boolean includeDeleted,
             @Parameter(description = "created_at ou name")
             @RequestParam(name = "sort_by", defaultValue = "created_at") String sortBy,
             @Parameter(description = "asc ou desc")
             @RequestParam(defaultValue = "desc") String order) {
 
         return ResponseEntity.ok(adminCompanyListService.listCompanies(
-                page, limit, search, status, sector, companySize, sortBy, order));
+                page, limit, search, status, sector, companySize, includeDeleted, sortBy, order));
     }
 }
