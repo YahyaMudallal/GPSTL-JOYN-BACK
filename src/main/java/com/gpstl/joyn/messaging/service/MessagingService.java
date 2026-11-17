@@ -1,5 +1,6 @@
 package com.gpstl.joyn.messaging.service;
 
+import com.gpstl.joyn.company.service.CompanyLogoStorage;
 import com.gpstl.joyn.messaging.dto.ConversationItem;
 import com.gpstl.joyn.messaging.dto.ConversationList;
 import com.gpstl.joyn.messaging.dto.MessageItem;
@@ -61,17 +62,20 @@ public class MessagingService {
     private final MessageRepository messageRepository;
     private final ApplicationEventPublisher events;
     private final UserProfilePictureStorage profilePictureStorage;
+    private final CompanyLogoStorage logoStorage;
 
     public MessagingService(NamedParameterJdbcTemplate jdbc,
                             ConversationRepository conversationRepository,
                             MessageRepository messageRepository,
                             ApplicationEventPublisher events,
-                            UserProfilePictureStorage profilePictureStorage) {
+                            UserProfilePictureStorage profilePictureStorage,
+                            CompanyLogoStorage logoStorage) {
         this.jdbc = jdbc;
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
         this.events = events;
         this.profilePictureStorage = profilePictureStorage;
+        this.logoStorage = logoStorage;
     }
 
     // ================================================================== qui est connecté ?
@@ -470,7 +474,7 @@ public class MessagingService {
                     rs.getString("offer_title"),
                     rs.getLong("company_id"),
                     companyName,
-                    rs.getString("logo_url"),
+                    logoStorage.createPresignedUrlIfValid(rs.getString("logo_url")), // R84 : clé -> URL
                     rs.getLong("candidate_id"),
                     candidateName,
                     photoUrl,

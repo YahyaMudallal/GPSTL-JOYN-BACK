@@ -2,6 +2,8 @@ package com.gpstl.joyn.config;
 
 import com.gpstl.joyn.candidate.service.CandidateResumeStorage;
 import com.gpstl.joyn.candidate.service.SupabaseCandidateResumeStorage;
+import com.gpstl.joyn.company.service.CompanyLogoStorage;
+import com.gpstl.joyn.company.service.SupabaseCompanyLogoStorage;
 import com.gpstl.joyn.user.service.SupabaseUserProfilePictureStorage;
 import com.gpstl.joyn.user.service.UserProfilePictureStorage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -82,6 +84,21 @@ public class SupabaseStorageConfig {
             @Value("${joyn.storage.supabase.bucket}") String bucket
     ) {
         return new SupabaseUserProfilePictureStorage(
+                s3Client,
+                s3Presigner,
+                bucket,
+                Duration.ofHours(24)
+        );
+    }
+
+    // R84 : logos des entreprises, même bucket que les photos de profil (dossier company_logos/)
+    @Bean
+    public CompanyLogoStorage supabaseCompanyLogoStorage(
+            S3Client s3Client,
+            S3Presigner s3Presigner,
+            @Value("${joyn.storage.supabase.bucket}") String bucket
+    ) {
+        return new SupabaseCompanyLogoStorage(
                 s3Client,
                 s3Presigner,
                 bucket,

@@ -25,6 +25,11 @@ public record AdminCompanyItem(
 ) {
 
     public static AdminCompanyItem from(Company company) {
+        return from(company, company.getLogoUrl());
+    }
+
+    /** R84 : logoUrl = l'URL affichable du logo (et non la clé de stockage enregistrée en base). */
+    public static AdminCompanyItem from(Company company, String logoUrl) {
         return new AdminCompanyItem(
                 company.getId(),
                 company.getName(),
@@ -34,7 +39,7 @@ public record AdminCompanyItem(
                 company.getSector(),
                 company.getCompanySize(),
                 company.getVerificationStatus(),
-                company.getLogoUrl(),
+                logoUrl,
                 company.getWebsite(),
                 company.getCreatedAt(),
                 company.getUpdatedAt());
