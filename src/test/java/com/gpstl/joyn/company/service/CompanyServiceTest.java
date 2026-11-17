@@ -39,6 +39,10 @@ class CompanyServiceTest {
     @Mock
     private RecruiterRepository recruiterProfileRepository;
 
+    // R84 : convertit la clé du logo en URL (non utilisé dans ces tests)
+    @Mock
+    private CompanyLogoStorage logoStorage;
+
     @InjectMocks
     private CompanyService companyService;
 
