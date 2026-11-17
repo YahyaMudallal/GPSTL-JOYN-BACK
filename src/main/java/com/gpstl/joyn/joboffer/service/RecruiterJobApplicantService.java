@@ -1,6 +1,7 @@
 package com.gpstl.joyn.joboffer.service;
 
 import com.gpstl.joyn.candidate.dto.CandidateProfileResponse;
+import com.gpstl.joyn.candidate.service.CandidateRecommendationService;
 import com.gpstl.joyn.candidate.repository.CandidateRepository;
 import com.gpstl.joyn.candidate.service.CandidateResumeStorage;
 import com.gpstl.joyn.joboffer.dto.RecruiterJobApplicantItem;
@@ -12,7 +13,8 @@ import com.gpstl.joyn.joboffer.repository.RecruiterJobApplicantProjection;
 import com.gpstl.joyn.joboffer.repository.RecruiterJobApplicantRepository;
 import com.gpstl.joyn.user.service.UserProfilePictureStorage;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import java.util.Comparator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,39 +68,35 @@ public class RecruiterJobApplicantService {
                 .orElseThrow(() -> new JobApiException(404, "Job not found"));
         jobAccess.checkCompanyAccess(recruiterUserId, jobOffer);
 
-        Page<RecruiterJobApplicantProjection> results = applicants.findApplicants(
-                jobId,
-                PageRequest.of(page - 1, limit));
-
-        List<RecruiterJobApplicantItem> content = results.getContent().stream()
-                .map(result -> toItem(result))
+        // Score every visible applicant before pagination: seed-created applications may
+        // have no cached recommendation, and profile/offer edits can invalidate old scores.
+        Page<RecruiterJobApplicantProjection> results = applicants.findApplicants(jobId, Pageable.unpaged());
+        List<RecruiterJobApplicantItem> ranked = results.getContent().stream()
+                .map(result -> toItem(result, jobOffer))
+                .sorted(Comparator.comparing(RecruiterJobApplicantItem::matchScore,
+                        Comparator.nullsLast(Comparator.reverseOrder()))
+                    .thenComparing(RecruiterJobApplicantItem::appliedAt,
+                        Comparator.nullsLast(Comparator.reverseOrder()))
+                    .thenComparing(RecruiterJobApplicantItem::applicationId, Comparator.reverseOrder()))
                 .toList();
-        return new RecruiterJobApplicantsPageResponse(
-            content,
-            results.getNumber() + 1,
-            results.getSize(),
-            results.getTotalElements(),
-            results.getTotalPages(),
-            results.hasNext());
+        long offset = (long) (page - 1) * limit;
+        List<RecruiterJobApplicantItem> content = offset >= ranked.size() ? List.of()
+                : ranked.subList((int) offset, (int) Math.min(offset + limit, ranked.size()));
+        return new RecruiterJobApplicantsPageResponse(content, page, limit, ranked.size(),
+                (int) Math.ceil((double) ranked.size() / limit), offset + limit < ranked.size());
     }
 
-    private RecruiterJobApplicantItem toItem(RecruiterJobApplicantProjection result) {
-        CandidateProfileResponse profile = candidates.findProfileById(result.getCandidateId())
-                .map(candidate -> CandidateProfileResponse.forRecruiter(
-                        candidate,
-                        resumeStorage.createPresignedUrlIfValid(candidate.getResumeUrl()),
-                        profilePictureStorage.createPresignedUrlIfValid(candidate.getPhotoUrl())))
+    private RecruiterJobApplicantItem toItem(RecruiterJobApplicantProjection result, JobOffer offer) {
+        var candidate = candidates.findProfileById(result.getCandidateId())
                 .orElseThrow(() -> new JobApiException(404, "Candidate profile not found"));
-
-        Integer score = result.getMatchScore() == null ? null : result.getMatchScore().intValue();
-        RecruiterJobApplicantItem.ScoreBreakdown breakdown = score == null ? null
-                : new RecruiterJobApplicantItem.ScoreBreakdown(
-                    toInt(result.getSkillScore()),
-                    toInt(result.getExperienceScore()),
-                    toInt(result.getEducationScore()),
-                    toInt(result.getLocationScore()),
-                    toInt(result.getAvailabilityScore()),
-                    result.getDistanceKm());
+        CandidateProfileResponse profile = CandidateProfileResponse.forRecruiter(candidate,
+                resumeStorage.createPresignedUrlIfValid(candidate.getResumeUrl()),
+                profilePictureStorage.createPresignedUrlIfValid(candidate.getPhotoUrl()));
+        var calculated = CandidateRecommendationService.calculate(candidate, offer);
+        Integer score = calculated.matchScore();
+        var breakdown = new RecruiterJobApplicantItem.ScoreBreakdown(calculated.skillScore(),
+                calculated.experienceScore(), calculated.educationScore(), calculated.locationScore(),
+                calculated.availabilityScore(), calculated.distanceKm() == null ? null : java.math.BigDecimal.valueOf(calculated.distanceKm()));
         return new RecruiterJobApplicantItem(
             result.getApplicationId(),
             result.getApplicationStatus(),
@@ -108,7 +106,4 @@ public class RecruiterJobApplicantService {
             profile);
     }
 
-    private static Integer toInt(Short value) {
-        return value == null ? null : value.intValue();
-    }
 }

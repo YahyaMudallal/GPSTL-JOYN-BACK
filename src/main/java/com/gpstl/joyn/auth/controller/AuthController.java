@@ -37,7 +37,7 @@ public class AuthController {
             description = "Validates user credentials and issues a signed JSON Web Token containing roles and identity claims",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
                     examples = @ExampleObject(value = """
-                            {"email": "admin@joyn.dev", "password": "JoynAdmin2026!"}"""))))
+                            {"email": "admin@joyn.test", "password": "JoynAdmin2026!"}"""))))
     @ApiResponse(responseCode = "200", description = "Connexion réussie",
             content = @Content(schema = @Schema(implementation = LoginResponse.class)))
     @ApiResponse(responseCode = "400", description = "Email ou mot de passe manquant, ou email mal formé",

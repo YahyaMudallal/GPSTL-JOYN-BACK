@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
-@Schema(description = "Paginated applicants for a recruiter-owned job offer, ranked by stored match score")
+@Schema(description = "Paginated applicants for a recruiter-owned job offer, ranked by current match score")
 public record RecruiterJobApplicantsPageResponse(
         List<RecruiterJobApplicantItem> content,
         int page,

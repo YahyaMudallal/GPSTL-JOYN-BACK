@@ -42,6 +42,7 @@ public class JwtTokenService {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .subject(String.valueOf(user.getId()))
                 .claim("role", user.getRole())
+                .claim("sessionVersion", user.getTokensValidAfter()==null ? "0" : user.getTokensValidAfter().toString())
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expirationSeconds))
                 .build();

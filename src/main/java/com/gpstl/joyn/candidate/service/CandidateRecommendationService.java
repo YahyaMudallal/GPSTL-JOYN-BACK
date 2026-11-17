@@ -199,7 +199,7 @@ public class CandidateRecommendationService {
      * Calcule chaque critère disponible puis normalise la moyenne pondérée :
      * un critère non renseigné n'ajoute ni points ni poids au dénominateur.
      */
-    private static Breakdown calculate(Candidate candidate, JobOffer offer) {
+    public static Breakdown calculate(Candidate candidate, JobOffer offer) {
         // Le score de compétences mesure la part des compétences exigées par l'offre
         // présentes dans le profil du candidat.
         Set<Long> candidateSkills = new HashSet<>();

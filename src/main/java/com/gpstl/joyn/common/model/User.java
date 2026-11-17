@@ -38,6 +38,10 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt = Instant.now();
 
+    @Column(name="tokens_valid_after")
+    private Instant tokensValidAfter;
+    public Instant getTokensValidAfter() { return tokensValidAfter; }
+
     public User() {}
 
     public User(String email, String passwordHash, String role) {
