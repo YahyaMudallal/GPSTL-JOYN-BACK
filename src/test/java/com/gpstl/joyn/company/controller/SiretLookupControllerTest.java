@@ -24,6 +24,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(SiretLookupController.class)
 @Import({SecurityConfig.class, SiretLookupService.class, SiretLookupControllerTest.RegistryConfig.class})
 class SiretLookupControllerTest {
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    org.springframework.jdbc.core.JdbcTemplate jdbc;
     private static final String URL = "/api/v1/companies/lookup?siret=35600000000048";
     @Autowired private MockRestServiceServer server;
     @Autowired private MockMvc mvc;

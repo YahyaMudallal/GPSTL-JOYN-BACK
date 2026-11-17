@@ -38,7 +38,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            CorsConfigurationSource corsConfigurationSource
+            CorsConfigurationSource corsConfigurationSource,
+            org.springframework.jdbc.core.JdbcTemplate jdbc
     ) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
@@ -46,6 +47,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/account", "/api/v1/account/**").authenticated()
+                        .requestMatchers("/api/v1/interviews", "/api/v1/interviews/**").hasAnyRole("CANDIDATE", "RECRUITER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/companies/lookup").permitAll()
                         // Logos des entreprises (R84) : tout le monde peut les voir ;
                         // envoi / suppression par un recruteur (de l'entreprise, vérifié dans le service) ou un admin.
@@ -67,7 +70,7 @@ public class SecurityConfig {
                         // Back-office : toutes les routes /api/v1/admin/** sont réservées aux administrateurs
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/companies/*")
-                                .hasRole("RECRUITER")
+                                .hasAnyRole("RECRUITER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/companies/*")
                                 .hasAnyRole("RECRUITER", "ADMIN")
                         // Profil du candidat connecté ; /candidates/register reste public.
@@ -84,6 +87,8 @@ public class SecurityConfig {
                 // Sans token -> 401 ; token valide sans le rôle -> 403
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+        http.addFilterAfter(new com.gpstl.joyn.additional.AccountTokenFilter(jdbc),
+            org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter.class);
         return http.build();
     }
 

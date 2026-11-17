@@ -52,6 +52,10 @@ class RecruiterJobApplicantControllerTest extends JobDatabaseTestSupport {
         candidateWithoutScore = createCandidate("Linus", "Torvalds", "Paris", true);
         hiddenCandidate = createCandidate("Hidden", "Profile", "Paris", false);
 
+        long secondSkill = insert("INSERT INTO skills(name) VALUES (?) RETURNING id", "Skill-" + UUID.randomUUID());
+        jdbc.update("INSERT INTO job_offer_skills(job_offer_id, skill_id) VALUES (?, ?)", job, secondSkill);
+        jdbc.update("INSERT INTO candidate_skills(candidate_id, skill_id) VALUES (?, ?), (?, ?), (?, ?)",
+                firstCandidate, skill, firstCandidate, secondSkill, secondCandidate, skill);
         apply(firstCandidate);
         apply(secondCandidate);
         apply(candidateWithoutScore);
@@ -85,16 +89,16 @@ class RecruiterJobApplicantControllerTest extends JobDatabaseTestSupport {
     }
 
     @Test
-    void returnsOnlyVisibleApplicantsOrderedByStoredScoreAndPaginates() throws Exception {
+    void recalculatesVisibleApplicantsIgnoringStaleCacheAndPaginates() throws Exception {
         mvc.perform(get(route(job))
                         .queryParam("limit", "1")
                         .header("Authorization", token(recruiter, "RECRUITER")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1))
                 .andExpect(jsonPath("$.content[0].candidate.first_name").value("Ada"))
-                .andExpect(jsonPath("$.content[0].match_score").value(85))
+                .andExpect(jsonPath("$.content[0].match_score").value(100))
                 .andExpect(jsonPath("$.content[0].score_breakdown.skills").value(100))
-                .andExpect(jsonPath("$.content[0].score_breakdown.distance_km").value(12.5))
+                .andExpect(jsonPath("$.content[0].score_breakdown.distance_km").doesNotExist())
                 .andExpect(jsonPath("$.totalElements").value(3))
                 .andExpect(jsonPath("$.hasNext").value(true));
 
@@ -104,7 +108,7 @@ class RecruiterJobApplicantControllerTest extends JobDatabaseTestSupport {
                         .header("Authorization", token(recruiter, "RECRUITER")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].candidate.first_name").value("Grace"))
-                .andExpect(jsonPath("$.content[0].match_score").value(72));
+                .andExpect(jsonPath("$.content[0].match_score").value(50));
 
         mvc.perform(get(route(job))
                         .queryParam("page", "3")
@@ -112,7 +116,7 @@ class RecruiterJobApplicantControllerTest extends JobDatabaseTestSupport {
                         .header("Authorization", token(recruiter, "RECRUITER")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].candidate.first_name").value("Linus"))
-                .andExpect(jsonPath("$.content[0].match_score").doesNotExist())
+                .andExpect(jsonPath("$.content[0].match_score").value(0))
                 .andExpect(jsonPath("$.hasNext").value(false));
     }
 

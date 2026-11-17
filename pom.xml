@@ -84,9 +84,9 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.sejda.imageio</groupId>
+			<groupId>com.github.usefulness</groupId>
 			<artifactId>webp-imageio</artifactId>
-			<version>0.1.6</version>
+			<version>0.11.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
