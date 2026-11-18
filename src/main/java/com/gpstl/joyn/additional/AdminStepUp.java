@@ -23,11 +23,21 @@ public class AdminStepUp {
     private final JdbcTemplate jdbc;
     private final PasswordEncoder passwords;
     private final Map<String, String> secrets;
+    // Réservé aux environnements de démonstration : désactivé par défaut.
+    private final boolean testCodeEnabled;
+    private final String testCode;
 
     public AdminStepUp(JdbcTemplate jdbc, PasswordEncoder passwords,
-            @Value("${JOYN_ADMIN_TOTP_SECRETS:}") String configuredSecrets) {
+            @Value("${JOYN_ADMIN_TOTP_SECRETS:}") String configuredSecrets,
+            @Value("${JOYN_ADMIN_ALLOW_TEST_CODE:false}") boolean allowTestCode,
+            @Value("${JOYN_ADMIN_TEST_CODE:123456}") String configuredTestCode) {
         this.jdbc = jdbc;
         this.passwords = passwords;
+        if (!configuredTestCode.matches("[0-9]{6}")) {
+            throw new IllegalStateException("Invalid six-digit administrative test code configuration");
+        }
+        this.testCodeEnabled = allowTestCode && configuredSecrets.isBlank();
+        this.testCode = configuredTestCode;
         try {
             this.secrets = configuredSecrets.isBlank() ? Map.of() : new JsonMapper().readValue(configuredSecrets, new TypeReference<Map<String, String>>() {});
         } catch (RuntimeException e) {
@@ -43,7 +53,10 @@ public class AdminStepUp {
         if (accounts.isEmpty()) throw ActorAccess.error(403, "Accès réservé à l’administration");
         var account = accounts.getFirst();
         String secret = secrets.get(((String) account.get("email")).toLowerCase(Locale.ROOT));
-        if (secret == null) throw ActorAccess.error(412, "Second facteur de ce compte non configuré");
+        boolean useTestCode = secret == null && testCodeEnabled;
+        if (secret == null && !useTestCode) {
+            throw ActorAccess.error(412, "Second facteur de ce compte non configuré");
+        }
 
         int attempts = jdbc.queryForObject("""
                 INSERT INTO admin_moderation_step_up(user_id, attempts) VALUES (?, 1)
@@ -57,6 +70,17 @@ public class AdminStepUp {
         if (attempts > 5) throw ActorAccess.error(429, "Réessayez dans une minute");
         if (password.getBytes(StandardCharsets.UTF_8).length > 72 ||
                 !passwords.matches(password, (String) account.get("password_hash"))) {
+            throw ActorAccess.error(403, "Mot de passe ou code invalide");
+        }
+
+        // Mode de test explicitement activé uniquement si aucun secret TOTP n'est configuré.
+        // Il conserve la vérification du mot de passe et la limitation de tentatives,
+        // mais NE constitue PAS un second facteur sécurisé : ne pas utiliser en production.
+        if (useTestCode) {
+            if (MessageDigest.isEqual(testCode.getBytes(StandardCharsets.US_ASCII),
+                    code.getBytes(StandardCharsets.US_ASCII))) {
+                return;
+            }
             throw ActorAccess.error(403, "Mot de passe ou code invalide");
         }
 
