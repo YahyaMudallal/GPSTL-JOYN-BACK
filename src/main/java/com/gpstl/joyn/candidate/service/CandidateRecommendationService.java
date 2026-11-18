@@ -148,7 +148,7 @@ public class CandidateRecommendationService {
         List<CandidateRecommendationScore> scoresToSave = new ArrayList<>(offers.size());
         for (JobOffer offer : offers) {
             // Le score est toujours recalculé à partir du profil et de l'offre actuels.
-            Breakdown breakdown = calculate(candidate, offer);
+            Breakdown breakdown = calculateForCandidate(candidate, offer);
             CandidateRecommendationScore score = scoresByOffer.get(offer.getId());
             if (score == null) {
                 score = new CandidateRecommendationScore(candidate, offer, breakdown);
@@ -251,6 +251,29 @@ public class CandidateRecommendationService {
             location, 
             availability, 
             distance);
+    }
+
+    private static Breakdown calculateForCandidate(Candidate candidate, JobOffer offer) {
+        Breakdown detail = calculate(candidate, offer);
+        // Aucune barre de trajet : les coordonnées fournissent une distance à vol d'oiseau.
+        Integer experience = offer.getExperienceLevelRequired() == ExperienceLevel.JUNIOR
+                ? null : detail.experienceScore();
+        Integer education = detail.educationScore();
+        if (education != null && candidate.getEducations().stream().noneMatch(e -> educationLevel(e) > 0)) {
+            education = null;
+        }
+        Integer[] observed = {detail.skillScore(), experience, education, detail.availabilityScore()};
+        int[] weights = {65, 15, 10, 10};
+        int weight = 0;
+        int score = 0;
+        for (int i = 0; i < observed.length; i++) {
+            if (observed[i] == null) continue;
+            weight += weights[i];
+            score += observed[i] * weights[i];
+        }
+        int total = weight == 0 ? 0 : (int) Math.round((double) score / weight);
+        return new Breakdown(total, detail.skillScore(), experience, education, null,
+                detail.availabilityScore(), detail.distanceKm());
     }
 
     /** Compare l'expérience du candidat à une référence en années définie par le niveau demandé. */

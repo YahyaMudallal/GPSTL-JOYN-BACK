@@ -110,6 +110,11 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.markAsRead(userId(jwt), positive(id), delete));
     }
 
+    @PatchMapping("/{id}/unread")
+    public ResponseEntity<NotificationItem> markUnread(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+        return ResponseEntity.ok(notificationService.markUnread(userId(jwt), id));
+    }
+
     @PatchMapping("/read-all")
     @Operation(
             summary = "Marquer toutes les notifications comme lues",

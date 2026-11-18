@@ -26,17 +26,25 @@ public class RecruiterCatalogController {
         var ids=jdbc.queryForList("""
             SELECT j.id FROM job_offers j JOIN recruiter_profiles r ON r.company_id=j.company_id
             JOIN companies c ON c.id=j.company_id
-            WHERE r.user_id=? AND c.status<>'DELETED'
+            WHERE r.user_id=? AND c.status<>'DELETED' AND j.deleted_at IS NULL
             ORDER BY j.created_at DESC, j.id DESC LIMIT ? OFFSET ?
             """,Long.class,user,limit,(long)(page-1)*limit);
         long count=jdbc.queryForObject("""
             SELECT count(*) FROM job_offers j JOIN recruiter_profiles r ON r.company_id=j.company_id
             JOIN companies c ON c.id=j.company_id
-            WHERE r.user_id=? AND c.status<>'DELETED'
+            WHERE r.user_id=? AND c.status<>'DELETED' AND j.deleted_at IS NULL
             """,Long.class,user);
         return Map.of("content",ids.stream().map(this::item).toList(),"page",page,"limit",limit,
             "totalElements",count,"hasNext",(long)page*limit<count);
     }
+    /** Contract IDs for the existing numeric JobPatch API; contract edits remain fully supported. */
+    @GetMapping("/contract-types")
+    @Transactional(readOnly=true)
+    public List<Map<String,Object>> contractTypes(@AuthenticationPrincipal Jwt jwt) {
+        long user=Long.parseLong(jwt.getSubject()); access.active(user,"RECRUITER");
+        return jdbc.queryForList("SELECT id,code,label FROM contract_types ORDER BY id");
+    }
+
     @GetMapping("/{id}")
     @Transactional(readOnly=true)
     public Map<String,Object> detail(@AuthenticationPrincipal Jwt jwt,@PathVariable long id) {

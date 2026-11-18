@@ -76,7 +76,15 @@ public class SupabaseCandidateResumeStorage implements CandidateResumeStorage {
     @Override
     public Optional<StoredCandidateResume> load(String storageKey) {
         validateStorageKey(storageKey);
-        return Optional.empty();
+        var request = GetObjectRequest.builder().bucket(bucket).key(storageKey).build();
+        try {
+            byte[] bytes = s3Client.getObjectAsBytes(request).asByteArray();
+            return Optional.of(new StoredCandidateResume(
+                    new org.springframework.core.io.ByteArrayResource(bytes), MediaType.APPLICATION_PDF));
+        } catch (software.amazon.awssdk.services.s3.model.S3Exception ex) {
+            if (ex.statusCode() == 404) return Optional.empty();
+            throw ex;
+        }
     }
 
     private static void validateStorageKey(String storageKey) {
