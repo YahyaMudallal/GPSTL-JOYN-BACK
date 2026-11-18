@@ -132,6 +132,7 @@ public class AdminCandidateListService {
             Join<Candidate, User> user = root.join("user");
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(user.get("role"), "CANDIDATE"));
+            predicates.add(cb.isNull(user.get("deletedAt")));
 
             if (status != null) {
                 predicates.add(cb.equal(user.get("status"), status));

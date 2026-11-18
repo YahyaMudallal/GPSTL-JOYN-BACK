@@ -20,7 +20,7 @@ public class AdminAccountController {
     public Map<String,Object> status(@AuthenticationPrincipal Jwt jwt,@PathVariable long id,@Valid @RequestBody StatusChange body){
         long actor=Long.parseLong(jwt.getSubject());access.active(actor,"ADMIN");
         if(id==actor)throw ActorAccess.error(403,"Cannot change your own status");
-        var rows=jdbc.queryForList("SELECT role FROM users WHERE id=? FOR UPDATE",id);
+        var rows=jdbc.queryForList("SELECT role FROM users WHERE id=? AND deleted_at IS NULL FOR UPDATE",id);
         if(rows.isEmpty())throw ActorAccess.error(404,"User not found");
         if("ADMIN".equals(rows.getFirst().get("role")))throw ActorAccess.error(403,"Administrator access is managed privately");
         if(body.status().equals("SUSPENDED") && (body.reason()==null||body.reason().trim().length()<5))throw ActorAccess.error(400,"A reason is required");

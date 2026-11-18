@@ -26,7 +26,10 @@ public record CandidateDashboardResponse(
         Conversations conversations,
         Interviews interviews,
         @JsonProperty("new_offers_count") long newOffersCount,
-        @JsonProperty("recent_activities") List<Activity> recentActivities) {
+        @JsonProperty("recent_activities") List<Activity> recentActivities,
+        List<TrendPoint> trend) {
+
+    public record TrendPoint(java.time.LocalDate date, long applications, long interviews) {}
 
     /**
      * Carte "Candidatures en cours" de la maquette (ex. 14 actives : Intéressé 5, Envoyée 4, Vue 3, Entretien 2).

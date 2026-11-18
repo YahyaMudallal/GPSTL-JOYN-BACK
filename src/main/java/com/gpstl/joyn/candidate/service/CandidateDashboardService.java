@@ -79,7 +79,28 @@ public class CandidateDashboardService {
                 conversations(params),
                 interviews(params),
                 newOffersCount(params),
-                recentActivities(params));
+                recentActivities(params),
+                trend(params, "all".equals(period.code())));
+    }
+
+    private List<CandidateDashboardResponse.TrendPoint> trend(MapSqlParameterSource params, boolean monthly) {
+        params.addValue("bucket", monthly ? "month" : "day");
+        return jdbc.query("""
+                WITH events AS (
+                    SELECT a.created_at AS occurred, 1 AS applications, 0 AS interviews
+                    FROM applications a WHERE a.candidate_id=:cid
+                    UNION ALL
+                    SELECT i.created_at, 0, 1 FROM interviews i
+                    LEFT JOIN applications a ON a.id=i.application_id
+                    LEFT JOIN matches m ON m.id=i.match_id
+                    WHERE a.candidate_id=:cid OR m.candidate_id=:cid
+                )
+                SELECT CAST(date_trunc(:bucket, occurred AT TIME ZONE 'Europe/Paris') AS date) AS bucket,
+                       sum(applications) AS applications, sum(interviews) AS interviews
+                FROM events WHERE occurred >= :from AND occurred <= :now
+                GROUP BY 1 ORDER BY 1
+                """, params, (row, index) -> new CandidateDashboardResponse.TrendPoint(
+                row.getObject("bucket", java.time.LocalDate.class), row.getLong("applications"), row.getLong("interviews")));
     }
 
     // ------------------------------------------------------------------ identité

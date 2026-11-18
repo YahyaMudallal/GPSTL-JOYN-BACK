@@ -161,6 +161,29 @@ public class NotificationService {
         return notificationRepository.deleteAllByUserId(userId);
     }
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.jdbc.core.JdbcTemplate preferencesJdbc;
+
+    private boolean allowsNotification(User user, NotificationType type) {
+        String preference = switch (type) {
+            case NEW_MESSAGE -> "messageAlerts";
+            case NEW_OFFER, RECOMMENDATION, NEW_MATCH -> "opportunityAlerts";
+            default -> null;
+        };
+        if (preference == null || preferencesJdbc == null || !"CANDIDATE".equals(user.getRole())) return true;
+        return Boolean.TRUE.equals(preferencesJdbc.queryForObject("""
+                SELECT coalesce((settings->>?)::boolean,true) FROM users WHERE id=?
+                """, Boolean.class, preference, user.getId()));
+    }
+
+    @Transactional
+    public NotificationItem markUnread(Long userId, Long notificationId) {
+        Notification item = notificationRepository.findByIdAndUserId(notificationId, userId)
+                .orElseThrow(() -> NotificationException.notFound("notificationId", "Notification not found"));
+        item.setReadAt(null);
+        return NotificationItem.from(notificationRepository.saveAndFlush(item));
+    }
+
     /**
      * Crée une notification générique en appliquant le plafond par utilisateur.
      */
@@ -172,6 +195,7 @@ public class NotificationService {
             String message,
             String link) {
 
+        if (!allowsNotification(user, type)) return null;
         Notification notification = new Notification(user, type, title, message, link);
         Notification saved = notificationRepository.saveAndFlush(notification);
 
@@ -228,6 +252,7 @@ public class NotificationService {
             String messageContent,
             Long conversationId) {
 
+        if (!allowsNotification(recipientUser, NotificationType.NEW_MESSAGE)) return null;
         String link = "/conversations/" + conversationId;
         String snippet = truncate(messageContent, 120);
 

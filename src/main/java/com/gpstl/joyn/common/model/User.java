@@ -7,6 +7,9 @@ import java.time.Instant;
 @Table(name = "users")
 public class User {
 
+    @Column(name = "deleted_at")
+    private java.time.Instant deletedAt;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

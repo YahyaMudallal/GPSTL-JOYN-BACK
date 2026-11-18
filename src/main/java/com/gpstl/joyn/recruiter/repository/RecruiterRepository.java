@@ -33,7 +33,7 @@ public interface RecruiterRepository extends JpaRepository<Recruiter, Long> {
         SELECT r FROM Recruiter r
         JOIN r.user u
         LEFT JOIN r.company c
-        WHERE (:search IS NULL OR :search = '' 
+        WHERE u.deletedAt IS NULL AND u.role = 'RECRUITER' AND (:search IS NULL OR :search = ''
                OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))
                OR LOWER(r.firstName) LIKE LOWER(CONCAT('%', :search, '%'))
                OR LOWER(r.lastName) LIKE LOWER(CONCAT('%', :search, '%'))

@@ -13,6 +13,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -35,7 +38,7 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Create an application",
         description = "Creates an application for the candidate identified by the JWT, "
@@ -69,6 +72,19 @@ public class ApplicationController {
             @Valid @RequestBody CreateApplicationRequest request) {
         Long userId = ApplicationService.userIdFromSubject(jwt.getSubject());
         return ResponseEntity.status(HttpStatus.CREATED).body(applicationService.create(userId, request));
+    }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApplicationResponse> createWithCoverPdf(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam Long jobOfferId,
+            @RequestParam("coverPdf") MultipartFile coverPdf) {
+        Long userId = ApplicationService.userIdFromSubject(jwt.getSubject());
+        if (jobOfferId <= 0) {
+            throw com.gpstl.joyn.application.exception.ApplicationException.badRequest("Invalid job offer ID");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                applicationService.create(userId, new CreateApplicationRequest(jobOfferId, null, null), coverPdf));
     }
 
     @PatchMapping("/{applicationId}/status")

@@ -82,6 +82,12 @@ public class ApplicationService {
     public ApplicationResponse create(
             Long userId, 
             CreateApplicationRequest request) {
+        return create(userId, request, null);
+    }
+
+    @Transactional
+    public ApplicationResponse create(Long userId, CreateApplicationRequest request,
+            org.springframework.web.multipart.MultipartFile coverPdf) {
         User actor = activeUser(userId);
         if (!"CANDIDATE".equals(actor.getRole())) {
             throw ApplicationException.forbidden("Only candidates can apply to jobs");
@@ -104,6 +110,7 @@ public class ApplicationService {
         ApplicationStatus pendingStatus = statusRepository.findByCode("PENDING")
                 .orElseThrow(() -> ApplicationException.internalError(
                         "The initial application status is not configured"));
+        byte[] document = coverPdf == null ? null : validateCoverPdf(coverPdf);
         Application application = new Application(
             candidate, 
             jobOffer, 
@@ -111,6 +118,9 @@ public class ApplicationService {
             request.coverMessage(),
             candidate.getResumeUrl());
         Application saved = applicationRepository.saveAndFlush(application);
+        if (document != null) {
+            coverDocuments.save(new com.gpstl.joyn.application.model.ApplicationCoverPdf(saved.getId(), document));
+        }
         if (events != null) {
             Long recruiterUserId = null;
             try {
@@ -127,6 +137,26 @@ public class ApplicationService {
                     recruiterUserId));
         }
         return toResponse(saved);
+    }
+
+    @Autowired
+    private com.gpstl.joyn.application.repository.ApplicationCoverPdfRepository coverDocuments;
+
+    private static byte[] validateCoverPdf(org.springframework.web.multipart.MultipartFile file) {
+        if (file.isEmpty() || file.getSize() > 5 * 1024 * 1024) {
+            throw ApplicationException.badRequest("La lettre PDF doit faire entre 1 octet et 5 Mo.");
+        }
+        try {
+            byte[] bytes = file.getBytes();
+            try (var pdf = org.apache.pdfbox.Loader.loadPDF(bytes)) {
+                if (pdf.isEncrypted() || pdf.getNumberOfPages() < 1 || pdf.getNumberOfPages() > 20) {
+                    throw ApplicationException.badRequest("La lettre doit être un PDF sans mot de passe de 1 à 20 pages.");
+                }
+            }
+            return bytes;
+        } catch (java.io.IOException ex) {
+            throw ApplicationException.badRequest("La lettre doit être un fichier PDF lisible.");
+        }
     }
 
     /** Injecté par Spring ; un setter garde le constructeur inchangé pour les tests existants. */

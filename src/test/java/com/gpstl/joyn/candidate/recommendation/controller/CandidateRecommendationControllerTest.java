@@ -22,6 +22,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -92,14 +93,17 @@ class CandidateRecommendationControllerTest extends JobDatabaseTestSupport {
                 WHERE id = ?
                 """, LocalDate.now(), job);
 
+        // (50 × 65 + 33 × 15 + 66 × 10 + 50 × 10) / 100 = 49.05.
+        // La distance reste disponible en kilomètres, sans entrer dans le score.
+        int expectedScore = 49;
         mvc.perform(get(ROUTE).header("Authorization", token(candidate, "CANDIDATE")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].offer.id").value(job))
-                .andExpect(jsonPath("$.content[0].match_score").value(54))
+                .andExpect(jsonPath("$.content[0].match_score").value(expectedScore))
                 .andExpect(jsonPath("$.content[0].score_breakdown.skills").value(50))
                 .andExpect(jsonPath("$.content[0].score_breakdown.experience").value(33))
                 .andExpect(jsonPath("$.content[0].score_breakdown.education").value(66))
-                .andExpect(jsonPath("$.content[0].score_breakdown.location").value(100))
+                .andExpect(jsonPath("$.content[0].score_breakdown.location").value(nullValue()))
                 .andExpect(jsonPath("$.content[0].score_breakdown.distance_km").value(0.0))
                 .andExpect(jsonPath("$.content[0].score_breakdown.availability").value(50))
                 .andExpect(jsonPath("$.page").value(1))
@@ -108,7 +112,7 @@ class CandidateRecommendationControllerTest extends JobDatabaseTestSupport {
         assertThat(jdbc.queryForObject("""
                 SELECT match_score FROM candidate_recommendation_scores
                 WHERE candidate_id = ? AND job_offer_id = ?
-                """, Short.class, candidateProfile, job)).isEqualTo((short) 54);
+                """, Short.class, candidateProfile, job)).isEqualTo((short) expectedScore);
     }
 
     @Test

@@ -89,6 +89,41 @@ public class AccountController {
         }catch(DataIntegrityViolationException e){throw ActorAccess.error(409,"Email already in use");}
         return Map.of("message","Credentials updated. Sign in again.");
     }
+    @PostMapping("/sessions/revoke")
+    @Transactional
+    public Map<String, String> revokeSessions(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody Confirmation body) {
+        long user = Long.parseLong(jwt.getSubject());
+        verify(user, body.currentPassword());
+        jdbc.update("UPDATE users SET tokens_valid_after=now() WHERE id=?", user);
+        return Map.of("message", "Sessions revoked");
+    }
+
+    public record NotificationPreferences(@NotNull Boolean messageAlerts, @NotNull Boolean opportunityAlerts) {}
+
+    @GetMapping("/notification-preferences")
+    public NotificationPreferences notificationPreferences(@AuthenticationPrincipal Jwt jwt) {
+        long user = Long.parseLong(jwt.getSubject());
+        access.active(user, "CANDIDATE");
+        return jdbc.queryForObject("""
+                SELECT coalesce((settings->>'messageAlerts')::boolean,true),
+                       coalesce((settings->>'opportunityAlerts')::boolean,true)
+                FROM users WHERE id=?
+                """, (row, i) -> new NotificationPreferences(row.getBoolean(1), row.getBoolean(2)), user);
+    }
+
+    @PutMapping("/notification-preferences")
+    @Transactional
+    public NotificationPreferences saveNotificationPreferences(@AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody NotificationPreferences body) {
+        long user = Long.parseLong(jwt.getSubject());
+        access.active(user, "CANDIDATE");
+        jdbc.update("""
+                UPDATE users SET settings=settings || jsonb_build_object(
+                    'messageAlerts', CAST(? AS boolean), 'opportunityAlerts', CAST(? AS boolean)) WHERE id=?
+                """, body.messageAlerts(), body.opportunityAlerts(), user);
+        return body;
+    }
+
     @PostMapping("/deactivate")
     @Transactional
     public Map<String,String> deactivate(@AuthenticationPrincipal Jwt jwt,@Valid @RequestBody Confirmation body){
