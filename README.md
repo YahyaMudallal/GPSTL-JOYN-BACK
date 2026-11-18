@@ -155,6 +155,50 @@ Exécutez la méthode principale (main) de la classe :
 L'application démarre sur le port 8080 : http://localhost:8080. Sans profil `local`,
 la configuration utilise Supabase Storage et exige les variables d'environnement décrites ci-dessus.
 
+## Peuplement de la base de données (Données de test)
+
+Un script automatisé permet de peupler la base de données avec des jeux de données réalistes et modulaires issus du dossier `data/` :
+- **Compétences :** 235 compétences réparties en 11 domaines professionnels (`data/skills.json`).
+- **Entreprises :** 33 entreprises fictives avec leurs offres d'emploi et recruteurs (`data/companies_jobs.json`).
+- **Logos :** Emblèmes géométriques modernes générés au format WebP.
+- **Candidats :** Profils complets avec expériences, formations, compétences et avatars illustrés (`data/candidates.json`).
+- **CVs PDF :** Générés automatiquement sur disque et 100% cohérents avec les profils, sans consommer de tokens Gemini.
+- **Interactions :** Candidatures aux statuts variés (Acceptée, Entretien avec visio, Refusée, En attente, Vue) avec messagerie active.
+
+### Exécution du script de peuplement
+
+```bash
+# 1. Rendre le script exécutable (si besoin)
+chmod +x scripts/seed.sh
+
+# 2. Lancer le peuplement en mode local (fichiers enregistrés dans media/)
+./scripts/seed.sh
+
+# Optionnel : envoyer les médias sur Supabase Storage (S3)
+./scripts/seed.sh --storage supabase
+
+# Optionnel : stocker en local ET sur Supabase
+./scripts/seed.sh --storage both
+```
+
+### Identifiants des comptes de test générés
+
+> 🔒 **Mot de passe commun pour tous les comptes :** `Password123!`
+
+* **Recruteurs de test :**
+  * `recruteur.atoutnumerique@joyn.test` *(Atout Numérique - Services numériques, candidature acceptée)*
+  * `recruteur.studiopixel@joyn.test` *(Studio Pixel - Création & Design, entretien planifié & refus)*
+  * `recruteur.robotikindustrie@joyn.test` *(Robotik Industrie - Robotique, alternance en attente)*
+  * `recruteur.agrinova@joyn.test` *(AgriNova - Agroécologie, candidature vue)*
+  * `recruteur.cliniquedesrives@joyn.test` *(Clinique des Rives - Santé, candidature acceptée)*
+
+* **Candidats de test :**
+  * `alexandre.martin@joyn.test` *(Lead Dev Python / Cloud - Candidature acceptée chez Atout Numérique)*
+  * `sophie.bernard@joyn.test` *(Directrice Artistique & UI - Entretien chez Studio Pixel)*
+  * `claire.petit@joyn.test` *(Étudiante Robotique - Alternance en attente chez Robotik Industrie)*
+  * `julien.moreau@joyn.test` *(Ingénieur Agronome - Candidature vue chez AgriNova)*
+  * `ines.garcia@joyn.test` *(Infirmière DE - Candidature acceptée chez Clinique des Rives)*
+
 ### Accès depuis un frontend (CORS)
 
 L'API autorise les frontends servis depuis `localhost` ou `127.0.0.1` (quel que soit leur port), ainsi que le frontend Joyn déployé à l'adresse `https://gpstl-joyn-front.joynpstl.workers.dev`.

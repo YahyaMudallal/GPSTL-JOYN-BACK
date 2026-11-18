@@ -1,0 +1,6 @@
+psycopg2-binary>=2.9.9
+faker>=24.0.0
+bcrypt>=4.1.2
+fpdf2>=2.7.8
+pillow>=10.0.0
+boto3>=1.34.0

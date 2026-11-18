@@ -1,0 +1,1537 @@
+[
+  {
+    "name": "AgriNova",
+    "domain": "agrinova.example",
+    "website": "https://www.agrinova.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=agrinova",
+    "sector": "Agriculture et agroalimentaire",
+    "size": "SMALL",
+    "desc": "Accompagne les exploitations agricoles dans leur transition agroécologique.",
+    "location": "Bordeaux",
+    "recruiter": [
+      "recruteur.agrinova@joyn.test",
+      "Camille",
+      "Bernard"
+    ],
+    "jobs": [
+      {
+        "title": "Conseiller·ère agronome",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 32000,
+        "salary_max": 42000,
+        "skills": [
+          "Agronomie",
+          "Agroécologie",
+          "Gestion de projet"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Conseiller·ère agronome : rejoignez AgriNova pour contribuer à ses activités dans le secteur agriculture et agroalimentaire.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Technicien·ne de production agricole",
+        "contract": "CDD",
+        "remote": "ONSITE",
+        "salary_min": 24000,
+        "salary_max": 30000,
+        "skills": [
+          "Conduite d'exploitation agricole",
+          "HSE"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Technicien·ne de production agricole : rejoignez AgriNova pour contribuer à ses activités dans le secteur agriculture et agroalimentaire.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "BioTerra",
+    "domain": "bioterra.example",
+    "website": "https://www.bioterra.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=bioterra",
+    "sector": "Environnement et biodiversité",
+    "size": "MEDIUM",
+    "desc": "Bureau d'études spécialisé dans la restauration des écosystèmes.",
+    "location": "Lyon",
+    "recruiter": [
+      "recruteur.bioterra@joyn.test",
+      "Thomas",
+      "Petit"
+    ],
+    "jobs": [
+      {
+        "title": "Chargé·e d'études biodiversité",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 34000,
+        "salary_max": 45000,
+        "skills": [
+          "Biodiversité",
+          "Écologie",
+          "QGIS"
+        ],
+        "degree": "BAC_5",
+        "exp": "MID",
+        "description": "Chargé·e d'études biodiversité : rejoignez BioTerra pour contribuer à ses activités dans le secteur environnement et biodiversité.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Responsable gestion des déchets",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 38000,
+        "salary_max": 48000,
+        "skills": [
+          "Gestion des déchets",
+          "Économie circulaire",
+          "RSE"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Responsable gestion des déchets : rejoignez BioTerra pour contribuer à ses activités dans le secteur environnement et biodiversité.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Soleil & Réseaux",
+    "domain": "soleilrseaux.example",
+    "website": "https://www.soleilrseaux.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=soleilrseaux",
+    "sector": "Énergie renouvelable",
+    "size": "MEDIUM",
+    "desc": "Développe et exploite des installations photovoltaïques.",
+    "location": "Montpellier",
+    "recruiter": [
+      "recruteur.soleilrseaux@joyn.test",
+      "Sarah",
+      "Moreau"
+    ],
+    "jobs": [
+      {
+        "title": "Chef·fe de projet photovoltaïque",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 38000,
+        "salary_max": 50000,
+        "skills": [
+          "Photovoltaïque",
+          "Gestion de projet",
+          "Électricité bâtiment"
+        ],
+        "degree": "BAC_5",
+        "exp": "MID",
+        "description": "Chef·fe de projet photovoltaïque : rejoignez Soleil & Réseaux pour contribuer à ses activités dans le secteur énergie renouvelable.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Technicien·ne maintenance éolienne",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 28000,
+        "salary_max": 36000,
+        "skills": [
+          "Éolien",
+          "Maintenance industrielle",
+          "HSE"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Technicien·ne maintenance éolienne : rejoignez Soleil & Réseaux pour contribuer à ses activités dans le secteur énergie renouvelable.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Clinique des Rives",
+    "domain": "cliniquedesrives.example",
+    "website": "https://www.cliniquedesrives.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=cliniquedesrives",
+    "sector": "Santé",
+    "size": "LARGE",
+    "desc": "Établissement de santé pluridisciplinaire.",
+    "location": "Nantes",
+    "recruiter": [
+      "recruteur.cliniquedesrives@joyn.test",
+      "Nicolas",
+      "Leroy"
+    ],
+    "jobs": [
+      {
+        "title": "Infirmier·ère diplômé·e d'État",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 30000,
+        "salary_max": 39000,
+        "skills": [
+          "Soins infirmiers",
+          "Hygiène hospitalière"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Infirmier·ère diplômé·e d'État : rejoignez Clinique des Rives pour contribuer à ses activités dans le secteur santé.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Gestionnaire administratif·ve hospitalier·ère",
+        "contract": "CDD",
+        "remote": "ONSITE",
+        "salary_min": 26000,
+        "salary_max": 33000,
+        "skills": [
+          "Gestion hospitalière",
+          "Gestion administrative"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Gestionnaire administratif·ve hospitalier·ère : rejoignez Clinique des Rives pour contribuer à ses activités dans le secteur santé.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "MediLab Diagnostics",
+    "domain": "medilabdiagnostics.example",
+    "website": "https://www.medilabdiagnostics.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=medilabdiagnostics",
+    "sector": "Biotechnologies et santé",
+    "size": "MEDIUM",
+    "desc": "Laboratoire de biologie médicale et de recherche clinique.",
+    "location": "Lille",
+    "recruiter": [
+      "recruteur.medilabdiagnostics@joyn.test",
+      "Inès",
+      "Garcia"
+    ],
+    "jobs": [
+      {
+        "title": "Technicien·ne de laboratoire",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 27000,
+        "salary_max": 35000,
+        "skills": [
+          "Biologie médicale",
+          "Qualité industrielle"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Technicien·ne de laboratoire : rejoignez MediLab Diagnostics pour contribuer à ses activités dans le secteur biotechnologies et santé.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Coordinateur·rice d'études cliniques",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 36000,
+        "salary_max": 47000,
+        "skills": [
+          "Recherche clinique",
+          "Gestion de projet",
+          "Anglais professionnel"
+        ],
+        "degree": "BAC_5",
+        "exp": "MID",
+        "description": "Coordinateur·rice d'études cliniques : rejoignez MediLab Diagnostics pour contribuer à ses activités dans le secteur biotechnologies et santé.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "ÉduCap",
+    "domain": "ducap.example",
+    "website": "https://www.ducap.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=ducap",
+    "sector": "Éducation et formation",
+    "size": "SMALL",
+    "desc": "Conçoit des parcours de formation et des outils pédagogiques.",
+    "location": "Rennes",
+    "recruiter": [
+      "recruteur.ducap@joyn.test",
+      "Julien",
+      "Roux"
+    ],
+    "jobs": [
+      {
+        "title": "Ingénieur·e pédagogique",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 32000,
+        "salary_max": 42000,
+        "skills": [
+          "Ingénierie pédagogique",
+          "Conception e-learning",
+          "Pédagogie"
+        ],
+        "degree": "BAC_5",
+        "exp": "MID",
+        "description": "Ingénieur·e pédagogique : rejoignez ÉduCap pour contribuer à ses activités dans le secteur éducation et formation.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Formateur·rice bureautique",
+        "contract": "CDD",
+        "remote": "ONSITE",
+        "salary_min": 25000,
+        "salary_max": 32000,
+        "skills": [
+          "Enseignement",
+          "Animation",
+          "Prise de parole en public"
+        ],
+        "degree": "BAC_3",
+        "exp": "JUNIOR",
+        "description": "Formateur·rice bureautique : rejoignez ÉduCap pour contribuer à ses activités dans le secteur éducation et formation.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Campus Ouvert",
+    "domain": "campusouvert.example",
+    "website": "https://www.campusouvert.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=campusouvert",
+    "sector": "Enseignement supérieur",
+    "size": "LARGE",
+    "desc": "Établissement d'enseignement supérieur et de formation continue.",
+    "location": "Paris",
+    "recruiter": [
+      "recruteur.campusouvert@joyn.test",
+      "Léa",
+      "Simon"
+    ],
+    "jobs": [
+      {
+        "title": "Chargé·e des relations entreprises",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 30000,
+        "salary_max": 39000,
+        "skills": [
+          "Relation client",
+          "Gestion de projet",
+          "Communication"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Chargé·e des relations entreprises : rejoignez Campus Ouvert pour contribuer à ses activités dans le secteur enseignement supérieur.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Assistant·e de scolarité",
+        "contract": "CDD",
+        "remote": "ONSITE",
+        "salary_min": 24000,
+        "salary_max": 29000,
+        "skills": [
+          "Gestion administrative",
+          "Accueil"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Assistant·e de scolarité : rejoignez Campus Ouvert pour contribuer à ses activités dans le secteur enseignement supérieur.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Financia Conseil",
+    "domain": "financiaconseil.example",
+    "website": "https://www.financiaconseil.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=financiaconseil",
+    "sector": "Banque et conseil financier",
+    "size": "MEDIUM",
+    "desc": "Cabinet indépendant de conseil financier et d'accompagnement des PME.",
+    "location": "Paris",
+    "recruiter": [
+      "recruteur.financiaconseil@joyn.test",
+      "Mehdi",
+      "Laurent"
+    ],
+    "jobs": [
+      {
+        "title": "Analyste financier·ère",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 40000,
+        "salary_max": 52000,
+        "skills": [
+          "Analyse financière",
+          "Comptabilité générale",
+          "Excel"
+        ],
+        "degree": "BAC_5",
+        "exp": "JUNIOR",
+        "description": "Analyste financier·ère : rejoignez Financia Conseil pour contribuer à ses activités dans le secteur banque et conseil financier.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Gestionnaire conformité",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 36000,
+        "salary_max": 46000,
+        "skills": [
+          "Conformité réglementaire",
+          "Gestion des risques",
+          "Droit des affaires"
+        ],
+        "degree": "BAC_5",
+        "exp": "MID",
+        "description": "Gestionnaire conformité : rejoignez Financia Conseil pour contribuer à ses activités dans le secteur banque et conseil financier.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Mutuelle des Territoires",
+    "domain": "mutuelledesterritoires.example",
+    "website": "https://www.mutuelledesterritoires.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=mutuelledesterritoires",
+    "sector": "Assurance et protection sociale",
+    "size": "LARGE",
+    "desc": "Mutuelle régionale proposant des services aux particuliers et entreprises.",
+    "location": "Dijon",
+    "recruiter": [
+      "recruteur.mutuelledesterritoires@joyn.test",
+      "Emma",
+      "Michel"
+    ],
+    "jobs": [
+      {
+        "title": "Conseiller·ère clientèle assurance",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 26000,
+        "salary_max": 34000,
+        "skills": [
+          "Assurance",
+          "Relation client",
+          "Négociation commerciale"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Conseiller·ère clientèle assurance : rejoignez Mutuelle des Territoires pour contribuer à ses activités dans le secteur assurance et protection sociale.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Gestionnaire prestations santé",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 27000,
+        "salary_max": 35000,
+        "skills": [
+          "Assurance",
+          "Gestion administrative"
+        ],
+        "degree": "BAC_2",
+        "exp": "MID",
+        "description": "Gestionnaire prestations santé : rejoignez Mutuelle des Territoires pour contribuer à ses activités dans le secteur assurance et protection sociale.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Atelier Mécafab",
+    "domain": "ateliermcafab.example",
+    "website": "https://www.ateliermcafab.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=ateliermcafab",
+    "sector": "Industrie manufacturière",
+    "size": "SMALL",
+    "desc": "Conçoit et fabrique des équipements mécaniques pour l'industrie.",
+    "location": "Saint-Étienne",
+    "recruiter": [
+      "recruteur.ateliermcafab@joyn.test",
+      "Lucas",
+      "Andre"
+    ],
+    "jobs": [
+      {
+        "title": "Ingénieur·e méthodes industrielles",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 36000,
+        "salary_max": 47000,
+        "skills": [
+          "Génie mécanique",
+          "Lean manufacturing",
+          "CAO"
+        ],
+        "degree": "BAC_5",
+        "exp": "MID",
+        "description": "Ingénieur·e méthodes industrielles : rejoignez Atelier Mécafab pour contribuer à ses activités dans le secteur industrie manufacturière.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Technicien·ne de maintenance",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 27000,
+        "salary_max": 35000,
+        "skills": [
+          "Maintenance industrielle",
+          "Automatisme industriel"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Technicien·ne de maintenance : rejoignez Atelier Mécafab pour contribuer à ses activités dans le secteur industrie manufacturière.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Robotik Industrie",
+    "domain": "robotikindustrie.example",
+    "website": "https://www.robotikindustrie.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=robotikindustrie",
+    "sector": "Robotique et automatisation",
+    "size": "MEDIUM",
+    "desc": "Intègre des solutions robotisées pour les sites de production.",
+    "location": "Toulouse",
+    "recruiter": [
+      "recruteur.robotikindustrie@joyn.test",
+      "Camille",
+      "Bernard"
+    ],
+    "jobs": [
+      {
+        "title": "Automaticien·ne",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 35000,
+        "salary_max": 46000,
+        "skills": [
+          "Automatisme industriel",
+          "Robotique",
+          "Électronique"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Automaticien·ne : rejoignez Robotik Industrie pour contribuer à ses activités dans le secteur robotique et automatisation.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Technicien·ne robotique",
+        "contract": "APPRENTICESHIP",
+        "remote": "ONSITE",
+        "salary_min": 18000,
+        "salary_max": 24000,
+        "skills": [
+          "Robotique",
+          "Maintenance industrielle"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Technicien·ne robotique : rejoignez Robotik Industrie pour contribuer à ses activités dans le secteur robotique et automatisation.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Bâtir Ensemble",
+    "domain": "btirensemble.example",
+    "website": "https://www.btirensemble.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=btirensemble",
+    "sector": "Construction et BTP",
+    "size": "MEDIUM",
+    "desc": "Entreprise générale de construction et de rénovation énergétique.",
+    "location": "Lyon",
+    "recruiter": [
+      "recruteur.btirensemble@joyn.test",
+      "Thomas",
+      "Petit"
+    ],
+    "jobs": [
+      {
+        "title": "Conducteur·rice de travaux",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 36000,
+        "salary_max": 48000,
+        "skills": [
+          "Conduite de travaux",
+          "Génie civil",
+          "Gestion de projet"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Conducteur·rice de travaux : rejoignez Bâtir Ensemble pour contribuer à ses activités dans le secteur construction et btp.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Dessinateur·rice BIM",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 30000,
+        "salary_max": 39000,
+        "skills": [
+          "BIM",
+          "Revit",
+          "AutoCAD"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Dessinateur·rice BIM : rejoignez Bâtir Ensemble pour contribuer à ses activités dans le secteur construction et btp.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "LogiRoute",
+    "domain": "logiroute.example",
+    "website": "https://www.logiroute.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=logiroute",
+    "sector": "Transport et logistique",
+    "size": "LARGE",
+    "desc": "Opérateur de transport et de logistique pour les entreprises.",
+    "location": "Orléans",
+    "recruiter": [
+      "recruteur.logiroute@joyn.test",
+      "Sarah",
+      "Moreau"
+    ],
+    "jobs": [
+      {
+        "title": "Responsable d'exploitation transport",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 35000,
+        "salary_max": 46000,
+        "skills": [
+          "Logistique",
+          "Gestion de flotte",
+          "Gestion des stocks"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Responsable d'exploitation transport : rejoignez LogiRoute pour contribuer à ses activités dans le secteur transport et logistique.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Agent·e d'exploitation",
+        "contract": "CDD",
+        "remote": "ONSITE",
+        "salary_min": 23000,
+        "salary_max": 29000,
+        "skills": [
+          "Logistique",
+          "Gestion administrative"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Agent·e d'exploitation : rejoignez LogiRoute pour contribuer à ses activités dans le secteur transport et logistique.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Cuisine & Partage",
+    "domain": "cuisinepartage.example",
+    "website": "https://www.cuisinepartage.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=cuisinepartage",
+    "sector": "Restauration collective",
+    "size": "MEDIUM",
+    "desc": "Prépare des repas pour les établissements scolaires et médico-sociaux.",
+    "location": "Marseille",
+    "recruiter": [
+      "recruteur.cuisinepartage@joyn.test",
+      "Nicolas",
+      "Leroy"
+    ],
+    "jobs": [
+      {
+        "title": "Chef·fe de cuisine",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 30000,
+        "salary_max": 39000,
+        "skills": [
+          "Cuisine",
+          "Gestion des stocks",
+          "HSE"
+        ],
+        "degree": "BAC_2",
+        "exp": "MID",
+        "description": "Chef·fe de cuisine : rejoignez Cuisine & Partage pour contribuer à ses activités dans le secteur restauration collective.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Responsable qualité alimentaire",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 32000,
+        "salary_max": 42000,
+        "skills": [
+          "Qualité industrielle",
+          "HSE",
+          "Gestion de projet"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Responsable qualité alimentaire : rejoignez Cuisine & Partage pour contribuer à ses activités dans le secteur restauration collective.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Hôtel des Voyageurs",
+    "domain": "hteldesvoyageurs.example",
+    "website": "https://www.hteldesvoyageurs.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=hteldesvoyageurs",
+    "sector": "Hôtellerie et tourisme",
+    "size": "SMALL",
+    "desc": "Hôtel indépendant accueillant une clientèle professionnelle et touristique.",
+    "location": "Nice",
+    "recruiter": [
+      "recruteur.hteldesvoyageurs@joyn.test",
+      "Inès",
+      "Garcia"
+    ],
+    "jobs": [
+      {
+        "title": "Responsable de réception",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 28000,
+        "salary_max": 36000,
+        "skills": [
+          "Hôtellerie",
+          "Réception",
+          "Anglais professionnel"
+        ],
+        "degree": "BAC_2",
+        "exp": "MID",
+        "description": "Responsable de réception : rejoignez Hôtel des Voyageurs pour contribuer à ses activités dans le secteur hôtellerie et tourisme.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Chargé·e de réservation",
+        "contract": "CDD",
+        "remote": "HYBRID",
+        "salary_min": 24000,
+        "salary_max": 30000,
+        "skills": [
+          "Gestion de réservation",
+          "Relation client",
+          "Tourisme"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Chargé·e de réservation : rejoignez Hôtel des Voyageurs pour contribuer à ses activités dans le secteur hôtellerie et tourisme.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Scène Locale",
+    "domain": "scnelocale.example",
+    "website": "https://www.scnelocale.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=scnelocale",
+    "sector": "Culture et spectacle vivant",
+    "size": "SMALL",
+    "desc": "Association culturelle organisant des spectacles et événements locaux.",
+    "location": "Avignon",
+    "recruiter": [
+      "recruteur.scnelocale@joyn.test",
+      "Julien",
+      "Roux"
+    ],
+    "jobs": [
+      {
+        "title": "Chargé·e de production culturelle",
+        "contract": "CDD",
+        "remote": "HYBRID",
+        "salary_min": 26000,
+        "salary_max": 34000,
+        "skills": [
+          "Événementiel",
+          "Médiation culturelle",
+          "Gestion de projet"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Chargé·e de production culturelle : rejoignez Scène Locale pour contribuer à ses activités dans le secteur culture et spectacle vivant.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Médiateur·rice culturel·le",
+        "contract": "CDD",
+        "remote": "ONSITE",
+        "salary_min": 23000,
+        "salary_max": 29000,
+        "skills": [
+          "Médiation culturelle",
+          "Animation"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Médiateur·rice culturel·le : rejoignez Scène Locale pour contribuer à ses activités dans le secteur culture et spectacle vivant.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Studio Pixel",
+    "domain": "studiopixel.example",
+    "website": "https://www.studiopixel.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=studiopixel",
+    "sector": "Communication et création",
+    "size": "SMALL",
+    "desc": "Studio indépendant de design graphique et de production audiovisuelle.",
+    "location": "Paris",
+    "recruiter": [
+      "recruteur.studiopixel@joyn.test",
+      "Léa",
+      "Simon"
+    ],
+    "jobs": [
+      {
+        "title": "Directeur·rice artistique junior",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 30000,
+        "salary_max": 38000,
+        "skills": [
+          "Direction artistique",
+          "Design graphique",
+          "Figma"
+        ],
+        "degree": "BAC_3",
+        "exp": "JUNIOR",
+        "description": "Directeur·rice artistique junior : rejoignez Studio Pixel pour contribuer à ses activités dans le secteur communication et création.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Monteur·euse vidéo",
+        "contract": "CDD",
+        "remote": "HYBRID",
+        "salary_min": 26000,
+        "salary_max": 33000,
+        "skills": [
+          "Montage vidéo",
+          "Production audiovisuelle",
+          "Motion design"
+        ],
+        "degree": "BAC_2",
+        "exp": "MID",
+        "description": "Monteur·euse vidéo : rejoignez Studio Pixel pour contribuer à ses activités dans le secteur communication et création.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Sport & Mouvement",
+    "domain": "sportmouvement.example",
+    "website": "https://www.sportmouvement.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=sportmouvement",
+    "sector": "Sport et loisirs",
+    "size": "MEDIUM",
+    "desc": "Gère des équipements sportifs et développe des activités accessibles à tous.",
+    "location": "Grenoble",
+    "recruiter": [
+      "recruteur.sportmouvement@joyn.test",
+      "Mehdi",
+      "Laurent"
+    ],
+    "jobs": [
+      {
+        "title": "Éducateur·rice sportif·ve",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 25000,
+        "salary_max": 33000,
+        "skills": [
+          "Animation sportive",
+          "Coaching sportif",
+          "Secourisme"
+        ],
+        "degree": "BAC_2",
+        "exp": "MID",
+        "description": "Éducateur·rice sportif·ve : rejoignez Sport & Mouvement pour contribuer à ses activités dans le secteur sport et loisirs.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Responsable d'équipement sportif",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 30000,
+        "salary_max": 39000,
+        "skills": [
+          "Gestion d'équipement sportif",
+          "Gestion de projet"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Responsable d'équipement sportif : rejoignez Sport & Mouvement pour contribuer à ses activités dans le secteur sport et loisirs.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "ImmoCité",
+    "domain": "immocit.example",
+    "website": "https://www.immocit.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=immocit",
+    "sector": "Immobilier",
+    "size": "MEDIUM",
+    "desc": "Agence immobilière spécialisée dans la gestion et la transaction résidentielle.",
+    "location": "Toulon",
+    "recruiter": [
+      "recruteur.immocit@joyn.test",
+      "Emma",
+      "Michel"
+    ],
+    "jobs": [
+      {
+        "title": "Gestionnaire locatif·ve",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 28000,
+        "salary_max": 36000,
+        "skills": [
+          "Gestion locative",
+          "Droit immobilier",
+          "Relation client"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Gestionnaire locatif·ve : rejoignez ImmoCité pour contribuer à ses activités dans le secteur immobilier.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Négociateur·rice immobilier",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 24000,
+        "salary_max": 42000,
+        "skills": [
+          "Transaction immobilière",
+          "Négociation commerciale",
+          "Prospection commerciale"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Négociateur·rice immobilier : rejoignez ImmoCité pour contribuer à ses activités dans le secteur immobilier.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Cabinet Lex & Co",
+    "domain": "cabinetlexco.example",
+    "website": "https://www.cabinetlexco.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=cabinetlexco",
+    "sector": "Services juridiques",
+    "size": "SMALL",
+    "desc": "Cabinet d'avocats accompagnant les entreprises et associations.",
+    "location": "Bordeaux",
+    "recruiter": [
+      "recruteur.cabinetlexco@joyn.test",
+      "Lucas",
+      "Andre"
+    ],
+    "jobs": [
+      {
+        "title": "Juriste droit des contrats",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 34000,
+        "salary_max": 45000,
+        "skills": [
+          "Droit des contrats",
+          "Droit des affaires",
+          "Veille juridique"
+        ],
+        "degree": "BAC_5",
+        "exp": "MID",
+        "description": "Juriste droit des contrats : rejoignez Cabinet Lex & Co pour contribuer à ses activités dans le secteur services juridiques.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Assistant·e juridique",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 26000,
+        "salary_max": 33000,
+        "skills": [
+          "Rédaction juridique",
+          "Gestion administrative"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Assistant·e juridique : rejoignez Cabinet Lex & Co pour contribuer à ses activités dans le secteur services juridiques.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Cap RH",
+    "domain": "caprh.example",
+    "website": "https://www.caprh.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=caprh",
+    "sector": "Ressources humaines",
+    "size": "SMALL",
+    "desc": "Cabinet de recrutement et de conseil en ressources humaines.",
+    "location": "Paris",
+    "recruiter": [
+      "recruteur.caprh@joyn.test",
+      "Camille",
+      "Bernard"
+    ],
+    "jobs": [
+      {
+        "title": "Consultant·e recrutement",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 30000,
+        "salary_max": 42000,
+        "skills": [
+          "Recrutement",
+          "Sourcing",
+          "Négociation commerciale"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Consultant·e recrutement : rejoignez Cap RH pour contribuer à ses activités dans le secteur ressources humaines.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Gestionnaire administration du personnel",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 28000,
+        "salary_max": 36000,
+        "skills": [
+          "Administration du personnel",
+          "Paie",
+          "Droit social"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Gestionnaire administration du personnel : rejoignez Cap RH pour contribuer à ses activités dans le secteur ressources humaines.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Commerce des Halles",
+    "domain": "commercedeshalles.example",
+    "website": "https://www.commercedeshalles.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=commercedeshalles",
+    "sector": "Commerce de détail",
+    "size": "LARGE",
+    "desc": "Réseau de magasins alimentaires de proximité.",
+    "location": "Tours",
+    "recruiter": [
+      "recruteur.commercedeshalles@joyn.test",
+      "Thomas",
+      "Petit"
+    ],
+    "jobs": [
+      {
+        "title": "Responsable de magasin",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 30000,
+        "salary_max": 39000,
+        "skills": [
+          "Gestion de magasin",
+          "Merchandising",
+          "Gestion des stocks"
+        ],
+        "degree": "BAC_2",
+        "exp": "MID",
+        "description": "Responsable de magasin : rejoignez Commerce des Halles pour contribuer à ses activités dans le secteur commerce de détail.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Employé·e polyvalent·e",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 22000,
+        "salary_max": 26000,
+        "skills": [
+          "Relation client",
+          "Gestion de magasin"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Employé·e polyvalent·e : rejoignez Commerce des Halles pour contribuer à ses activités dans le secteur commerce de détail.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Eau & Services",
+    "domain": "eauservices.example",
+    "website": "https://www.eauservices.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=eauservices",
+    "sector": "Eau et assainissement",
+    "size": "LARGE",
+    "desc": "Opérateur de services liés au cycle de l'eau et à l'assainissement.",
+    "location": "Rouen",
+    "recruiter": [
+      "recruteur.eauservices@joyn.test",
+      "Sarah",
+      "Moreau"
+    ],
+    "jobs": [
+      {
+        "title": "Technicien·ne traitement de l'eau",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 28000,
+        "salary_max": 37000,
+        "skills": [
+          "Traitement de l'eau",
+          "Hydraulique",
+          "HSE"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Technicien·ne traitement de l'eau : rejoignez Eau & Services pour contribuer à ses activités dans le secteur eau et assainissement.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Ingénieur·e environnement",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 38000,
+        "salary_max": 50000,
+        "skills": [
+          "Écologie",
+          "Bilan carbone",
+          "Gestion de projet"
+        ],
+        "degree": "BAC_5",
+        "exp": "MID",
+        "description": "Ingénieur·e environnement : rejoignez Eau & Services pour contribuer à ses activités dans le secteur eau et assainissement.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Data & Territoires",
+    "domain": "dataterritoires.example",
+    "website": "https://www.dataterritoires.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=dataterritoires",
+    "sector": "Géomatique et études",
+    "size": "SMALL",
+    "desc": "Produit des études territoriales et des services de cartographie.",
+    "location": "Nancy",
+    "recruiter": [
+      "recruteur.dataterritoires@joyn.test",
+      "Nicolas",
+      "Leroy"
+    ],
+    "jobs": [
+      {
+        "title": "Géomaticien·ne",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 32000,
+        "salary_max": 42000,
+        "skills": [
+          "Géomatique",
+          "QGIS",
+          "Data analysis"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Géomaticien·ne : rejoignez Data & Territoires pour contribuer à ses activités dans le secteur géomatique et études.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Chargé·e d'études statistiques",
+        "contract": "CDD",
+        "remote": "HYBRID",
+        "salary_min": 30000,
+        "salary_max": 39000,
+        "skills": [
+          "Data analysis",
+          "Power BI",
+          "SQL"
+        ],
+        "degree": "BAC_5",
+        "exp": "JUNIOR",
+        "description": "Chargé·e d'études statistiques : rejoignez Data & Territoires pour contribuer à ses activités dans le secteur géomatique et études.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Les Petits Explorateurs",
+    "domain": "lespetitsexplorateurs.example",
+    "website": "https://www.lespetitsexplorateurs.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=lespetitsexplorateurs",
+    "sector": "Petite enfance et social",
+    "size": "SMALL",
+    "desc": "Réseau de structures d'accueil et d'accompagnement des familles.",
+    "location": "Reims",
+    "recruiter": [
+      "recruteur.lespetitsexplorateurs@joyn.test",
+      "Inès",
+      "Garcia"
+    ],
+    "jobs": [
+      {
+        "title": "Éducateur·rice de jeunes enfants",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 27000,
+        "salary_max": 35000,
+        "skills": [
+          "Petite enfance",
+          "Éducation spécialisée",
+          "Pédagogie"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Éducateur·rice de jeunes enfants : rejoignez Les Petits Explorateurs pour contribuer à ses activités dans le secteur petite enfance et social.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Auxiliaire petite enfance",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 23000,
+        "salary_max": 28000,
+        "skills": [
+          "Petite enfance",
+          "Animation"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Auxiliaire petite enfance : rejoignez Les Petits Explorateurs pour contribuer à ses activités dans le secteur petite enfance et social.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Maison des Langues",
+    "domain": "maisondeslangues.example",
+    "website": "https://www.maisondeslangues.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=maisondeslangues",
+    "sector": "Formation linguistique",
+    "size": "SMALL",
+    "desc": "Organisme de formation en langues pour particuliers et entreprises.",
+    "location": "Lille",
+    "recruiter": [
+      "recruteur.maisondeslangues@joyn.test",
+      "Julien",
+      "Roux"
+    ],
+    "jobs": [
+      {
+        "title": "Formateur·rice anglais",
+        "contract": "CDD",
+        "remote": "HYBRID",
+        "salary_min": 27000,
+        "salary_max": 35000,
+        "skills": [
+          "Anglais professionnel",
+          "Enseignement",
+          "Pédagogie"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Formateur·rice anglais : rejoignez Maison des Langues pour contribuer à ses activités dans le secteur formation linguistique.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Coordinateur·rice pédagogique",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 30000,
+        "salary_max": 39000,
+        "skills": [
+          "Ingénierie pédagogique",
+          "Gestion de projet",
+          "Traduction"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Coordinateur·rice pédagogique : rejoignez Maison des Langues pour contribuer à ses activités dans le secteur formation linguistique.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "SécuriPro",
+    "domain": "scuripro.example",
+    "website": "https://www.scuripro.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=scuripro",
+    "sector": "Sécurité et prévention",
+    "size": "MEDIUM",
+    "desc": "Prestataire de sécurité et de prévention des risques pour les organisations.",
+    "location": "Le Havre",
+    "recruiter": [
+      "recruteur.scuripro@joyn.test",
+      "Léa",
+      "Simon"
+    ],
+    "jobs": [
+      {
+        "title": "Responsable sécurité de site",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 32000,
+        "salary_max": 42000,
+        "skills": [
+          "Sécurité privée",
+          "Prévention des risques",
+          "SSIAP"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Responsable sécurité de site : rejoignez SécuriPro pour contribuer à ses activités dans le secteur sécurité et prévention.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Agent·e de prévention",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 22000,
+        "salary_max": 28000,
+        "skills": [
+          "Sécurité privée",
+          "Secourisme"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Agent·e de prévention : rejoignez SécuriPro pour contribuer à ses activités dans le secteur sécurité et prévention.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Maison des Saveurs",
+    "domain": "maisondessaveurs.example",
+    "website": "https://www.maisondessaveurs.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=maisondessaveurs",
+    "sector": "Artisanat alimentaire",
+    "size": "SMALL",
+    "desc": "Réseau de boulangeries artisanales et laboratoire de pâtisserie.",
+    "location": "Dijon",
+    "recruiter": [
+      "recruteur.maisondessaveurs@joyn.test",
+      "Mehdi",
+      "Laurent"
+    ],
+    "jobs": [
+      {
+        "title": "Responsable de laboratoire pâtisserie",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 28000,
+        "salary_max": 36000,
+        "skills": [
+          "Pâtisserie",
+          "Gestion des stocks",
+          "HSE"
+        ],
+        "degree": "BAC_2",
+        "exp": "MID",
+        "description": "Responsable de laboratoire pâtisserie : rejoignez Maison des Saveurs pour contribuer à ses activités dans le secteur artisanat alimentaire.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Boulanger·ère",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 24000,
+        "salary_max": 31000,
+        "skills": [
+          "Boulangerie",
+          "Gestion de production"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Boulanger·ère : rejoignez Maison des Saveurs pour contribuer à ses activités dans le secteur artisanat alimentaire.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Mobilité Demain",
+    "domain": "mobilitdemain.example",
+    "website": "https://www.mobilitdemain.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=mobilitdemain",
+    "sector": "Mobilité et transport public",
+    "size": "LARGE",
+    "desc": "Opérateur de mobilité partagée et de transport de voyageurs.",
+    "location": "Strasbourg",
+    "recruiter": [
+      "recruteur.mobilitdemain@joyn.test",
+      "Emma",
+      "Michel"
+    ],
+    "jobs": [
+      {
+        "title": "Chargé·e d'études mobilité",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 33000,
+        "salary_max": 44000,
+        "skills": [
+          "Transport de voyageurs",
+          "Étude de marché",
+          "Data analysis"
+        ],
+        "degree": "BAC_5",
+        "exp": "MID",
+        "description": "Chargé·e d'études mobilité : rejoignez Mobilité Demain pour contribuer à ses activités dans le secteur mobilité et transport public.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Gestionnaire de flotte",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 29000,
+        "salary_max": 37000,
+        "skills": [
+          "Gestion de flotte",
+          "Logistique",
+          "Gestion des stocks"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Gestionnaire de flotte : rejoignez Mobilité Demain pour contribuer à ses activités dans le secteur mobilité et transport public.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Atelier des Archives",
+    "domain": "atelierdesarchives.example",
+    "website": "https://www.atelierdesarchives.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=atelierdesarchives",
+    "sector": "Patrimoine et documentation",
+    "size": "SMALL",
+    "desc": "Prestataire de gestion documentaire et de valorisation des archives.",
+    "location": "Poitiers",
+    "recruiter": [
+      "recruteur.atelierdesarchives@joyn.test",
+      "Lucas",
+      "Andre"
+    ],
+    "jobs": [
+      {
+        "title": "Archiviste",
+        "contract": "CDD",
+        "remote": "ONSITE",
+        "salary_min": 26000,
+        "salary_max": 33000,
+        "skills": [
+          "Archivistique",
+          "Gestion de bibliothèque",
+          "Gestion administrative"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Archiviste : rejoignez Atelier des Archives pour contribuer à ses activités dans le secteur patrimoine et documentation.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Chargé·e de médiation patrimoniale",
+        "contract": "CDD",
+        "remote": "ONSITE",
+        "salary_min": 25000,
+        "salary_max": 32000,
+        "skills": [
+          "Médiation culturelle",
+          "Rédaction",
+          "Animation"
+        ],
+        "degree": "BAC_3",
+        "exp": "JUNIOR",
+        "description": "Chargé·e de médiation patrimoniale : rejoignez Atelier des Archives pour contribuer à ses activités dans le secteur patrimoine et documentation.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Nova Conseil Public",
+    "domain": "novaconseilpublic.example",
+    "website": "https://www.novaconseilpublic.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=novaconseilpublic",
+    "sector": "Conseil aux collectivités",
+    "size": "MEDIUM",
+    "desc": "Accompagne les collectivités dans leurs projets de transformation et de service public.",
+    "location": "Paris",
+    "recruiter": [
+      "recruteur.novaconseilpublic@joyn.test",
+      "Camille",
+      "Bernard"
+    ],
+    "jobs": [
+      {
+        "title": "Consultant·e transformation publique",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 36000,
+        "salary_max": 48000,
+        "skills": [
+          "Gestion de projet",
+          "Communication",
+          "Gestion budgétaire"
+        ],
+        "degree": "BAC_5",
+        "exp": "MID",
+        "description": "Consultant·e transformation publique : rejoignez Nova Conseil Public pour contribuer à ses activités dans le secteur conseil aux collectivités.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Chargé·e de mission développement local",
+        "contract": "CDD",
+        "remote": "HYBRID",
+        "salary_min": 30000,
+        "salary_max": 39000,
+        "skills": [
+          "Gestion de projet",
+          "Économie circulaire",
+          "Rédaction"
+        ],
+        "degree": "BAC_5",
+        "exp": "JUNIOR",
+        "description": "Chargé·e de mission développement local : rejoignez Nova Conseil Public pour contribuer à ses activités dans le secteur conseil aux collectivités.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "Atout Numérique",
+    "domain": "atoutnumrique.example",
+    "website": "https://www.atoutnumrique.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=atoutnumrique",
+    "sector": "Services numériques",
+    "size": "MEDIUM",
+    "desc": "Entreprise de services numériques intervenant auprès de clients de plusieurs secteurs.",
+    "location": "Nantes",
+    "recruiter": [
+      "recruteur.atoutnumrique@joyn.test",
+      "Thomas",
+      "Petit"
+    ],
+    "jobs": [
+      {
+        "title": "Développeur·euse backend Python",
+        "contract": "CDI",
+        "remote": "HYBRID",
+        "salary_min": 38000,
+        "salary_max": 50000,
+        "skills": [
+          "Python",
+          "FastAPI",
+          "PostgreSQL",
+          "Docker"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Développeur·euse backend Python : rejoignez Atout Numérique pour contribuer à ses activités dans le secteur services numériques.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Technicien·ne support informatique",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 25000,
+        "salary_max": 32000,
+        "skills": [
+          "Linux",
+          "Réseaux informatiques",
+          "Administration système"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Technicien·ne support informatique : rejoignez Atout Numérique pour contribuer à ses activités dans le secteur services numériques.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  },
+  {
+    "name": "La Fabrique du Goût",
+    "domain": "lafabriquedugot.example",
+    "website": "https://www.lafabriquedugot.example",
+    "logo_url": "https://api.dicebear.com/9.x/initials/svg?seed=lafabriquedugot",
+    "sector": "Agroalimentaire",
+    "size": "LARGE",
+    "desc": "Fabricant régional de produits alimentaires et distributeur auprès des commerces.",
+    "location": "Angers",
+    "recruiter": [
+      "recruteur.lafabriquedugot@joyn.test",
+      "Sarah",
+      "Moreau"
+    ],
+    "jobs": [
+      {
+        "title": "Responsable qualité agroalimentaire",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 34000,
+        "salary_max": 44000,
+        "skills": [
+          "Qualité industrielle",
+          "HSE",
+          "Gestion de production"
+        ],
+        "degree": "BAC_3",
+        "exp": "MID",
+        "description": "Responsable qualité agroalimentaire : rejoignez La Fabrique du Goût pour contribuer à ses activités dans le secteur agroalimentaire.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      },
+      {
+        "title": "Technicien·ne de production",
+        "contract": "CDI",
+        "remote": "ONSITE",
+        "salary_min": 25000,
+        "salary_max": 32000,
+        "skills": [
+          "Gestion de production",
+          "Lean manufacturing"
+        ],
+        "degree": "BAC_2",
+        "exp": "JUNIOR",
+        "description": "Technicien·ne de production : rejoignez La Fabrique du Goût pour contribuer à ses activités dans le secteur agroalimentaire.\n\nMissions principales :\n- Réalisation des activités clés du poste\n- Collaboration avec les équipes\n- Suivi de la qualité et amélioration continue."
+      }
+    ]
+  }
+]

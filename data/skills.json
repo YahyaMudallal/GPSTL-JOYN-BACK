@@ -1,0 +1,942 @@
+[
+  {
+    "name": "Java",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Spring Boot",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "React",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "TypeScript",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "PostgreSQL",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Docker",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Python",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Kubernetes",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Angular",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Vue.js",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Git",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Node.js",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Redis",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Kafka",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "AWS",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "C++",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "C",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "C#",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "PHP",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Ruby",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Go",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Rust",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Django",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "FastAPI",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Flask",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": ".NET",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "ASP.NET Core",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "MySQL",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "MongoDB",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Elasticsearch",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Linux",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Bash",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Terraform",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Ansible",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Jenkins",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "GitLab CI",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "GitHub Actions",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Azure",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Google Cloud",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "HTML",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "CSS",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "JavaScript",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Figma",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "UX design",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Cybersécurité",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Réseaux informatiques",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Administration système",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Data analysis",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Machine learning",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Deep learning",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Power BI",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Tableau",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "SQL",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "ETL",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Apache Spark",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Airflow",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Prompt engineering",
+    "category": "Numérique et informatique"
+  },
+  {
+    "name": "Gestion de projet",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Agile / Scrum",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Product management",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Gestion budgétaire",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Comptabilité générale",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Comptabilité analytique",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Audit financier",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Contrôle de gestion",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Analyse financière",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Gestion de trésorerie",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Fiscalité",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Paie",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Gestion des risques",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Conformité réglementaire",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Assurance",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Banque de détail",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Crédit",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Vente B2B",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Négociation commerciale",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Prospection commerciale",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Relation client",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "CRM",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Marketing digital",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "SEO",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "SEA",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Community management",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Communication",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Étude de marché",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Merchandising",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Gestion de magasin",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "E-commerce",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Achats",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Approvisionnement",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Excel",
+    "category": "Gestion, commerce et finance"
+  },
+  {
+    "name": "Recrutement",
+    "category": "Ressources humaines et administration"
+  },
+  {
+    "name": "Sourcing",
+    "category": "Ressources humaines et administration"
+  },
+  {
+    "name": "Gestion des talents",
+    "category": "Ressources humaines et administration"
+  },
+  {
+    "name": "Formation professionnelle",
+    "category": "Ressources humaines et administration"
+  },
+  {
+    "name": "Droit social",
+    "category": "Ressources humaines et administration"
+  },
+  {
+    "name": "Relations sociales",
+    "category": "Ressources humaines et administration"
+  },
+  {
+    "name": "Administration du personnel",
+    "category": "Ressources humaines et administration"
+  },
+  {
+    "name": "Gestion de carrière",
+    "category": "Ressources humaines et administration"
+  },
+  {
+    "name": "Marque employeur",
+    "category": "Ressources humaines et administration"
+  },
+  {
+    "name": "Secrétariat",
+    "category": "Ressources humaines et administration"
+  },
+  {
+    "name": "Gestion administrative",
+    "category": "Ressources humaines et administration"
+  },
+  {
+    "name": "Accueil",
+    "category": "Ressources humaines et administration"
+  },
+  {
+    "name": "Génie mécanique",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Génie électrique",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Électronique",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Automatisme industriel",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Robotique",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "CAO",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "SolidWorks",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "CATIA",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Maintenance industrielle",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Lean manufacturing",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Six Sigma",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Qualité industrielle",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "HSE",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Gestion de production",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Supply chain",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Logistique",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Gestion des stocks",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Conduite de travaux",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "BIM",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "AutoCAD",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Revit",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Génie civil",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Électricité bâtiment",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Plomberie",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "CVC",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Topographie",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Soudure",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Usinage",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Lecture de plans",
+    "category": "Industrie, ingénierie et construction"
+  },
+  {
+    "name": "Soins infirmiers",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Médecine générale",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Pédiatrie",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Gériatrie",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Aide-soignant",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Accompagnement social",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Psychologie",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Éducation spécialisée",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Petite enfance",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Coordination médico-sociale",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Gestion hospitalière",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Pharmacie",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Biologie médicale",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Recherche clinique",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Épidémiologie",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Hygiène hospitalière",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Nutrition",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Kinésithérapie",
+    "category": "Santé, social et sciences"
+  },
+  {
+    "name": "Enseignement",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Pédagogie",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Ingénierie pédagogique",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Conception e-learning",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Animation",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Médiation culturelle",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Gestion de bibliothèque",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Archivistique",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Traduction",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Anglais professionnel",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Espagnol",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Allemand",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Rédaction",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Correction",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Prise de parole en public",
+    "category": "Éducation, culture et langues"
+  },
+  {
+    "name": "Agronomie",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Agroécologie",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Conduite d'exploitation agricole",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Viticulture",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Horticulture",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Gestion forestière",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Biodiversité",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Écologie",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Gestion des déchets",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Économie circulaire",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Bilan carbone",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "RSE",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Énergies renouvelables",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Photovoltaïque",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Éolien",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Efficacité énergétique",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Hydraulique",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Traitement de l'eau",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Géomatique",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "QGIS",
+    "category": "Environnement, agriculture et énergie"
+  },
+  {
+    "name": "Service en salle",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Cuisine",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Pâtisserie",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Boulangerie",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Hôtellerie",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Réception",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Gestion hôtelière",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Housekeeping",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Tourisme",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Guidage touristique",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Événementiel",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Gestion de réservation",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Relation voyageurs",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Conciergerie",
+    "category": "Hôtellerie, restauration, tourisme et services"
+  },
+  {
+    "name": "Conduite poids lourd",
+    "category": "Transport, sécurité et métiers opérationnels"
+  },
+  {
+    "name": "Permis C",
+    "category": "Transport, sécurité et métiers opérationnels"
+  },
+  {
+    "name": "Permis D",
+    "category": "Transport, sécurité et métiers opérationnels"
+  },
+  {
+    "name": "Préparation de commandes",
+    "category": "Transport, sécurité et métiers opérationnels"
+  },
+  {
+    "name": "Cariste",
+    "category": "Transport, sécurité et métiers opérationnels"
+  },
+  {
+    "name": "CACES",
+    "category": "Transport, sécurité et métiers opérationnels"
+  },
+  {
+    "name": "Gestion de flotte",
+    "category": "Transport, sécurité et métiers opérationnels"
+  },
+  {
+    "name": "Transport de voyageurs",
+    "category": "Transport, sécurité et métiers opérationnels"
+  },
+  {
+    "name": "Sécurité privée",
+    "category": "Transport, sécurité et métiers opérationnels"
+  },
+  {
+    "name": "Prévention des risques",
+    "category": "Transport, sécurité et métiers opérationnels"
+  },
+  {
+    "name": "Secourisme",
+    "category": "Transport, sécurité et métiers opérationnels"
+  },
+  {
+    "name": "SSIAP",
+    "category": "Transport, sécurité et métiers opérationnels"
+  },
+  {
+    "name": "Gestion d'entrepôt",
+    "category": "Transport, sécurité et métiers opérationnels"
+  },
+  {
+    "name": "Design graphique",
+    "category": "Arts, médias et sport"
+  },
+  {
+    "name": "Illustration",
+    "category": "Arts, médias et sport"
+  },
+  {
+    "name": "Photographie",
+    "category": "Arts, médias et sport"
+  },
+  {
+    "name": "Montage vidéo",
+    "category": "Arts, médias et sport"
+  },
+  {
+    "name": "Production audiovisuelle",
+    "category": "Arts, médias et sport"
+  },
+  {
+    "name": "Motion design",
+    "category": "Arts, médias et sport"
+  },
+  {
+    "name": "Direction artistique",
+    "category": "Arts, médias et sport"
+  },
+  {
+    "name": "Journalisme",
+    "category": "Arts, médias et sport"
+  },
+  {
+    "name": "Réseaux sociaux",
+    "category": "Arts, médias et sport"
+  },
+  {
+    "name": "Coaching sportif",
+    "category": "Arts, médias et sport"
+  },
+  {
+    "name": "Préparation physique",
+    "category": "Arts, médias et sport"
+  },
+  {
+    "name": "Animation sportive",
+    "category": "Arts, médias et sport"
+  },
+  {
+    "name": "Gestion d'équipement sportif",
+    "category": "Arts, médias et sport"
+  },
+  {
+    "name": "Droit des contrats",
+    "category": "Juridique et immobilier"
+  },
+  {
+    "name": "Droit des affaires",
+    "category": "Juridique et immobilier"
+  },
+  {
+    "name": "Droit immobilier",
+    "category": "Juridique et immobilier"
+  },
+  {
+    "name": "Veille juridique",
+    "category": "Juridique et immobilier"
+  },
+  {
+    "name": "Rédaction juridique",
+    "category": "Juridique et immobilier"
+  },
+  {
+    "name": "Gestion locative",
+    "category": "Juridique et immobilier"
+  },
+  {
+    "name": "Transaction immobilière",
+    "category": "Juridique et immobilier"
+  },
+  {
+    "name": "Syndic de copropriété",
+    "category": "Juridique et immobilier"
+  },
+  {
+    "name": "Estimation immobilière",
+    "category": "Juridique et immobilier"
+  },
+  {
+    "name": "Urbanisme",
+    "category": "Juridique et immobilier"
+  }
+]

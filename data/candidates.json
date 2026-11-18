@@ -1,0 +1,244 @@
+[
+  {
+    "email": "alexandre.martin@joyn.test",
+    "first_name": "Alexandre",
+    "last_name": "Martin",
+    "headline": "Lead Developpeur Backend & Cloud",
+    "bio": "Ingenieur logiciel passionne par les architectures modulaires, les microservices et les bases de donnees. 6 ans d'experience.",
+    "phone": "+33612345678",
+    "location": "Paris",
+    "exp_years": 6,
+    "photo_url": "https://randomuser.me/api/portraits/men/32.jpg",
+    "skills": [
+      [
+        "Python",
+        "ADVANCED"
+      ],
+      [
+        "FastAPI",
+        "ADVANCED"
+      ],
+      [
+        "PostgreSQL",
+        "ADVANCED"
+      ],
+      [
+        "Docker",
+        "INTERMEDIATE"
+      ],
+      [
+        "Linux",
+        "INTERMEDIATE"
+      ]
+    ],
+    "experiences": [
+      {
+        "title": "Lead Developpeur Backend",
+        "organization": "Tech Horizon",
+        "description": "Direction technique, refonte des APIs REST et optimisation PostgreSQL.",
+        "start": "2021-03-01",
+        "end": "2024-05-01"
+      },
+      {
+        "title": "Developpeur Logiciel",
+        "organization": "Capgemini",
+        "description": "Conception d'APIs securisees et integration continue.",
+        "start": "2018-09-01",
+        "end": "2021-02-01"
+      }
+    ],
+    "educations": [
+      {
+        "school": "INSA Lyon",
+        "degree": "ENGINEERING",
+        "field": "Génie mécanique",
+        "start_year": 2013,
+        "end_year": 2018
+      }
+    ]
+  },
+  {
+    "email": "sophie.bernard@joyn.test",
+    "first_name": "Sophie",
+    "last_name": "Bernard",
+    "headline": "Directrice Artistique & Designer Graphique",
+    "bio": "Creatrice visuelle pluridisciplinaire, specialisee en identite de marque, design d'interfaces et montage video.",
+    "phone": "+33687654321",
+    "location": "Lyon",
+    "exp_years": 4,
+    "photo_url": "https://randomuser.me/api/portraits/women/44.jpg",
+    "skills": [
+      [
+        "Design graphique",
+        "ADVANCED"
+      ],
+      [
+        "Figma",
+        "ADVANCED"
+      ],
+      [
+        "Direction artistique",
+        "ADVANCED"
+      ],
+      [
+        "Montage vidéo",
+        "INTERMEDIATE"
+      ],
+      [
+        "Motion design",
+        "INTERMEDIATE"
+      ]
+    ],
+    "experiences": [
+      {
+        "title": "Designer Graphique / UI",
+        "organization": "Agence Pixel Wave",
+        "description": "Creation de maquettes interactives sous Figma, chartes graphiques et spots publicitaires.",
+        "start": "2020-09-01",
+        "end": "2024-06-01"
+      }
+    ],
+    "educations": [
+      {
+        "school": "École de Design Nantes Atlantique",
+        "degree": "MASTERS",
+        "field": "Design graphique",
+        "start_year": 2015,
+        "end_year": 2020
+      }
+    ]
+  },
+  {
+    "email": "claire.petit@joyn.test",
+    "first_name": "Claire",
+    "last_name": "Petit",
+    "headline": "Etudiante en Robotique industrielle - Recherche Alternance",
+    "bio": "En cours de formation specialisee en robotique et automatismes, motivee pour integrer un atelier d'integration moderne.",
+    "phone": "+33654321890",
+    "location": "Toulouse",
+    "exp_years": 1,
+    "photo_url": "https://randomuser.me/api/portraits/women/68.jpg",
+    "skills": [
+      [
+        "Robotique",
+        "INTERMEDIATE"
+      ],
+      [
+        "Automatisme industriel",
+        "BASIC"
+      ],
+      [
+        "Maintenance industrielle",
+        "INTERMEDIATE"
+      ]
+    ],
+    "experiences": [
+      {
+        "title": "Stagiaire Maintenance et Robotique",
+        "organization": "AeroTech Occitanie",
+        "description": "Maintenance de bras robotises et suivi des indicateurs de production.",
+        "start": "2023-04-01",
+        "end": "2023-07-01"
+      }
+    ],
+    "educations": [
+      {
+        "school": "IUT de Toulouse",
+        "degree": "BACHELORS",
+        "field": "Automatisme industriel",
+        "start_year": 2021,
+        "end_year": 2024
+      }
+    ]
+  },
+  {
+    "email": "julien.moreau@joyn.test",
+    "first_name": "Julien",
+    "last_name": "Moreau",
+    "headline": "Ingenieur Agronome & Transition Ecologique",
+    "bio": "Expert en accompagnement de filieres agricoles vers des pratiques durables et regeneratrices des sols.",
+    "phone": "+33633445566",
+    "location": "Bordeaux",
+    "exp_years": 5,
+    "photo_url": "https://randomuser.me/api/portraits/men/52.jpg",
+    "skills": [
+      [
+        "Agronomie",
+        "ADVANCED"
+      ],
+      [
+        "Agroécologie",
+        "ADVANCED"
+      ],
+      [
+        "Gestion de projet",
+        "ADVANCED"
+      ],
+      [
+        "RSE",
+        "INTERMEDIATE"
+      ]
+    ],
+    "experiences": [
+      {
+        "title": "Conseiller Agronome de Territoire",
+        "organization": "Chambre d'Agriculture Nouvelle-Aquitaine",
+        "description": "Accompagnement de 40 exploitations dans la reduction des intrants.",
+        "start": "2019-03-01",
+        "end": "2024-02-01"
+      }
+    ],
+    "educations": [
+      {
+        "school": "Bordeaux Sciences Agro",
+        "degree": "ENGINEERING",
+        "field": "Agronomie",
+        "start_year": 2014,
+        "end_year": 2019
+      }
+    ]
+  },
+  {
+    "email": "ines.garcia@joyn.test",
+    "first_name": "Ines",
+    "last_name": "Garcia",
+    "headline": "Infirmiere Diplomee d'Etat (IDE)",
+    "bio": "Professionnelle de sante investie avec 3 ans d'experience en service hospitalier et soins d'urgence.",
+    "phone": "+33699887766",
+    "location": "Nantes",
+    "exp_years": 3,
+    "photo_url": "https://randomuser.me/api/portraits/women/12.jpg",
+    "skills": [
+      [
+        "Soins infirmiers",
+        "ADVANCED"
+      ],
+      [
+        "Hygiène hospitalière",
+        "ADVANCED"
+      ],
+      [
+        "Secourisme",
+        "ADVANCED"
+      ]
+    ],
+    "experiences": [
+      {
+        "title": "Infirmiere en soins generaux",
+        "organization": "CHU de Nantes",
+        "description": "Prise en charge globale des patients, administration des protocoles de soins.",
+        "start": "2021-07-01",
+        "end": "2024-06-01"
+      }
+    ],
+    "educations": [
+      {
+        "school": "IFSI Nantes",
+        "degree": "BACHELORS",
+        "field": "Soins infirmiers",
+        "start_year": 2018,
+        "end_year": 2021
+      }
+    ]
+  }
+]
