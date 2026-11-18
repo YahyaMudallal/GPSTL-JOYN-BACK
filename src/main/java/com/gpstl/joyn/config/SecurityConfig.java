@@ -57,6 +57,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/recruiters/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/candidates/applications").hasRole("CANDIDATE")
                         .requestMatchers("/api/v1/candidates/offers/**").hasRole("CANDIDATE")
+                        .requestMatchers("/api/v1/candidates/workspace", "/api/v1/candidates/workspace/**",
+                                "/api/v1/candidates/catalog", "/api/v1/candidates/catalog/**").hasRole("CANDIDATE")
                         .requestMatchers(HttpMethod.GET, "/api/v1/candidates/recommendations").hasRole("CANDIDATE")
                         .requestMatchers(HttpMethod.POST, "/api/v1/applications").hasRole("CANDIDATE")
                         .requestMatchers(HttpMethod.GET, "/api/v1/candidates/resumes/**")
