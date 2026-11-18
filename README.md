@@ -169,7 +169,7 @@ Un script automatisé permet de peupler la base de données avec des jeux de don
 
 ```bash
 # 1. Rendre le script exécutable (si besoin)
-chmod +x scripts/seed.sh
+chmod +x scripts/seed.sh scripts/rollback.sh
 
 # 2. Lancer le peuplement en mode local (fichiers enregistrés dans media/)
 ./scripts/seed.sh
@@ -179,6 +179,21 @@ chmod +x scripts/seed.sh
 
 # Optionnel : stocker en local ET sur Supabase
 ./scripts/seed.sh --storage both
+```
+
+### Nettoyage et Rollback des données de test
+
+Pour supprimer l'ensemble des données injectées par le seed (offres, candidatures, entreprises et utilisateurs de test) ainsi que leurs fichiers médias physiques associés :
+
+```bash
+# Nettoyage interactif en mode local
+./scripts/rollback.sh
+
+# Nettoyage sur Supabase Storage
+./scripts/rollback.sh --storage supabase
+
+# Nettoyage automatique sans confirmation
+./scripts/rollback.sh -y
 ```
 
 ### Identifiants des comptes de test générés
